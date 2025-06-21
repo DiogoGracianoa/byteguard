@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.26)
 set(CMAKE_CXX_STANDARD 17)
 
 # Configurando o nome e executável do projeto
-set(PROJECT_NAME "tp4-smb-1-2")
+set(PROJECT_NAME "byteguard")
 project(${PROJECT_NAME})
 
 find_package(SDL2 2.32.2 EXACT REQUIRED)
@@ -61,6 +61,8 @@ add_executable(${PROJECT_NAME}
         Source/SpatialHashing.h
         Source/Actors/Collectible.cpp
         Source/Actors/Collectible.h
+        Source/Actors/EnemyBlock.cpp
+        Source/Actors/EnemyBlock.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer)

@@ -9,8 +9,8 @@
 #include "ColliderComponents/AABBColliderComponent.h"
 
 const float MAX_SPEED_X = 750.0f * 1.25f;
-const float MAX_SPEED_Y = 750 * 1.25f;
-const float GRAVITY = 2000.0f;
+const float MAX_SPEED_Y = 750 * 1000000.0f;
+const float GRAVITY = 2500.0f;
 
 RigidBodyComponent::RigidBodyComponent(class Actor* owner, float mass, float friction, bool applyGravity, int updateOrder)
         :Component(owner, updateOrder)

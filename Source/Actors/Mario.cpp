@@ -17,19 +17,21 @@ Mario::Mario(Game* game, const float forwardSpeed, const float jumpSpeed)
         , mJumpSpeed(jumpSpeed)
         , mPoleSlideTimer(0.0f)
 {
-    mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 5.0f);
+    mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
     mColliderComponent = new AABBColliderComponent(this, 0, 0, Game::TILE_SIZE - 4.0f,Game::TILE_SIZE,
                                                    ColliderLayer::Player);
 
     mDrawComponent = new DrawAnimatedComponent(this,
-                                              "../Assets/Sprites/Mario/Mario.png",
-                                              "../Assets/Sprites/Mario/Mario.json");
+                                              "../Assets/Sprites/ByteGuard/ByteGuard.png",
+                                              "../Assets/Sprites/ByteGuard/ByteGuard.json");
 
     mDrawComponent->AddAnimation("Dead", {0});
-    mDrawComponent->AddAnimation("idle", {1});
-    mDrawComponent->AddAnimation("jump", {2});
-    mDrawComponent->AddAnimation("run", {3, 4, 5});
-    mDrawComponent->AddAnimation("win", {7});
+    mDrawComponent->AddAnimation("idle", {0});
+    mDrawComponent->AddAnimation("jump", {0,1,2,3,4,5,6,7});
+    mDrawComponent->AddAnimation("run", {9,10,11,12,13});
+    mDrawComponent->AddAnimation("win", {0});
+
+
 
     mDrawComponent->SetAnimation("idle");
     mDrawComponent->SetAnimFPS(10.0f);
@@ -39,7 +41,7 @@ void Mario::OnProcessInput(const uint8_t* state)
 {
     if(mGame->GetGamePlayState() != Game::GamePlayState::Playing) return;
 
-    if (state[SDL_SCANCODE_D])
+    /*if (state[SDL_SCANCODE_D])
     {
         mRigidBodyComponent->ApplyForce(Vector2::UnitX * mForwardSpeed);
         mRotation = 0.0f;
@@ -56,6 +58,18 @@ void Mario::OnProcessInput(const uint8_t* state)
     if (!state[SDL_SCANCODE_D] && !state[SDL_SCANCODE_A])
     {
         mIsRunning = false;
+    }*/
+    if (state[SDL_SCANCODE_SPACE] && mIsOnGround)
+    {
+        mRigidBodyComponent->SetVelocity(Vector2(mRigidBodyComponent->GetVelocity().x, mJumpSpeed));
+        mIsOnGround = false;
+
+        // --------------
+        // TODO - PARTE 4
+        // --------------
+
+        // TODO 1.: Toque o som "Jump.wav" quando Mario pular.
+        //mGame->GetAudio()->PlaySound("Jump.wav");
     }
 }
 
@@ -64,7 +78,7 @@ void Mario::OnHandleKeyPress(const int key, const bool isPressed)
     if(mGame->GetGamePlayState() != Game::GamePlayState::Playing) return;
 
     // Jump
-    if (key == SDLK_SPACE && isPressed && mIsOnGround)
+    /*if (key == SDLK_SPACE && isPressed && mIsOnGround)
     {
         mRigidBodyComponent->SetVelocity(Vector2(mRigidBodyComponent->GetVelocity().x, mJumpSpeed));
         mIsOnGround = false;
@@ -75,7 +89,7 @@ void Mario::OnHandleKeyPress(const int key, const bool isPressed)
 
         // TODO 1.: Toque o som "Jump.wav" quando Mario pular.
         mGame->GetAudio()->PlaySound("Jump.wav");
-    }
+    }*/
 }
 
 void Mario::OnUpdate(float deltaTime)
@@ -131,6 +145,13 @@ void Mario::OnUpdate(float deltaTime)
         return;
     }
 
+    if (!mIsDying && !mIsOnPole && mGame->GetGamePlayState() == Game::GamePlayState::Playing)
+    {
+        // Mario sempre corre pra frente com velocidade constante
+        mRigidBodyComponent->SetVelocity(Vector2(mForwardSpeed, mRigidBodyComponent->GetVelocity().y));
+        mIsRunning = true;
+    }
+
     ManageAnimations();
 }
 
@@ -176,7 +197,7 @@ void Mario::Kill()
     mGame->GetAudio()->StopAllSounds();
     mGame->GetAudio()->PlaySound("Dead.wav");
 
-    mGame->ResetGameScene(3.5f); // Reset the game scene after 3 seconds
+    mGame->ResetGameScene(0.5f); // Reset the game scene after 3 seconds
 }
 
 void Mario::Win(AABBColliderComponent *poleCollider)
@@ -206,15 +227,15 @@ void Mario::Win(AABBColliderComponent *poleCollider)
 
 void Mario::OnHorizontalCollision(const float minOverlap, AABBColliderComponent* other)
 {
-    if (other->GetLayer() == ColliderLayer::Enemy)
+    if (other->GetLayer() == ColliderLayer::Enemy || other->GetLayer() == ColliderLayer::EnemyBlocks)
     {
         Kill();
     }
-    else if (other->GetLayer() == ColliderLayer::Pole)
+    /*else if (other->GetLayer() == ColliderLayer::Pole)
     {
         mIsOnPole = true;
         Win(other);
-    }
+    }*/
     else if (other->GetLayer() == ColliderLayer::Collectible)
     {
         mGame->AddCoin();
@@ -247,11 +268,11 @@ void Mario::OnVerticalCollision(const float minOverlap, AABBColliderComponent* o
             // --------------
 
             // TODO 1.: Toque o som "Bump.wav"
-            mGame->GetAudio()->PlaySound("Bump.wav");
+            //mGame->GetAudio()->PlaySound("Bump.wav");
 
             // Cast actor to Block to call OnBump
             auto* block = dynamic_cast<Block*>(other->GetOwner());
-            block->OnBump();
+            //block->OnBump();
         }
     }
     else if (other->GetLayer() == ColliderLayer::Collectible)
@@ -259,5 +280,9 @@ void Mario::OnVerticalCollision(const float minOverlap, AABBColliderComponent* o
         mGame->AddCoin();
         other->GetOwner()->SetState(ActorState::Destroy);
         mGame->GetAudio()->PlaySound("Coin.wav");
+    }
+    if (other->GetLayer() == ColliderLayer::EnemyBlocks)
+    {
+        Kill();
     }
 }

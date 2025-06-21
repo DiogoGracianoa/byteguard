@@ -22,6 +22,7 @@
 #include "Actors/Actor.h"
 #include "Actors/Mario.h"
 #include "Actors/Block.h"
+#include "Actors/EnemyBlock.h"
 #include "Actors/Collectible.h"
 #include "Actors/Spawner.h"
 #include "UIElements/UIScreen.h"
@@ -114,7 +115,8 @@ bool Game::Initialize()
     mTicksCount = SDL_GetTicks();
 
     // Init all game actors
-    SetGameScene(GameScene::MainMenu);
+    //SetGameScene(GameScene::MainMenu);
+    SetGameScene(GameScene::Level1);
 
     // Initially, change scene to MainMenu
     //ChangeScene();
@@ -213,26 +215,27 @@ void Game::ChangeScene()
         // --------------
 
         // TODO 1. Toque a música de fundo "MusicMain.ogg" em loop e armaze o SoundHandle retornado em mMusicHandle.
-        mMusicHandle = mAudio->PlaySound("MusicMain.ogg", true);
+        //aqui é a musica principal que vai tocar
+        //mMusicHandle = mAudio->PlaySound("MusicMain.ogg", true);
 
         // Set background color
-        mBackgroundColor.Set(107.0f, 140.0f, 255.0f);
+        mBackgroundColor.Set(152.0f, 172.0f, 175.0f);
 
         // Set background color
-        SetBackgroundImage("../Assets/Sprites/Background.png", Vector2(TILE_SIZE,0), Vector2(6784,448));
+        SetBackgroundImage("../Assets/Sprites/Background_Level1.png", Vector2(0,0), Vector2(1600,600));
 
         // Draw Flag
-        auto flag = new Actor(this);
-        flag->SetPosition(Vector2(LEVEL_WIDTH * TILE_SIZE - (16 * TILE_SIZE) - 16, 3 * TILE_SIZE));
+        //auto flag = new Actor(this);
+        //flag->SetPosition(Vector2(LEVEL_WIDTH * TILE_SIZE - (16 * TILE_SIZE) - 16, 3 * TILE_SIZE));
 
         // Add a flag sprite
-        new DrawSpriteComponent(flag, "../Assets/Sprites/Background_Flag.png", 32.0f, 32.0f, 1);
+        //new DrawSpriteComponent(flag, "../Assets/Sprites/Background_Flag.png", 32.0f, 32.0f, 1);
 
         // Add a flag pole taking the entire height
-        new AABBColliderComponent(flag, 30, 0, 4, TILE_SIZE * LEVEL_HEIGHT, ColliderLayer::Pole, true);
+        //new AABBColliderComponent(flag, 30, 0, 4, TILE_SIZE * LEVEL_HEIGHT, ColliderLayer::Pole, true);
 
         // Initialize actors
-        LoadLevel("../Assets/Levels/level1-1-new2.csv", LEVEL_WIDTH, LEVEL_HEIGHT);
+        LoadLevel("../Assets/Levels/level1.csv", LEVEL_WIDTH, LEVEL_HEIGHT);
     }
     else if (mNextScene == GameScene::Level2)
     {
@@ -329,14 +332,17 @@ void Game::BuildLevel(int** levelData, int width, int height)
 
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
-            {0, "../Assets/Sprites/Blocks/BlockA.png"},
-            {1, "../Assets/Sprites/Blocks/BlockC.png"},
-            {2, "../Assets/Sprites/Blocks/BlockF.png"},
-            {4, "../Assets/Sprites/Blocks/BlockB.png"},
-            {6, "../Assets/Sprites/Blocks/BlockI.png"},
-            {8, "../Assets/Sprites/Blocks/BlockD.png"},
-            {9, "../Assets/Sprites/Blocks/BlockH.png"},
-            {12, "../Assets/Sprites/Blocks/BlockG.png"}
+            {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
+            {9, "../Assets/Sprites/ScifiBlocks/BGTile_3.png"},
+            {17, "../Assets/Sprites/ScifiBlocks/BGTile_3.png"},
+            {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
+            {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
+            {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
+            {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
+            {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
+            {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
+            {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
+            {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
     };
 
     for (int y = 0; y < LEVEL_HEIGHT; ++y)
@@ -345,7 +351,7 @@ void Game::BuildLevel(int** levelData, int width, int height)
         {
             int tile = levelData[y][x];
 
-            if(tile == 16) // Mario
+            if(tile == 25) // Mario
             {
                 mMario = new Mario(this);
                 mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
@@ -359,6 +365,15 @@ void Game::BuildLevel(int** levelData, int width, int height)
             {
                 Collectible* coin = new Collectible(this);
                 coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if(tile == 0 || tile == 8 || tile == 19 || tile == 33 || tile == 18 || tile == 4) {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
+                    // Create a enemy block actor
+                    EnemyBlock* enemyBlock= new EnemyBlock(this, it->second);
+                    enemyBlock->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
             }
             else // Blocks
             {

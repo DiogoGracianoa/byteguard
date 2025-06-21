@@ -5,20 +5,20 @@
       "frame": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -29,21 +29,21 @@
       "filename": "Idle.png",
       "frame": {
         "x": 0,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "y": 40,
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -53,22 +53,22 @@
     {
       "filename": "Jump.png",
       "frame": {
-        "x": 32,
+        "x": 40,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -79,21 +79,21 @@
       "filename": "Run1.png",
       "frame": {
         "x": 0,
-        "y": 64,
-        "w": 32,
-        "h": 32
+        "y": 80,
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -103,22 +103,22 @@
     {
       "filename": "Run2.png",
       "frame": {
-        "x": 32,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "x": 40,
+        "y": 40,
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -128,22 +128,22 @@
     {
       "filename": "Run3.png",
       "frame": {
-        "x": 64,
+        "x": 80,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -154,21 +154,21 @@
       "filename": "Stomp1.png",
       "frame": {
         "x": 0,
-        "y": 96,
-        "w": 32,
-        "h": 32
+        "y": 120,
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -178,22 +178,22 @@
     {
       "filename": "Stomp2.png",
       "frame": {
-        "x": 32,
-        "y": 64,
-        "w": 32,
-        "h": 32
+        "x": 40,
+        "y": 80,
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -203,22 +203,22 @@
     {
       "filename": "Turn.png",
       "frame": {
-        "x": 64,
-        "y": 32,
-        "w": 32,
-        "h": 32
+        "x": 80,
+        "y": 40,
+        "w": 40,
+        "h": 40
       },
       "rotated": false,
       "trimmed": false,
       "spriteSourceSize": {
         "x": 0,
         "y": 0,
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "sourceSize": {
-        "w": 32,
-        "h": 32
+        "w": 40,
+        "h": 40
       },
       "pivot": {
         "x": 0.5,
@@ -229,11 +229,11 @@
   "meta": {
     "app": "http://free-tex-packer.com",
     "version": "0.6.7",
-    "image": "Mario.png",
+    "image": "texture.png",
     "format": "RGBA8888",
     "size": {
-      "w": 96,
-      "h": 128
+      "w": 120,
+      "h": 160
     },
     "scale": 1
   }
