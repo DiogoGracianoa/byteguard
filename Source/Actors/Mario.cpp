@@ -18,12 +18,18 @@ Mario::Mario(Game* game, const float forwardSpeed, const float jumpSpeed)
         , mPoleSlideTimer(0.0f)
 {
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
-    mColliderComponent = new AABBColliderComponent(this, 0, 0, Game::TILE_SIZE - 4.0f,Game::TILE_SIZE,
+
+    float byteGuardColliderWidth = Game::TILE_SIZE - 10.0f;
+    float byteGuardColliderHeight = Game::TILE_SIZE;
+    float offsetX = 0;
+    float offsetY = 0;
+
+    mColliderComponent = new AABBColliderComponent(this, offsetX, offsetY, byteGuardColliderWidth,byteGuardColliderHeight,
                                                    ColliderLayer::Player);
 
     mDrawComponent = new DrawAnimatedComponent(this,
                                               "../Assets/Sprites/ByteGuard/ByteGuard.png",
-                                              "../Assets/Sprites/ByteGuard/ByteGuard.json");
+                                              "../Assets/Sprites/ByteGuard/ByteGuard.json", 200);
 
     mDrawComponent->AddAnimation("Dead", {0});
     mDrawComponent->AddAnimation("idle", {0});
@@ -32,9 +38,9 @@ Mario::Mario(Game* game, const float forwardSpeed, const float jumpSpeed)
     mDrawComponent->AddAnimation("win", {0});
 
 
-
     mDrawComponent->SetAnimation("idle");
     mDrawComponent->SetAnimFPS(10.0f);
+
 }
 
 void Mario::OnProcessInput(const uint8_t* state)

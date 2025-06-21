@@ -165,6 +165,7 @@ void Game::ResetGameScene(float transitionTime)
 
     // TODO 1.: Chame SetGameScene passando o mGameScene atual e o tempo de transição.
     mCoinCount = 0;
+
     SetGameScene(mGameScene, transitionTime);
 }
 

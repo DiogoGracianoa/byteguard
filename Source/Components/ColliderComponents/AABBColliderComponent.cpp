@@ -85,6 +85,10 @@ float AABBColliderComponent::DetectHorizontalCollision(RigidBodyComponent *rigid
         if (Intersect(*collider))
         {
             float minHorizontalOverlap = GetMinHorizontalOverlap(collider);
+            if (Math::Abs(minHorizontalOverlap) <= 0.5f)
+            {
+                continue; // Ignora colisões com sobreposição muito pequena
+            }
 
             if (!IsSensor() && !collider->IsSensor())
             {
@@ -123,6 +127,11 @@ float AABBColliderComponent::DetectVertialCollision(RigidBodyComponent *rigidBod
         if (Intersect(*collider))
         {
             float minVerticalOverlap = GetMinVerticalOverlap(collider);
+
+            if (Math::Abs(minVerticalOverlap) <= 0.5f)
+            {
+                continue; // Ignora colisões com sobreposição muito pequena
+            }
             if (!IsSensor() && !collider->IsSensor())
             {
                 ResolveVerticalCollisions(rigidBody, minVerticalOverlap);
