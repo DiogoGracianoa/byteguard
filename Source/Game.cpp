@@ -30,6 +30,7 @@
 #include "Components/DrawComponents/DrawSpriteComponent.h"
 #include "Components/DrawComponents/DrawPolygonComponent.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
+#include "Actors/PressMachine.h"
 
 Game::Game(int windowWidth, int windowHeight)
         :mWindow(nullptr)
@@ -326,6 +327,8 @@ void Game::LoadLevel(const std::string& levelName, const int levelWidth, const i
 
     // Instantiate level actors
     BuildLevel(mLevelData, levelWidth, levelHeight);
+
+    auto* press = new PressMachine(this, mRenderer);
 }
 
 void Game::BuildLevel(int** levelData, int width, int height)

@@ -153,6 +153,7 @@ void Mario::OnUpdate(float deltaTime)
 
     if (!mIsDying && !mIsOnPole && mGame->GetGamePlayState() == Game::GamePlayState::Playing)
     {
+        //AUTORUN
         // Mario sempre corre pra frente com velocidade constante
         mRigidBodyComponent->SetVelocity(Vector2(mForwardSpeed, mRigidBodyComponent->GetVelocity().y));
         mIsRunning = true;
