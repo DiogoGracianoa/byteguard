@@ -17,7 +17,7 @@ EnemyBlock::EnemyBlock(Game* game, const std::string &texturePath, const bool is
         :Actor(game)
 {
     float spikeColliderWidth = Game::TILE_SIZE - 15.0f;
-    float spikeColliderHeight = Game::TILE_SIZE - 10.0f;
+    float spikeColliderHeight = Game::TILE_SIZE - 20.0f;
     float offsetX = 7.5f;
     float offsetY = 10;
 

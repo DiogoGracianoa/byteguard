@@ -327,8 +327,6 @@ void Game::LoadLevel(const std::string& levelName, const int levelWidth, const i
 
     // Instantiate level actors
     BuildLevel(mLevelData, levelWidth, levelHeight);
-
-    auto* press = new PressMachine(this, mRenderer);
 }
 
 void Game::BuildLevel(int** levelData, int width, int height)
@@ -394,6 +392,11 @@ void Game::BuildLevel(int** levelData, int width, int height)
             {
                 Collectible* coin = new Collectible(this);
                 coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if(tile == 36) // Spawner
+            {
+                auto* press = new PressMachine(this, mRenderer);
+                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
             else if (
                     tile == 0  || tile == 8  ||

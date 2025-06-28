@@ -17,7 +17,7 @@ PressMachine::PressMachine(Game* game, SDL_Renderer* renderer)
     mAnim->SetAnimFPS(10.0f);
 
     // Define posição inicial (você pode setar depois externamente também)
-    this->SetPosition(Vector2(360.0f, 320.0f));
+    //this->SetPosition(Vector2(360.0f, 320.0f));
     mColliderComponent = new AABBColliderComponent(this, 0, 0, 40, 40, ColliderLayer::EnemyBlocks, true);
 
     // Inicia com colisor em altura mínima
