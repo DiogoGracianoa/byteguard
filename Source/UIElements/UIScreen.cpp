@@ -72,32 +72,16 @@ void UIScreen::Update(float deltaTime)
 
 void UIScreen::Draw(SDL_Renderer *renderer)
 {
-    // --------------
-    // TODO - PARTE 1-1
-    // --------------
-
-    // TODO 1.: Percorra a listas de textos (mTexts) e chame o método Draw de cada UIText, passando o renderer
-    //  e a posição da tela (mPos).
-    for (auto text : mTexts)
-    {
-        text->Draw(renderer, mPos);
-    }
-
-    // --------------
-    // TODO - PARTE 1-3
-    // --------------
-
-    // TODO 1.: Percorra a lista de imagens (mImages) e chame o método Draw de cada UIImage, passando o renderer
     for (auto image : mImages)
     {
         image->Draw(renderer, mPos);
     }
 
-    // --------------
-    // TODO - PARTE 1-2
-    // --------------
+    for (auto text : mTexts)
+    {
+        text->Draw(renderer, mPos);
+    }
 
-    // TODO 1.: Percorra a lista de botões (mButtons) e chame o método Draw de cada UIButton, passando o renderer
     for (auto button : mButtons)
     {
         button->Draw(renderer, mPos);
@@ -111,17 +95,6 @@ void UIScreen::ProcessInput(const uint8_t* keys)
 
 void UIScreen::HandleKeyPress(int key)
 {
-    // --------------
-    // TODO - PARTE 1-2
-    // --------------
-
-    // TODO 1.: Verifique se a tecla pressionada é W (SDLK_w), S (SDLK_s) ou Enter (SDLK_RETURN). Se a tecla for W,
-    //  diminua o índice do botão selecionado (mSelectedButtonIndex) e destaque o botão anterior. Se o índice for
-    //  menor que 0, defina-o como o último botão da lista. Se a tecla for S, aumente o índice do botão selecionado
-    //  e destaque o próximo botão. Se o índice for maior ou igual ao tamanho da lista, defina-o como 0 (o primeiro botão).
-    //  Se a tecla for Enter, verifique se o índice do botão selecionado é válido (maior ou igual a 0 e menor que
-    //  o tamanho da lista). Se for, chame o método OnClick do botão selecionado.
-
     if (mButtons.empty())
         return;
 
@@ -203,13 +176,6 @@ UIButton* UIScreen::AddButton(const std::string& name, const Vector2 &pos, const
 
 UIImage* UIScreen::AddImage(SDL_Renderer* renderer, const std::string &imagePath, const Vector2 &pos, const Vector2 &dims, const Vector3 &color)
 {
-    // --------------
-    // TODO - PARTE 1-3
-    // --------------
-
-    // TODO 1.: Crie um novo UIImage com o caminho da imagem (imagePath), posição (pos), dimensões (dims) e cor (color).
-    //  Armazene o ponteiro em uma variável img. A seguir, adicione o UIImage à lista de imagens (mImages) e retorne
-    //  o ponteiro img.
     UIImage* img = new UIImage(renderer, imagePath, pos, dims, color);
 
     mImages.emplace_back(img);

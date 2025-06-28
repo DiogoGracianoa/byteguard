@@ -24,20 +24,37 @@ HUD::HUD(SDL_Renderer *renderer, class Game* game, const std::string& fontName)
         POINT_SIZE
         );*/
 
-    /*mAttemptBackground = AddImage(
-        renderer,
-        "../Assets/Sprites/Background/AttemptBackground.png",
-        Vector2(screenWidth * 0.5f - CHAR_WIDTH * 7, HUD_POS_Y),
-        Vector2(CHAR_WIDTH*15, WORD_HEIGHT * 3)
-        );*/
-
     auto offsetTextAttempt_x = 15.0f;
+    auto HUD_CharWidth = 15.0f;
+    auto HUD_CharHeight = 15.0f;
+
+    float imageWidth = (HUD_CharWidth * 15) + 30 ;
+    float imageHeight = HUD_CharHeight * 2 + 15;
+
+    Vector2 imagePos(offsetTextAttempt_x, HUD_POS_Y);
+
+    AddImage(
+        renderer,
+        "../Assets/Sprites/AttemptPlate.png",
+        imagePos,
+        Vector2(imageWidth, imageHeight)
+    );
+
+
+    float textWidth = HUD_CharWidth * 11;
+    float textHeight = HUD_CharHeight;
+
+    Vector2 textPos(
+        imagePos.x + (imageWidth - textWidth) / 2,
+        (imagePos.y + (imageHeight - textHeight) / 2) + 5
+    );
+
     mAttemptText = AddText(
         "Tentativa 1",
-        Vector2(offsetTextAttempt_x, HUD_POS_Y + WORD_HEIGHT),
-        Vector2(CHAR_WIDTH * 11, WORD_HEIGHT),
+        textPos,
+        Vector2(textWidth, textHeight),
         POINT_SIZE
-        );
+    );
 }
 
 HUD::~HUD()

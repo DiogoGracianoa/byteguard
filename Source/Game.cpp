@@ -212,7 +212,7 @@ void Game::ChangeScene()
         // --------------
 
         // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf.
-        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Audiowide-Regular.ttf");
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial.
         //  Em seguida, altere o nome do nível para "1-1" no HUD.
@@ -253,7 +253,7 @@ void Game::ChangeScene()
 
         // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf. Como
         //  feito no nível 1-1.
-        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Audiowide-Regular.ttf");
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial. Como
         //  feito no nível 1-1.
