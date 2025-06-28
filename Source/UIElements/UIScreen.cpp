@@ -170,14 +170,8 @@ UIText* UIScreen::AddText(const std::string &name, const Vector2 &pos, const Vec
 
 UIButton* UIScreen::AddButton(const std::string& name, const Vector2 &pos, const Vector2& dims, std::function<void()> onClick)
 {
-    // --------------
-    // TODO - PARTE 1-2
-    // --------------
-
-    // TODO 1.: Crie um novo UIButton com o nome, fonte (mFont), função de clique (onClick),
-    //  posição (pos), dimensões (dims) e cor laranja. Adicione o botão à lista de botões (mButtons).
-    Vector3 buttonColor(200.0f, 100.0f, 0.0f);
-    Vector3 textColor(1.0f, 1.0f, 1.0f);
+    Vector3 buttonColor = Vector3(30.0f, 77.0f, 93.0f);
+    Vector3 textColor = Vector3(1.0f, 1.0f, 1.0f);
     Vector2 textSize = dims * 0.6f;
     Vector2 textPos = (dims * 0.5f) - (textSize * 0.5f);
     unsigned wrapLength = dims.x * 2;
@@ -198,15 +192,12 @@ UIButton* UIScreen::AddButton(const std::string& name, const Vector2 &pos, const
 
     mButtons.emplace_back(b);
 
-    // TODO 2.: Se a lista de botões (mButtons) tiver apenas um botão, defina o índice do botão
-    //  selecionado (mSelectedButtonIndex) como 0 e destaque o botão (b->SetHighlighted(true)).
     if (mButtons.size() == 1)
     {
         mSelectedButtonIndex = 0;
         b->SetHighlighted(true);
     }
 
-    // TODO 3.: Retorne o ponteiro do botão criado (b).
     return b;
 }
 

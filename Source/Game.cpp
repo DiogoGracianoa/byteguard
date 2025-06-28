@@ -103,11 +103,6 @@ bool Game::Initialize()
     // Start random number generator
     Random::Init();
 
-    // --------------
-    // TODO - PARTE 4
-    // --------------
-
-    // TODO 1. Instancie um AudioSystem.
     mAudio = new AudioSystem();
 
     mSpatialHashing = new SpatialHashing(TILE_SIZE * 4.0f,
@@ -116,8 +111,8 @@ bool Game::Initialize()
     mTicksCount = SDL_GetTicks();
 
     // Init all game actors
-    //SetGameScene(GameScene::MainMenu);
-    SetGameScene(GameScene::Level1);
+    SetGameScene(GameScene::MainMenu);
+    //SetGameScene(GameScene::Level1);
     mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
     mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
     mParallax5 = LoadTexture("../Assets/Sprites/Background/5.png");
@@ -125,7 +120,6 @@ bool Game::Initialize()
     mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");
 
     // Initially, change scene to MainMenu
-    //ChangeScene();
     mCoinCount = 0;
     return true;
 }
@@ -206,7 +200,7 @@ void Game::ChangeScene()
     if (mNextScene == GameScene::MainMenu)
     {
         // Set background color
-        mBackgroundColor.Set(107.0f, 140.0f, 255.0f);
+        mBackgroundColor.Set(5.0f, 12.0f, 22.0f);
 
         // Initialize main menu actors
         LoadMainMenu();
@@ -299,39 +293,19 @@ void Game::ChangeScene()
 
 void Game::LoadMainMenu()
 {
-    // --------------
-    // TODO - PARTE 1
-    // --------------
+    auto mainMenu = new UIScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-    // Esse método será usado para criar uma tela de UI e adicionar os elementos do menu principal.
-    auto mainMenu = new UIScreen(this, "../Assets/Fonts/SMB.ttf");
-    const Vector2 titleSize = Vector2(178.0f, 88.0f) * 2.0f;
-    const Vector2 titlePos = Vector2(mWindowWidth/2.0f - titleSize.x/2.0f, 50.0f);
+    const Vector2 menuImagePos = Vector2(0,0);
+    const Vector2 menuImageDims= Vector2(mWindowWidth,450);
 
-    const Vector2 backgroundPos = Vector2(0, mWindowHeight - 162);
+    mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo_ByteGuard.png", menuImagePos, menuImageDims);
 
-    mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo.png", titlePos, titleSize);
-    mainMenu->AddImage(mRenderer, "../Assets/Sprites/background_menu.png", backgroundPos, Vector2(640, 162.0f));
-
-    /*mainMenu->AddText("Super Mario Bros",
-        Vector2(170.0f, 50.0f),
-        Vector2(300.0f, 30.0f),
-         60);*/
-
-    auto button1 = mainMenu->AddButton(
-        "1 Player",
-        Vector2(mWindowWidth/2.0f - 100.0f, 275.0f),
-        Vector2(200.0f, 40.0f),
+    mainMenu->AddButton(
+        "Jogar",
+        Vector2(mWindowWidth/2.0f - 150.0f, mWindowHeight/4.0f * 3.0f),
+        Vector2(300.0f, 60.0f),
         [this]() {
          SetGameScene(GameScene::Level1);});
-
-    auto button2 = mainMenu->AddButton(
-        "2 Players",
-        Vector2(mWindowWidth/2.0f - 100.0f, 325.0f),
-        Vector2(200.0f, 40.0f),
-        nullptr);
-
-
 }
 
 void Game::LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight)
@@ -825,7 +799,9 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
-    DrawParallaxBackground(mRenderer, mCameraPos);
+    if (mGameScene == GameScene::Level1) {
+        DrawParallaxBackground(mRenderer, mCameraPos);
+    }
 
     // Draw background texture considering camera position
     /*if (mBackgroundTexture)
