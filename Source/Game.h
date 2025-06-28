@@ -175,4 +175,6 @@ private:
     SDL_Texture *mBg2 = nullptr;
 
     int mCoinCount;
+
+    std::unordered_map<GameScene, int> mSceneAttempts;
 };

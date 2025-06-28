@@ -172,6 +172,12 @@ void Game::ResetGameScene(float transitionTime)
     // TODO 1.: Chame SetGameScene passando o mGameScene atual e o tempo de transição.
     mCoinCount = 0;
 
+    if (mSceneAttempts.find(mGameScene) != mSceneAttempts.end()) {
+        mSceneAttempts[mGameScene]++;
+    } else {
+        mSceneAttempts[mGameScene] = 1;
+    }
+
     SetGameScene(mGameScene, transitionTime);
 }
 
@@ -192,6 +198,10 @@ void Game::ChangeScene()
     // Reset scene manager state
     mSpatialHashing = new SpatialHashing(TILE_SIZE * 4.0f, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE);
 
+    if (mSceneAttempts.find(mNextScene) == mSceneAttempts.end()) {
+        mSceneAttempts[mNextScene] = 1;
+    }
+
     // Scene Manager FSM: using if/else instead of switch
     if (mNextScene == GameScene::MainMenu)
     {
@@ -208,14 +218,18 @@ void Game::ChangeScene()
         // --------------
 
         // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf.
-        mHUD = new HUD(this, "../Assets/Fonts/SMB.ttf");
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Audiowide-Regular.ttf");
 
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial.
         //  Em seguida, altere o nome do nível para "1-1" no HUD.
         mGameTimeLimit = 400;
         mHUD->SetTime(mGameTimeLimit);
-        mHUD->SetCoinsCount(mCoinCount);
-        mHUD->SetLevelName("1-1");
+        //mHUD->SetCoinsCount(mCoinCount);
+        //mHUD->SetLevelName("1-1");
+        int tentativa = mSceneAttempts[mNextScene];
+
+        mHUD->SetAttemptCount(tentativa);
+
 
         // --------------
         // TODO - PARTE 4
@@ -252,7 +266,7 @@ void Game::ChangeScene()
 
         // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf. Como
         //  feito no nível 1-1.
-        mHUD = new HUD(this, "../Assets/Fonts/SMB.ttf");
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Audiowide-Regular.ttf");
 
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial. Como
         //  feito no nível 1-1.

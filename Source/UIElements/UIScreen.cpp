@@ -163,13 +163,6 @@ void UIScreen::Close()
 
 UIText* UIScreen::AddText(const std::string &name, const Vector2 &pos, const Vector2 &dims, const int pointSize, const int unsigned wrapLength)
 {
-    // --------------
-    // TODO - PARTE 1-1
-    // --------------
-
-    // TODO 1.: Crie um novo UIText com o nome, fonte (mFont), tamanho do ponto (pointSize), comprimento de quebra (wrapLength),
-    //  posição (pos), dimensões (dims) e cor branca. Armazene o ponteiro em uma variável t. A seguir, adicione o UIText
-    //  à lista de textos (mTexts) e retorne o ponteiro t.
     UIText* t = new UIText(name, mFont, pointSize, wrapLength, pos, dims, Vector3(1.0f, 1.0f, 1.0f));
     mTexts.emplace_back(t);
     return t;

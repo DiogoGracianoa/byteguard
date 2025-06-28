@@ -19,9 +19,9 @@ Mario::Mario(Game* game, const float forwardSpeed, const float jumpSpeed)
 {
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
 
-    float byteGuardColliderWidth = Game::TILE_SIZE - 10.0f;
+    float byteGuardColliderWidth = Game::TILE_SIZE - 15.0f;
     float byteGuardColliderHeight = Game::TILE_SIZE;
-    float offsetX = 0;
+    float offsetX = 7.5f;
     float offsetY = 0;
 
     mColliderComponent = new AABBColliderComponent(this, offsetX, offsetY, byteGuardColliderWidth,byteGuardColliderHeight,

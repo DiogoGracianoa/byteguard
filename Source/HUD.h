@@ -17,7 +17,7 @@ public:
     const int CHAR_WIDTH = 20.0f;
     const int HUD_POS_Y = 10.0f;
 
-    HUD(class Game* game, const std::string& fontName);
+    HUD(SDL_Renderer *renderer, class Game* game, const std::string& fontName);
     ~HUD();
 
     // Reinsert the HUD elements
@@ -25,12 +25,15 @@ public:
     void SetCoinsCount(int coinsCount);
 
     void SetLevelName(const std::string& levelName);
+    void SetAttemptCount(int count);
+    void CreateAttemptTextWithOutline(const std::string& text, const Vector2& basePos, int pointSize);
 
 private:
     // HUD elements
     UIText* mScoreCounter;
-    UIText* mLevelName;
+    //UIText* mLevelName;
     UIText* mLivesCount;
     UIText* mTimeText;
-    UIText* mCoinsCountText;
+    //UIText* mCoinsCountText;
+    UIText* mAttemptText;
 };
