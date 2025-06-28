@@ -336,17 +336,42 @@ void Game::BuildLevel(int** levelData, int width, int height)
 
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
-            {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
-            {9, "../Assets/Sprites/ScifiBlocks/BGTile_3.png"},
-            {17, "../Assets/Sprites/ScifiBlocks/BGTile_3.png"},
-            {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
-            {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
-            {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
-            {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
-            {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
-            {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
-            {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
-            {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
+        {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
+        {1, "../Assets/Sprites/ScifiBlocks/BGTile_1.png"},
+        {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
+        {3, "../Assets/Sprites/ScifiBlocks/Fence_1.png"},
+        {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
+        {5, "../Assets/Sprites/ScifiBlocks/Spike8.png"},
+        {6, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+        {7, "../Assets/Sprites/ScifiBlocks/Tile_9.png"},
+        {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
+        {9, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+        {10, "../Assets/Sprites/ScifiBlocks/BGTile_7.png"},
+        {11, "../Assets/Sprites/ScifiBlocks/Spike1.png"},
+        {12, "../Assets/Sprites/ScifiBlocks/Spike7.png"},
+        {13, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+        {14, "../Assets/Sprites/ScifiBlocks/Tile_8.png"},
+        {16, "../Assets/Sprites/ScifiBlocks/BGTile_2.png"},
+        {17, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+        {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
+        {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
+        {20, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+        {21, "../Assets/Sprites/ScifiBlocks/Tile_7.png"},
+        {24, "../Assets/Sprites/ScifiBlocks/BGTile_5.png"},
+        {25, "../Assets/Sprites/ScifiBlocks/Fence_3.png"},
+        {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
+        {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+        {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
+        {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
+        {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
+        {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
+        {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
+        {40, "../Assets/Sprites/ScifiBlocks/Spike3.png"},
+        {41, "../Assets/Sprites/ScifiBlocks/Tile_10.png"},
+        {42, "../Assets/Sprites/ScifiBlocks/Tile_4.png"},
+        {48, "../Assets/Sprites/ScifiBlocks/Tile_1.png"},
+        {49, "../Assets/Sprites/ScifiBlocks/Tile_3.png"},
+        {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
     };
 
     for (int y = 0; y < LEVEL_HEIGHT; ++y)
@@ -355,7 +380,7 @@ void Game::BuildLevel(int** levelData, int width, int height)
         {
             int tile = levelData[y][x];
 
-            if(tile == 25) // Mario
+            if(tile == 15) // Mario
             {
                 mMario = new Mario(this);
                 mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
@@ -370,7 +395,11 @@ void Game::BuildLevel(int** levelData, int width, int height)
                 Collectible* coin = new Collectible(this);
                 coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            else if(tile == 0 || tile == 8 || tile == 19 || tile == 33 || tile == 18 || tile == 4) {
+            else if (
+                    tile == 0  || tile == 8  ||
+                    tile == 4  || tile == 5  || tile == 11 || tile == 12 ||
+                    tile == 18 || tile == 19 || tile == 26 || tile == 33 || tile == 40
+                ) {
                 auto it = tileMap.find(tile);
                 if (it != tileMap.end())
                 {
