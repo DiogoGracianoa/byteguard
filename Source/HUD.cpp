@@ -10,19 +10,19 @@ HUD::HUD(SDL_Renderer *renderer, class Game* game, const std::string& fontName)
     :UIScreen(game, fontName)
 {
     const float screenWidth = static_cast<float>(game->GetWindowWidth());
-    AddText(
+    /*AddText(
         "Time",
         Vector2(screenWidth - WORD_OFFSET - CHAR_WIDTH * 4, HUD_POS_Y),
         Vector2(CHAR_WIDTH * 4, WORD_HEIGHT),
         POINT_SIZE
-        );
+        );*/
 
-    mTimeText = AddText(
+    /*mTimeText = AddText(
         "400",
         Vector2(screenWidth - WORD_OFFSET - CHAR_WIDTH * 3, HUD_POS_Y + WORD_HEIGHT),
         Vector2(CHAR_WIDTH * 3, WORD_HEIGHT),
         POINT_SIZE
-        );
+        );*/
 
     /*mAttemptBackground = AddImage(
         renderer,
@@ -31,9 +31,10 @@ HUD::HUD(SDL_Renderer *renderer, class Game* game, const std::string& fontName)
         Vector2(CHAR_WIDTH*15, WORD_HEIGHT * 3)
         );*/
 
+    auto offsetTextAttempt_x = 15.0f;
     mAttemptText = AddText(
         "Tentativa 1",
-        Vector2(screenWidth * 0.5f - CHAR_WIDTH * 5, HUD_POS_Y + WORD_HEIGHT),
+        Vector2(offsetTextAttempt_x, HUD_POS_Y + WORD_HEIGHT),
         Vector2(CHAR_WIDTH * 11, WORD_HEIGHT),
         POINT_SIZE
         );
@@ -52,7 +53,7 @@ void HUD::SetTime(int time)
 
     // TODO 1.: Utilize o método SetText() do mTimeText para atualizar o texto com o tempo restante. Lembre-se que
     //  o tempo é um inteiro que representa os segundos restantes, e deve ser convertido para string.
-    std::string timeStr = std::to_string(time);
+    /*std::string timeStr = std::to_string(time);
     mTimeText->SetText(timeStr);
 
     // TODO 2.: A posição e o tamanho do texto irão mudar dependendo do número de dígitos na variável time.
@@ -71,7 +72,7 @@ void HUD::SetTime(int time)
         float newX = basePos.x + CHAR_WIDTH;
         mTimeText->SetPosition(Vector2(newX, basePos.y));
         mTimeText->SetSize(Vector2(newWidth, height));
-    }
+    }*/
 }
 
 void HUD::SetLevelName(const std::string &levelName)

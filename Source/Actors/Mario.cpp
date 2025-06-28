@@ -70,12 +70,7 @@ void Mario::OnProcessInput(const uint8_t* state)
         mRigidBodyComponent->SetVelocity(Vector2(mRigidBodyComponent->GetVelocity().x, mJumpSpeed));
         mIsOnGround = false;
 
-        // --------------
-        // TODO - PARTE 4
-        // --------------
-
-        // TODO 1.: Toque o som "Jump.wav" quando Mario pular.
-        //mGame->GetAudio()->PlaySound("Jump.wav");
+        mGame->GetAudio()->PlaySound("ByteGuard_Jump.ogg");
     }
 }
 
@@ -196,15 +191,10 @@ void Mario::Kill()
     mRigidBodyComponent->SetEnabled(false);
     mColliderComponent->SetEnabled(false);
 
-    // --------------
-    // TODO - PARTE 4
-    // --------------
-
-    // TODO 1.: Pare todos os sons com StopAllSounds() e toque o som "Dead.wav".
     mGame->GetAudio()->StopAllSounds();
-    mGame->GetAudio()->PlaySound("Dead.wav");
+    mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
 
-    mGame->ResetGameScene(0.5f); // Reset the game scene after 3 seconds
+    mGame->ResetGameScene(0.5f);
 }
 
 void Mario::Win(AABBColliderComponent *poleCollider)

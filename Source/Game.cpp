@@ -217,21 +217,14 @@ void Game::ChangeScene()
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial.
         //  Em seguida, altere o nome do nível para "1-1" no HUD.
         mGameTimeLimit = 400;
-        mHUD->SetTime(mGameTimeLimit);
+        //mHUD->SetTime(mGameTimeLimit);
         //mHUD->SetCoinsCount(mCoinCount);
         //mHUD->SetLevelName("1-1");
         int tentativa = mSceneAttempts[mNextScene];
 
         mHUD->SetAttemptCount(tentativa);
 
-
-        // --------------
-        // TODO - PARTE 4
-        // --------------
-
-        // TODO 1. Toque a música de fundo "MusicMain.ogg" em loop e armaze o SoundHandle retornado em mMusicHandle.
-        //aqui é a musica principal que vai tocar
-        //mMusicHandle = mAudio->PlaySound("MusicMain.ogg", true);
+        mMusicHandle = mAudio->PlaySound("Main_Level1.mp3", true);
 
         // Set background color
         mBackgroundColor.Set(55.0f, 68.0f, 110.0f);
@@ -265,7 +258,7 @@ void Game::ChangeScene()
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial. Como
         //  feito no nível 1-1.
         mGameTimeLimit = 400;
-        mHUD->SetTime(mGameTimeLimit);
+        //mHUD->SetTime(mGameTimeLimit);
         mHUD->SetCoinsCount(mCoinCount);
         mHUD->SetLevelName("1-2");
 
@@ -300,12 +293,17 @@ void Game::LoadMainMenu()
 
     mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo_ByteGuard.png", menuImagePos, menuImageDims);
 
+    mMusicHandle = mAudio->PlaySound("Menu_Music.mp3", true);
+
     mainMenu->AddButton(
         "Jogar",
         Vector2(mWindowWidth/2.0f - 150.0f, mWindowHeight/4.0f * 3.0f),
         Vector2(300.0f, 60.0f),
         [this]() {
-         SetGameScene(GameScene::Level1);});
+            SetGameScene(GameScene::Level1);
+            this->GetAudio()->StopAllSounds();
+            mMusicHandle = mAudio->PlaySound("Click_Jogar.ogg", false);
+    });
 }
 
 void Game::LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight)
@@ -708,7 +706,7 @@ void Game::UpdateLevelTime(float deltaTime)
 
         if (mHUD)
         {
-            mHUD->SetTime(mGameTimeLimit);
+            //mHUD->SetTime(mGameTimeLimit);
         }
         if (mGameTimeLimit <= 0 && mMario)
         {
