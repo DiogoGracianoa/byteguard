@@ -118,6 +118,11 @@ bool Game::Initialize()
     // Init all game actors
     //SetGameScene(GameScene::MainMenu);
     SetGameScene(GameScene::Level1);
+    mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
+    mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
+    mParallax5 = LoadTexture("../Assets/Sprites/Background/5.png");
+    mBg1 = LoadTexture("../Assets/Sprites/Background/1.png");
+    mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");
 
     // Initially, change scene to MainMenu
     //ChangeScene();
@@ -221,7 +226,7 @@ void Game::ChangeScene()
         //mMusicHandle = mAudio->PlaySound("MusicMain.ogg", true);
 
         // Set background color
-        mBackgroundColor.Set(152.0f, 172.0f, 175.0f);
+        mBackgroundColor.Set(55.0f, 68.0f, 110.0f);
 
         // Set background color
         SetBackgroundImage("../Assets/Sprites/Background_Level1.png", Vector2(0,0), Vector2(1600,600));
@@ -383,12 +388,12 @@ void Game::BuildLevel(int** levelData, int width, int height)
                 mMario = new Mario(this);
                 mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            else if(tile == 10) // Spawner
+            /*else if(tile == 10) // Spawner
             {
                 Spawner* spawner = new Spawner(this, SPAWN_DISTANCE);
                 spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }
-            else if(tile == 3) // Spawner
+            }*/
+            else if(tile == 3)
             {
                 Collectible* coin = new Collectible(this);
                 coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
@@ -806,8 +811,10 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
+    DrawParallaxBackground(mRenderer, mCameraPos);
+
     // Draw background texture considering camera position
-    if (mBackgroundTexture)
+    /*if (mBackgroundTexture)
     {
         SDL_Rect dstRect = { static_cast<int>(mBackgroundPosition.x - mCameraPos.x),
                              static_cast<int>(mBackgroundPosition.y - mCameraPos.y),
@@ -815,7 +822,7 @@ void Game::GenerateOutput()
                              static_cast<int>(mBackgroundSize.y) };
 
         SDL_RenderCopy(mRenderer, mBackgroundTexture, nullptr, &dstRect);
-    }
+    }*/
 
     // Get actors on camera
     std::vector<Actor*> actorsOnCamera =
@@ -968,6 +975,58 @@ UIFont* Game::LoadFont(const std::string& fileName)
     }
 }
 
+void Game::DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos)
+{
+    SDL_Texture* fixedBg1 = mBg1;
+    SDL_Texture* fixedBg2 = mBg2;
+
+    int texW1, texH1;
+    SDL_QueryTexture(fixedBg1, nullptr, nullptr, &texW1, &texH1);
+    SDL_Rect dst1 = { 0, 0, texW1, texH1 };
+    SDL_RenderCopy(renderer, fixedBg1, nullptr, &dst1);
+
+    int texW2, texH2;
+    SDL_QueryTexture(fixedBg2, nullptr, nullptr, &texW2, &texH2);
+    SDL_Rect dst2 = { 0, 0, texW2, texH2 };
+    SDL_RenderCopy(renderer, fixedBg2, nullptr, &dst2);
+
+    struct Layer {
+        SDL_Texture* texture;
+        float parallaxFactor;
+    };
+
+    std::vector<Layer> layers = {
+        {mParallax3, 0.1f},
+        {mParallax4, 0.3f},
+        {mParallax5, 0.5f}
+    };
+
+    int screenWidth = GetWindowWidth();
+
+    for (auto& layer : layers)
+    {
+        int texW, texH;
+        SDL_QueryTexture(layer.texture, nullptr, nullptr, &texW, &texH);
+
+        float scrollX = fmod(cameraPos.x * layer.parallaxFactor, static_cast<float>(texW));
+        if (scrollX < 0) scrollX += texW;
+
+        int numTiles = screenWidth / texW + 2;
+
+        for (int i = 0; i < numTiles; ++i)
+        {
+            SDL_Rect dst = {
+                static_cast<int>(-scrollX + i * texW),
+                0,
+                texW,
+                texH
+            };
+
+            SDL_RenderCopy(renderer, layer.texture, nullptr, &dst);
+        }
+    }
+}
+
 void Game::UnloadScene()
 {
     // Delete actors
@@ -1006,6 +1065,11 @@ void Game::Shutdown()
     IMG_Quit();
 
     SDL_DestroyRenderer(mRenderer);
+    SDL_DestroyTexture(mParallax3);
+    SDL_DestroyTexture(mParallax4);
+    SDL_DestroyTexture(mParallax5);
+    SDL_DestroyTexture(mBg1);
+    SDL_DestroyTexture(mBg2);
     SDL_DestroyWindow(mWindow);
     SDL_Quit();
 }

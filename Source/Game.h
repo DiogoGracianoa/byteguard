@@ -117,6 +117,7 @@ private:
 
     // HUD functions
     void UpdateLevelTime(float deltaTime);
+    void DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos);
 
     // Load the level from a CSV file as a 2D array
     int **ReadLevelData(const std::string& fileName, int width, int height);
@@ -165,6 +166,13 @@ private:
     SDL_Texture *mBackgroundTexture;
     Vector2 mBackgroundSize;
     Vector2 mBackgroundPosition;
+
+    //Parallax camera
+    SDL_Texture* mParallax3 = nullptr;
+    SDL_Texture *mParallax4 = nullptr;
+    SDL_Texture *mParallax5 = nullptr;
+    SDL_Texture *mBg1 = nullptr;
+    SDL_Texture *mBg2 = nullptr;
 
     int mCoinCount;
 };
