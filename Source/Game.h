@@ -157,6 +157,7 @@ private:
 
     // Game-specific
     class Mario *mMario;
+    class RobotPlane *mRobotPlane;
     class HUD *mHUD;
     SoundHandle mMusicHandle;
 
