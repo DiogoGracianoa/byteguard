@@ -1,27 +1,35 @@
 //
-// Created by Lucas N. Ferreira on 30/09/23.
+// Created by Lucas N. Ferreira on 08/09/23.
 //
 
 #pragma once
-
 #include "Actor.h"
 
-class Goomba : public Actor
+class Mario : public Actor
 {
 public:
-    explicit Goomba(Game* game, float forwardSpeed = 100.0f, float deathTime = 0.5f);
+    explicit Mario(Game* game, float forwardSpeed = 260.0f, float jumpSpeed = -640.0f);
 
+    void OnProcessInput(const Uint8* keyState) override;
     void OnUpdate(float deltaTime) override;
+
     void OnHorizontalCollision(const float minOverlap, AABBColliderComponent* other) override;
     void OnVerticalCollision(const float minOverlap, AABBColliderComponent* other) override;
 
     void Kill() override;
-    void BumpKill(const float bumpForce = 300.0f);
+    void Win(AABBColliderComponent *poleCollider);
 
 private:
-    bool mIsDying;
+    static const int POLE_SLIDE_TIME = 1; // Time in seconds to slide down the pole
+
+    void ManageAnimations();
+
     float mForwardSpeed;
-    float mDyingTimer;
+    float mJumpSpeed;
+    float mPoleSlideTimer;
+    bool mIsRunning;
+    bool mIsOnPole;
+    bool mIsDying;
 
     class RigidBodyComponent* mRigidBodyComponent;
     class DrawAnimatedComponent* mDrawComponent;

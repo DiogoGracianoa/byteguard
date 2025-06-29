@@ -76,24 +76,7 @@ void Mario::OnProcessInput(const uint8_t* state)
     }
 }
 
-void Mario::OnHandleKeyPress(const int key, const bool isPressed)
-{
-    if(mGame->GetGamePlayState() != Game::GamePlayState::Playing) return;
 
-    // Jump
-    /*if (key == SDLK_SPACE && isPressed && mIsOnGround)
-    {
-        mRigidBodyComponent->SetVelocity(Vector2(mRigidBodyComponent->GetVelocity().x, mJumpSpeed));
-        mIsOnGround = false;
-
-        // --------------
-        // TODO - PARTE 4
-        // --------------
-
-        // TODO 1.: Toque o som "Jump.wav" quando Mario pular.
-        mGame->GetAudio()->PlaySound("Jump.wav");
-    }*/
-}
 
 void Mario::OnUpdate(float deltaTime)
 {
@@ -198,7 +181,6 @@ void Mario::OnHorizontalCollision(const float minOverlap, AABBColliderComponent*
         mGame->AddCoin();
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);
-        mGame->GetAudio()->PlaySound("Coin.wav");
     }
 }
 
@@ -213,8 +195,7 @@ void Mario::OnVerticalCollision(const float minOverlap, AABBColliderComponent* o
         // TODO - PARTE 4
         // --------------
 
-        // TODO 1.: Toque o som "Stomp.wav"
-        mGame->GetAudio()->PlaySound("Stomp.wav");
+
     }
     else if (other->GetLayer() == ColliderLayer::Blocks)
     {
@@ -224,8 +205,6 @@ void Mario::OnVerticalCollision(const float minOverlap, AABBColliderComponent* o
             // TODO - PARTE 4
             // --------------
 
-            // TODO 1.: Toque o som "Bump.wav"
-            //mGame->GetAudio()->PlaySound("Bump.wav");
 
             // Cast actor to Block to call OnBump
             auto* block = dynamic_cast<Block*>(other->GetOwner());
@@ -236,7 +215,6 @@ void Mario::OnVerticalCollision(const float minOverlap, AABBColliderComponent* o
     {
         mGame->AddCoin();
         other->GetOwner()->SetState(ActorState::Destroy);
-        mGame->GetAudio()->PlaySound("Coin.wav");
     }
     if (other->GetLayer() == ColliderLayer::EnemyBlocks)
     {
