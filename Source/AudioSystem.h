@@ -1,7 +1,8 @@
 #pragma once
-#include <unordered_map>
+
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "SDL_stdinc.h"
 
@@ -16,7 +17,7 @@ public:
 	void Reset() { mID = 0; }
 
 	// Increments for convenience
-	SoundHandle& operator++()
+	SoundHandle &operator++()
 	{
 		mID++;
 		return *this;
@@ -24,12 +25,12 @@ public:
 
 	SoundHandle operator++(int)
 	{
-		SoundHandle temp(*this);
+		const SoundHandle temp(*this);
 		mID++;
 		return temp;
 	}
 
-	const char* GetDebugStr() const
+	const char *GetDebugStr() const
 	{
 		static std::string tempStr;
 		tempStr = std::to_string(mID);
@@ -37,12 +38,12 @@ public:
 	}
 
 	// Boolean checks
-	bool operator==(const SoundHandle& rhs) const { return mID == rhs.mID; }
-	bool operator!=(const SoundHandle& rhs) const { return mID != rhs.mID; }
-	bool operator<(const SoundHandle& rhs) const { return mID < rhs.mID; }
-	bool operator<=(const SoundHandle& rhs) const { return mID <= rhs.mID; }
-	bool operator>(const SoundHandle& rhs) const { return mID > rhs.mID; }
-	bool operator>=(const SoundHandle& rhs) const { return mID >= rhs.mID; }
+	bool operator==(const SoundHandle &rhs) const { return mID == rhs.mID; }
+	bool operator!=(const SoundHandle &rhs) const { return mID != rhs.mID; }
+	bool operator<(const SoundHandle &rhs) const { return mID < rhs.mID; }
+	bool operator<=(const SoundHandle &rhs) const { return mID <= rhs.mID; }
+	bool operator>(const SoundHandle &rhs) const { return mID > rhs.mID; }
+	bool operator>=(const SoundHandle &rhs) const { return mID >= rhs.mID; }
 
 	static SoundHandle Invalid;
 
@@ -59,30 +60,32 @@ enum class SoundState
 };
 
 // Manages playing audio through SDL_mixer
-    class AudioSystem
-    {
-    public:
-        // Create the AudioSystem with specified number of channels
-        // (Defaults to 8 channels)
-        AudioSystem(int numChannels = 8);
-        // Destroy the AudioSystem
-        ~AudioSystem();
+class AudioSystem
+{
+public:
+	// Create the AudioSystem with specified number of channels
+	// (Defaults to 8 channels)
+	explicit AudioSystem(int numChannels = 8);
 
-        // Updates the status of all the active sounds every frame
-        void Update(float deltaTime);
-        // Input for debugging purposes
-        void ProcessInput(const Uint8* keyState);
+	// Destroy the AudioSystem
+	~AudioSystem();
 
-        // Plays the sound with the specified name and loops if looping is true
-        // Returns the SoundHandle which is used to perform any other actions on the
-        // sound when active
-        // NOTE: The soundName is without the "Assets/Sounds/" part of the file
-        //       For example, pass in "ChompLoop.wav" rather than
-        //       "Assets/Sounds/ChompLoop.wav".
-        SoundHandle PlaySound(const std::string& soundName, bool looping = false);
+	// Updates the status of all the active sounds every frame
+	void Update(float deltaTime);
 
-        // Stops the sound if it is currently playing
-        void StopSound(SoundHandle sound);
+	// Input for debugging purposes
+	void ProcessInput(const Uint8 *keyState);
+
+	// Plays the sound with the specified name and loops if looping is true
+	// Returns the SoundHandle which is used to perform any other actions on the
+	// sound when active
+	// NOTE: The soundName is without the "Assets/Sounds/" part of the file
+	//       For example, pass in "ChompLoop.wav" rather than
+	//       "Assets/Sounds/ChompLoop.wav".
+	SoundHandle PlaySound(const std::string &soundName, bool looping = false);
+
+	// Stops the sound if it is currently playing
+	void StopSound(SoundHandle sound);
 
 	// Pauses the sound if it is currently playing
 	void PauseSound(SoundHandle sound);
@@ -103,7 +106,7 @@ enum class SoundState
 	// NOTE: The soundName is without the "Assets/Sounds/" part of the file
 	//       For example, pass in "ChompLoop.wav" rather than
 	//       "Assets/Sounds/ChompLoop.wav".
-	void CacheSound(const std::string& soundName);
+	void CacheSound(const std::string &soundName);
 
 private:
 	// If the sound is already loaded, returns Mix_Chunk from the map.
@@ -112,7 +115,7 @@ private:
 	// NOTE: The soundName is without the "Assets/Sounds/" part of the file
 	//       For example, pass in "ChompLoop.wav" rather than
 	//       "Assets/Sounds/ChompLoop.wav".
-	struct Mix_Chunk* GetSound(const std::string& soundName);
+	struct Mix_Chunk *GetSound(const std::string &soundName);
 
 	// Internal struct used to track the properties of active sound handles
 	struct HandleInfo
@@ -132,7 +135,7 @@ private:
 	std::map<SoundHandle, HandleInfo> mHandleMap;
 
 	// Map to store the Mix_Chunk data for all the files
-	std::unordered_map<std::string, Mix_Chunk*> mSounds;
+	std::unordered_map<std::string, Mix_Chunk *> mSounds;
 
 	// Used to track the last audio handle value used
 	// Will increment prior to playing a new sound

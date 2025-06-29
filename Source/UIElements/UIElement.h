@@ -9,6 +9,8 @@
 
 class UIElement {
 public:
+    virtual ~UIElement() = default;
+
     UIElement(const Vector2 &pos, const Vector2 &size, const Vector3 &color);
 
     // Getters/setters

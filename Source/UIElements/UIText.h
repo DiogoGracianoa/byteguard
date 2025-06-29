@@ -4,24 +4,31 @@
 
 #pragma once
 
-#include <string>
 #include <SDL.h>
-#include "../Math.h"
+#include <string>
 #include "UIElement.h"
+#include "../Math.h"
 
-class UIText : public UIElement {
+class UIText final : public UIElement
+{
 public:
-    UIText(const std::string& text, class UIFont* font, int pointSize = 40, const unsigned wrapLength = 1024,
-           const Vector2 &pos = Vector2::Zero, const Vector2 &size = Vector2(100.f, 20.0f), const Vector3& color = Color::White);
+    UIText(const std::string &text,
+           class UIFont *font,
+           int pointSize = 40,
+           unsigned wrapLength = 1024,
+           const Vector2 &pos = Vector2::Zero,
+           const Vector2 &size = Vector2(100.f, 20.0f),
+           const Vector3 &color = Color::White);
 
-    ~UIText();
+    ~UIText() override;
 
-    void SetText(const std::string& name);
-    void Draw(SDL_Renderer* renderer, const Vector2 &screenPos) override;
+    void SetText(const std::string &name);
+
+    void Draw(SDL_Renderer *renderer, const Vector2 &screenPos) override;
 
 protected:
     std::string mText;
-    class UIFont* mFont;
+    class UIFont *mFont;
     SDL_Texture *mTextTexture;
 
     unsigned int mPointSize;

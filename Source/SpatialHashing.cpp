@@ -3,28 +3,31 @@
 //
 
 #include "SpatialHashing.h"
-#include <SDL.h>
 #include <algorithm>
 
-SpatialHashing::SpatialHashing(int cellSize, int width, int height)
-    : mCellSize(cellSize), mWidth(width), mHeight(height)
+SpatialHashing::SpatialHashing(const int cellSize,
+                               const int width,
+                               const int height)
+    : mCellSize(cellSize),
+      mWidth(width),
+      mHeight(height)
 {
-    int cols = (width + cellSize - 1) / cellSize;
-    int rows = (height + cellSize - 1) / cellSize;
-    mGrid.resize(rows, std::vector<std::vector<Actor*>>(cols));
+    const int cols = (width + cellSize - 1) / cellSize;
+    const int rows = (height + cellSize - 1) / cellSize;
+    mGrid.resize(rows, std::vector<std::vector<Actor *> >(cols));
 }
 
 SpatialHashing::~SpatialHashing()
 {
     // Delete all actors
-    for (auto& row : mGrid)
+    for (auto &row: mGrid)
     {
-        for (auto& cell : row)
+        for (auto &cell: row)
         {
-           while(!cell.empty())
-           {
-               delete cell.back();; // Assuming ownership of actors
-           }
+            while (!cell.empty())
+            {
+                delete cell.back();; // Assuming ownership of actors
+            }
 
             cell.clear();
         }
@@ -35,10 +38,10 @@ SpatialHashing::~SpatialHashing()
     mCellIndices.clear();
 }
 
-void SpatialHashing::Insert(Actor *collider)
+void SpatialHashing::Insert(Actor *actor)
 {
     // Compute positions for each vertex of the collider
-    Vector2 position = collider->GetPosition();
+    const Vector2 position = actor->GetPosition();
 
     int col = static_cast<int>(position.x / mCellSize);
     int row = static_cast<int>(position.y / mCellSize);
@@ -50,25 +53,25 @@ void SpatialHashing::Insert(Actor *collider)
     }
 
     // Insert collider into the grid cell
-    mGrid[row][col].push_back(collider);
-    mPositions[collider] = position;
-    mCellIndices[collider] = std::make_pair(row, col);
+    mGrid[row][col].push_back(actor);
+    mPositions[actor] = position;
+    mCellIndices[actor] = std::make_pair(row, col);
 }
 
-void SpatialHashing::Remove(Actor *collider)
+void SpatialHashing::Remove(Actor *actor)
 {
-    auto it = mCellIndices.find(collider);
-    if (it != mCellIndices.end())
+    if (const auto it = mCellIndices.find(actor);
+        it != mCellIndices.end())
     {
-        int row = it->second.first;
-        int col = it->second.second;
+        const int row = it->second.first;
+        const int col = it->second.second;
 
         // Remove the collider from the grid cell
-        auto& cell = mGrid[row][col];
-        cell.erase(std::remove(cell.begin(), cell.end(), collider), cell.end());
+        auto &cell = mGrid[row][col];
+        cell.erase(std::remove(cell.begin(), cell.end(), actor), cell.end());
 
         // Remove from positions and indices maps
-        mPositions.erase(collider);
+        mPositions.erase(actor);
         mCellIndices.erase(it);
     }
 }
@@ -79,12 +82,13 @@ void SpatialHashing::Reinsert(Actor *actor)
     Insert(actor);
 }
 
-std::vector<Actor*> SpatialHashing::Query(const Vector2& position, const int range) const
+std::vector<Actor *> SpatialHashing::Query(const Vector2 &position,
+                                           const int range) const
 {
-    std::vector<Actor*> results;
+    std::vector<Actor *> results;
 
-    int col = static_cast<int>(position.x / mCellSize);
-    int row = static_cast<int>(position.y / mCellSize);
+    const int col = static_cast<int>(position.x / mCellSize);
+    const int row = static_cast<int>(position.y / mCellSize);
 
     // Ensure indices are within bounds
     if (col < 0 || col >= mGrid[0].size() || row < 0 || row >= mGrid.size())
@@ -102,7 +106,7 @@ std::vector<Actor*> SpatialHashing::Query(const Vector2& position, const int ran
                 continue; // Skip out of bounds cells
             }
 
-            const auto& cell = mGrid[r][c];
+            const auto &cell = mGrid[r][c];
             results.insert(results.end(), cell.begin(), cell.end());
         }
     }
@@ -110,15 +114,16 @@ std::vector<Actor*> SpatialHashing::Query(const Vector2& position, const int ran
     return results;
 }
 
-std::vector<AABBColliderComponent *> SpatialHashing::QueryColliders(const Vector2& position, const int range) const
+std::vector<AABBColliderComponent *> SpatialHashing::QueryColliders(
+    const Vector2 &position,
+    const int range) const
 {
-    std::vector<AABBColliderComponent*> results;
+    std::vector<AABBColliderComponent *> results;
 
-    std::vector<Actor*> actors = Query(position, range);
-    for (Actor* actor : actors)
+    const std::vector<Actor *> actors = Query(position, range);
+    for (const auto &actor: actors)
     {
-        auto collider = actor->GetComponent<AABBColliderComponent>();
-        if (collider)
+        if (auto collider = actor->GetComponent<AABBColliderComponent>())
         {
             results.push_back(collider);
         }
@@ -127,16 +132,20 @@ std::vector<AABBColliderComponent *> SpatialHashing::QueryColliders(const Vector
     return results;
 }
 
-std::vector<Actor*> SpatialHashing::QueryOnCamera(const Vector2& cameraPosition,
-                                                                  const float screenWidth,
-                                                                  const float screenHeight,
-                                                                  const float extraRadius) const
+std::vector<Actor *> SpatialHashing::QueryOnCamera(
+    const Vector2 &cameraPosition,
+    const float screenWidth,
+    const float screenHeight,
+    const float extraRadius) const
 {
-    std::vector<Actor*> results;
+    std::vector<Actor *> results;
 
     // Get the camera vertices
-    Vector2 topLeft = Vector2(cameraPosition.x - extraRadius, cameraPosition.y - extraRadius);
-    Vector2 bottomRight = Vector2(cameraPosition.x + screenWidth + extraRadius, cameraPosition.y + screenHeight + extraRadius);
+    const auto topLeft = Vector2(cameraPosition.x - extraRadius,
+                              cameraPosition.y - extraRadius);
+    const auto bottomRight = Vector2(cameraPosition.x + screenWidth + extraRadius,
+                                  cameraPosition.y + screenHeight +
+                                  extraRadius);
 
     // Calculate the grid cells that the camera covers
     int startCol = static_cast<int>(topLeft.x / mCellSize);
@@ -155,7 +164,7 @@ std::vector<Actor*> SpatialHashing::QueryOnCamera(const Vector2& cameraPosition,
     {
         for (int c = startCol; c <= endCol; ++c)
         {
-            const auto& cell = mGrid[r][c];
+            const auto &cell = mGrid[r][c];
             results.insert(results.end(), cell.begin(), cell.end());
         }
     }

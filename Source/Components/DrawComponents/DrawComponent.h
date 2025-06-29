@@ -3,19 +3,20 @@
 //
 
 #pragma once
+#include <SDL.h>
 #include "../Component.h"
 #include "../../Math.h"
-#include <vector>
-#include <SDL.h>
 
 class DrawComponent : public Component
 {
 public:
     // (Lower draw order corresponds with further back)
-    explicit DrawComponent(class Actor* owner, int drawOrder = 100);
+    explicit DrawComponent(class Actor *owner, int drawOrder = 100);
+
     ~DrawComponent() override;
 
-    virtual void Draw(SDL_Renderer* renderer, const Vector3 &modColor = Color::White);
+    virtual void Draw(SDL_Renderer *renderer,
+                      const Vector3 &modColor = Color::White);
 
     bool IsVisible() const { return mIsVisible; }
     void SetIsVisible(const bool isVisible) { mIsVisible = isVisible; }

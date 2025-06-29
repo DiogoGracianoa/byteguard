@@ -5,33 +5,36 @@
 #pragma once
 #include "Actor.h"
 
-class Mario : public Actor
+class Player final : public Actor
 {
 public:
-    explicit Mario(Game* game, float forwardSpeed = 260.0f, float jumpSpeed = -640.0f);
+    explicit Player(Game *game,
+                    float forwardSpeed = 260.0f,
+                    float jumpSpeed = -640.0f);
 
-    void OnProcessInput(const Uint8* keyState) override;
+    void OnProcessInput(const Uint8 *keyState) override;
+
     void OnUpdate(float deltaTime) override;
 
-    void OnHorizontalCollision(const float minOverlap, AABBColliderComponent* other) override;
-    void OnVerticalCollision(const float minOverlap, AABBColliderComponent* other) override;
+    void OnHorizontalCollision(float minOverlap,
+                               AABBColliderComponent *other) override;
+
+    void OnVerticalCollision(float minOverlap,
+                             AABBColliderComponent *other) override;
 
     void Kill() override;
-    void Win(AABBColliderComponent *poleCollider);
+
+    void Win(AABBColliderComponent *poleCollider) const;
 
 private:
-    static const int POLE_SLIDE_TIME = 1; // Time in seconds to slide down the pole
-
-    void ManageAnimations();
+    void ManageAnimations() const;
 
     float mForwardSpeed;
     float mJumpSpeed;
-    float mPoleSlideTimer;
     bool mIsRunning;
-    bool mIsOnPole;
     bool mIsDying;
 
-    class RigidBodyComponent* mRigidBodyComponent;
-    class DrawAnimatedComponent* mDrawComponent;
-    class AABBColliderComponent* mColliderComponent;
+    class RigidBodyComponent *mRigidBodyComponent;
+    class DrawAnimatedComponent *mDrawComponent;
+    class AABBColliderComponent *mColliderComponent;
 };

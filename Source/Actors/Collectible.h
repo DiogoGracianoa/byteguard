@@ -6,11 +6,11 @@
 
 #include "Actor.h"
 
-class Collectible : public Actor
+class Collectible final : public Actor
 {
 public:
-    explicit Collectible(Game* game);
+    explicit Collectible(Game *game);
 
 private:
-    class AABBColliderComponent* mColliderComponent;
+    class AABBColliderComponent *mColliderComponent;
 };

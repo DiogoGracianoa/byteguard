@@ -7,8 +7,7 @@
 // ----------------------------------------------------------------
 
 #pragma once
-//#include <SDL2/SDL_stdinc.h>
-// Retirando SDL2 do caminho da pasta pra evitar erros
+
 #include <SDL_stdinc.h>
 
 class Component

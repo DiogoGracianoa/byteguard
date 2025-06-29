@@ -4,23 +4,19 @@
 
 #pragma once
 
-#include "Actor.h"
 #include <string>
+#include "Actor.h"
 
-class EnemyBlock : public Actor
+class EnemyBlock final : public Actor
 {
 public:
-    explicit EnemyBlock(Game* game, const std::string &texturePath, const bool isStatic = true);
+    explicit EnemyBlock(Game *game,
+                        const std::string &texturePath,
+                        const bool isStatic = true);
 
-    void SetPosition(const Vector2& position)
-    {
-        Actor::SetPosition(position);
-        mOriginalPosition.Set(position.x, position.y);
-    }
 private:
-
     Vector2 mOriginalPosition;
 
-    class AABBColliderComponent* mColliderComponent;
-    class RigidBodyComponent* mRigidBodyComponent;
+    class AABBColliderComponent *mColliderComponent;
+    class RigidBodyComponent *mRigidBodyComponent;
 };

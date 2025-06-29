@@ -4,29 +4,25 @@
 
 #pragma once
 
-#include "Actor.h"
 #include <string>
+#include "Actor.h"
 
-class Block : public Actor
+class Block final : public Actor
 {
 public:
-    explicit Block(Game* game, const std::string &texturePath, const bool isStatic = true);
-
-    void SetPosition(const Vector2& position)
-    {
-        Actor::SetPosition(position);
-        mOriginalPosition.Set(position.x, position.y);
-    }
+    explicit Block(Game *game,
+                   const std::string &texturePath,
+                   const bool isStatic = true);
 
     void OnUpdate(float deltaTime) override;
+
     void OnBump();
-    void OnVerticalCollision(const float minOverlap, AABBColliderComponent* other) override;
 
 private:
     const int BUMP_FORCE = 200;
 
     Vector2 mOriginalPosition;
 
-    class AABBColliderComponent* mColliderComponent;
-    class RigidBodyComponent* mRigidBodyComponent;
+    class AABBColliderComponent *mColliderComponent;
+    class RigidBodyComponent *mRigidBodyComponent;
 };

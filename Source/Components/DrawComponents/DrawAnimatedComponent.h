@@ -4,40 +4,49 @@
 
 #pragma once
 
-#include "DrawSpriteComponent.h"
 #include <unordered_map>
+#include <vector>
+#include "DrawSpriteComponent.h"
 
-class DrawAnimatedComponent : public DrawSpriteComponent {
+class DrawAnimatedComponent final : public DrawSpriteComponent
+{
 public:
     // (Lower draw order corresponds with further back)
-    DrawAnimatedComponent(class Actor* owner, const std::string &spriteSheetPath, const std::string &spriteSheetData, int drawOrder = 100);
+    DrawAnimatedComponent(class Actor *owner,
+                          const std::string &spriteSheetPath,
+                          const std::string &spriteSheetData,
+                          int drawOrder = 100);
+
     ~DrawAnimatedComponent() override;
 
-    void Draw(SDL_Renderer* renderer, const Vector3 &modColor = Color::White) override;
+    void Draw(SDL_Renderer *renderer,
+              const Vector3 &modColor = Color::White) override;
+
     void Update(float deltaTime) override;
 
     // Use to change the FPS of the animation
-    void SetAnimFPS(float fps) { mAnimFPS = fps; }
+    void SetAnimFPS(const float fps) { mAnimFPS = fps; }
 
     // Set the current active animation
-    void SetAnimation(const std::string& name);
+    void SetAnimation(const std::string &name);
 
     // Use to pause/unpause the animation
-    void SetIsPaused(bool pause) { mIsPaused = pause; }
+    void SetIsPaused(const bool pause) { mIsPaused = pause; }
 
     // Add an animation of the corresponding name to the animation map
-    void AddAnimation(const std::string& name, const std::vector<int>& images);
+    void AddAnimation(const std::string &name, const std::vector<int> &images);
 
-    float GetAnimTimer() { return mAnimTimer; }
+    float GetAnimTimer() const { return mAnimTimer; }
 
 private:
-    void LoadSpriteSheet(const std::string& texturePath, const std::string& dataPath);
+    void LoadSpriteSheet(const std::string &texturePath,
+                         const std::string &dataPath);
 
     // Vector of sprites
-    std::vector<SDL_Rect*> mSpriteSheetData;
+    std::vector<SDL_Rect *> mSpriteSheetData;
 
     // Map of animation name to vector of textures corresponding to the animation
-    std::unordered_map<std::string, std::vector<int>> mAnimations;
+    std::unordered_map<std::string, std::vector<int> > mAnimations;
 
     // Name of current animation
     std::string mAnimName;

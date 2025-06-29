@@ -3,41 +3,52 @@
 //
 
 #include "Missile.h"
-#include "Mario.h"
+#include "Player.h"
 #include "../Game.h"
-#include "../Components/DrawComponents/DrawSpriteComponent.h"
 #include "../Components/ColliderComponents/AABBColliderComponent.h"
+#include "../Components/DrawComponents/DrawSpriteComponent.h"
 
 Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
-    : Actor(game)
-, mDForceFactor(dForceFactor)
-, mSForceFactor(sForceFactor)
+    : Actor(game),
+      mDForceFactor(dForceFactor),
+      mSForceFactor(sForceFactor)
 
 {
     new DrawSpriteComponent(this,
-        "../Assets/Sprites/Missile/missile.png",
-        Game::TILE_SIZE,
-        Game::TILE_SIZE,
+                            "../Assets/Sprites/Missile/missile.png",
+                            Game::TILE_SIZE,
+                            Game::TILE_SIZE,
                             10);
 
-    mRigidBodyComponent = new RigidBodyComponent(this, 1, 0, false);
+    mRigidBodyComponent = new RigidBodyComponent(this,
+                                                 1.0f,
+                                                 0.0f,
+                                                 false);
 
-    mColliderComponent = new AABBColliderComponent(
-        this, 0, 0, Game::TILE_SIZE / 2, Game::TILE_SIZE / 2,
-        ColliderLayer::Enemy);
+    mColliderComponent = new AABBColliderComponent(this,
+                                                   0.0f,
+                                                   0.0f,
+                                                   Game::TILE_SIZE / 2,
+                                                   Game::TILE_SIZE / 2,
+                                                   ColliderLayer::Enemy);
 }
 
-void Missile::OnUpdate(float deltaTime)
+void Missile::OnUpdate(const float deltaTime)
 {
-    auto player = mGame->GetMario();
-    auto dForce =
-            mDForceFactor * Vector2::Normalize(player->GetPosition() - GetPosition());
-    auto sForce = mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
+    const auto player = mGame->GetPlayer();
+    const auto dForce =
+            mDForceFactor * Vector2::Normalize(
+                player->GetPosition() - GetPosition()
+            );
+
+    const auto sForce =
+            mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
+
     mRigidBodyComponent->ApplyForce(sForce);
 }
 
 void Missile::OnHorizontalCollision(const float minOverlap,
-                                 AABBColliderComponent *other)
+                                    AABBColliderComponent *other)
 {
     if (other->GetLayer() == ColliderLayer::Player)
     {
@@ -48,7 +59,7 @@ void Missile::OnHorizontalCollision(const float minOverlap,
 }
 
 void Missile::OnVerticalCollision(const float minOverlap,
-                               AABBColliderComponent *other)
+                                  AABBColliderComponent *other)
 {
     if (other->GetLayer() == ColliderLayer::Player)
     {
@@ -58,7 +69,4 @@ void Missile::OnVerticalCollision(const float minOverlap,
     mState = ActorState::Destroy;
 }
 
-void Missile::Kill()
-{
-    mState = ActorState::Destroy;
-}
+void Missile::Kill() { mState = ActorState::Destroy; }

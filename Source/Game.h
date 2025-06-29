@@ -8,19 +8,19 @@
 
 #pragma once
 #include <SDL.h>
-#include <vector>
 #include <unordered_map>
+#include <vector>
 #include "AudioSystem.h"
 #include "Math.h"
 
 class Game
 {
 public:
-    static const int LEVEL_WIDTH = 200;
-    static const int LEVEL_HEIGHT = 15;
-    static const int TILE_SIZE = 40;
-    static const int SPAWN_DISTANCE = 700;
-    static const int TRANSITION_TIME = 1;
+    static constexpr int LEVEL_WIDTH = 200;
+    static constexpr int LEVEL_HEIGHT = 15;
+    static constexpr int TILE_SIZE = 40;
+    static constexpr int SPAWN_DISTANCE = 700;
+    static constexpr int TRANSITION_TIME = 1;
     static constexpr float CAMERA_X_SPEED = 250.0f;
 
     enum class GameScene
@@ -50,91 +50,119 @@ public:
     Game(int windowWidth, int windowHeight);
 
     bool Initialize();
+
     void RunLoop();
+
     void Shutdown();
+
     void Quit() { mIsRunning = false; }
 
     // Actor functions
     void UpdateActors(float deltaTime);
-    void AddActor(class Actor* actor);
-    void RemoveActor(class Actor* actor);
-    void ProcessInputActors();
-    void HandleKeyPressActors(const int key, const bool isPressed);
+
+    void AddActor(class Actor *actor) const;
+
+    void RemoveActor(class Actor *actor) const;
+
+    void ProcessInputActors() const;
+
+    void HandleKeyPressActors(int key, bool isPressed) const;
 
     // Level functions
     void LoadMainMenu();
-    void LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight);
 
-    std::vector<Actor *> GetNearbyActors(const Vector2& position, const int range = 1);
-    std::vector<class AABBColliderComponent *> GetNearbyColliders(const Vector2& position, const int range = 2);
+    void LoadLevel(const std::string &levelName,
+                   int levelWidth,
+                   int levelHeight);
 
-    void Reinsert(Actor* actor);
+    std::vector<Actor *> GetNearbyActors(const Vector2 &position,
+                                         int range = 1) const;
+
+    std::vector<class AABBColliderComponent *> GetNearbyColliders(
+        const Vector2 &position,
+        int range = 2) const;
+
+    void Reinsert(Actor *actor) const;
 
     // Camera functions
-    Vector2& GetCameraPos() { return mCameraPos; };
-    void SetCameraPos(const Vector2& position) { mCameraPos = position; };
+    Vector2 &GetCameraPos() { return mCameraPos; };
+    void SetCameraPos(const Vector2 &position) { mCameraPos = position; };
 
     // Audio functions
-    class AudioSystem* GetAudio() { return mAudio; }
+    class AudioSystem *GetAudio() const { return mAudio; }
 
     // UI functions
-    void PushUI(class UIScreen* screen) { mUIStack.emplace_back(screen); }
-    const std::vector<class UIScreen*>& GetUIStack() { return mUIStack; }
+    void PushUI(class UIScreen *screen) { mUIStack.emplace_back(screen); }
+    const std::vector<class UIScreen *> &GetUIStack() { return mUIStack; }
 
     // Window functions
     int GetWindowWidth() const { return mWindowWidth; }
     int GetWindowHeight() const { return mWindowHeight; }
 
     // Loading functions
-    class UIFont* LoadFont(const std::string& fileName);
-    SDL_Texture* LoadTexture(const std::string& texturePath);
+    class UIFont *LoadFont(const std::string &fileName);
+
+    SDL_Texture *LoadTexture(const std::string &texturePath) const;
 
     void SetGameScene(GameScene scene, float transitionTime = .0f);
+
     void ResetGameScene(float transitionTime = .0f);
+
     void UnloadScene();
 
-    void SetBackgroundImage(const std::string& imagePath, const Vector2 &position = Vector2::Zero, const Vector2& size = Vector2::Zero);
+    void SetBackgroundImage(const std::string &imagePath,
+                            const Vector2 &position = Vector2::Zero,
+                            const Vector2 &size = Vector2::Zero);
+
     void TogglePause();
 
     // Game-specific
-    const class Mario* GetMario() { return mMario; }
+    const class Player *GetPlayer() const { return mPlayer; }
 
     void SetGamePlayState(GamePlayState state) { mGamePlayState = state; }
     GamePlayState GetGamePlayState() const { return mGamePlayState; }
 
-    void AddCoin();
-
 private:
     void ProcessInput();
+
     void UpdateGame();
+
     void UpdateCamera(float deltaTime);
+
     void GenerateOutput();
 
     // Scene Manager
     void UpdateSceneManager(float deltaTime);
+
     void ChangeScene();
+
     SceneManagerState mSceneManagerState;
     float mSceneManagerTimer;
 
     // HUD functions
     void UpdateLevelTime(float deltaTime);
-    void DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos);
+
+    void DrawParallaxBackground(SDL_Renderer *renderer,
+                                const Vector2 &cameraPos) const;
 
     // Load the level from a CSV file as a 2D array
-    int **ReadLevelData(const std::string& fileName, int width, int height);
-    void BuildLevel(int** levelData, int width, int height);
+    static int **ReadLevelData(const std::string &fileName,
+                               int width,
+                               int height);
+
+    void BuildLevel(int **levelData, int width, int height);
 
     // Spatial Hashing for collision detection
-    class SpatialHashing* mSpatialHashing;
+    class SpatialHashing *mSpatialHashing;
 
     // All the UI elements
-    std::vector<class UIScreen*> mUIStack;
-    std::unordered_map<std::string, class UIFont*> mFonts;
+    std::vector<class UIScreen *> mUIStack;
+    std::unordered_map<std::string, class UIFont *> mFonts;
 
     // SDL stuff
-    SDL_Window* mWindow;
-    SDL_Renderer* mRenderer;
-    AudioSystem* mAudio;
+    SDL_Window *mWindow;
+    SDL_Renderer *mRenderer;
+    AudioSystem *mAudio;
 
     // Window properties
     int mWindowWidth;
@@ -157,7 +185,7 @@ private:
     Vector2 mCameraPos;
 
     // Game-specific
-    class Mario *mMario;
+    class Player *mPlayer;
     class HUD *mHUD;
     SoundHandle mMusicHandle;
 
@@ -169,13 +197,11 @@ private:
     Vector2 mBackgroundPosition;
 
     //Parallax camera
-    SDL_Texture* mParallax3 = nullptr;
+    SDL_Texture *mParallax3 = nullptr;
     SDL_Texture *mParallax4 = nullptr;
     SDL_Texture *mParallax5 = nullptr;
     SDL_Texture *mBg1 = nullptr;
     SDL_Texture *mBg2 = nullptr;
-
-    int mCoinCount;
 
     std::unordered_map<GameScene, int> mSceneAttempts;
 };

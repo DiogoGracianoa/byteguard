@@ -6,12 +6,13 @@
 
 #include "Actor.h"
 
-class MissileSpawner : public Actor
+class MissileSpawner final : public Actor
 {
 public:
-    explicit MissileSpawner(Game* game, float spawnDistance);
+    explicit MissileSpawner(Game *game, float spawnDistance);
 
     void OnUpdate(float deltaTime) override;
+
 private:
     float mSpawnDistance;
 };

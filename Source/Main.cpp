@@ -10,17 +10,13 @@
 #include "Game.h"
 
 //Screen dimension constants
-const int SCREEN_WIDTH = 800 ;
-const int SCREEN_HEIGHT = 560;
+constexpr int SCREEN_WIDTH = 800;
+constexpr int SCREEN_HEIGHT = 560;
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-    Game game = Game(SCREEN_WIDTH, SCREEN_HEIGHT);
-    bool success = game.Initialize();
-    if (success)
-    {
-        game.RunLoop();
-    }
+    auto game = Game(SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (game.Initialize()) { game.RunLoop(); }
     game.Shutdown();
     return 0;
 }

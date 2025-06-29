@@ -22,26 +22,20 @@ add_executable(${PROJECT_NAME}
         Source/Components/DrawComponents/DrawComponent.h
         Source/Components/RigidBodyComponent.cpp
         Source/Components/RigidBodyComponent.h
-        Source/Components/ColliderComponents/CircleColliderComponent.cpp
-        Source/Components/ColliderComponents/CircleColliderComponent.h
         Source/Json.h
         Source/CSV.h
         Source/Components/DrawComponents/DrawSpriteComponent.cpp
         Source/Components/DrawComponents/DrawSpriteComponent.h
         Source/Components/DrawComponents/DrawPolygonComponent.cpp
         Source/Components/DrawComponents/DrawPolygonComponent.h
-        Source/Actors/Mario.cpp
-        Source/Actors/Mario.h
+        Source/Actors/Player.cpp
+        Source/Actors/Player.h
         Source/Components/ColliderComponents/AABBColliderComponent.cpp
         Source/Components/ColliderComponents/AABBColliderComponent.h
         Source/Components/DrawComponents/DrawAnimatedComponent.cpp
         Source/Components/DrawComponents/DrawAnimatedComponent.h
         Source/Actors/Block.cpp
         Source/Actors/Block.h
-        Source/Actors/Goomba.cpp
-        Source/Actors/Goomba.h
-        Source/Actors/Spawner.cpp
-        Source/Actors/Spawner.h
         Source/AudioSystem.cpp
         Source/AudioSystem.h
         Source/UIElements/UIScreen.h

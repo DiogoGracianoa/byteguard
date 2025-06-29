@@ -6,57 +6,51 @@
 // See LICENSE in root directory for full details.
 // ----------------------------------------------------------------
 
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <map>
-#include <vector>
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-#include <SDL_mixer.h>
-#include "CSV.h"
-#include "Random.h"
 #include "Game.h"
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <map>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
+#include <vector>
+#include "CSV.h"
 #include "HUD.h"
+#include "Random.h"
 #include "SpatialHashing.h"
 #include "Actors/Actor.h"
-#include "Actors/Mario.h"
 #include "Actors/Block.h"
 #include "Actors/EnemyBlock.h"
-#include "Actors/Collectible.h"
-#include "Actors/Spawner.h"
-#include "UIElements/UIScreen.h"
-#include "Components/DrawComponents/DrawComponent.h"
-#include "Components/DrawComponents/DrawSpriteComponent.h"
-#include "Components/DrawComponents/DrawPolygonComponent.h"
-#include "Components/ColliderComponents/AABBColliderComponent.h"
+#include "Actors/Player.h"
 #include "Actors/PressMachine.h"
+#include "Components/ColliderComponents/AABBColliderComponent.h"
+#include "Components/DrawComponents/DrawComponent.h"
+#include "UIElements/UIScreen.h"
 
 Game::Game(int windowWidth, int windowHeight)
-        :mWindow(nullptr)
-        ,mRenderer(nullptr)
-        ,mTicksCount(0)
-        ,mIsRunning(true)
-        ,mWindowWidth(windowWidth)
-        ,mWindowHeight(windowHeight)
-        ,mMario(nullptr)
-        ,mHUD(nullptr)
-        ,mBackgroundColor(0, 0, 0)
-        ,mModColor(255, 255, 255)
-        ,mCameraPos(Vector2::Zero)
-        ,mAudio(nullptr)
-        ,mGameTimer(0.0f)
-        ,mGameTimeLimit(0)
-        ,mSceneManagerTimer(0.0f)
-        ,mSceneManagerState(SceneManagerState::None)
-        ,mGameScene(GameScene::MainMenu)
-        ,mNextScene(GameScene::MainMenu)
-        ,mBackgroundTexture(nullptr)
-        ,mBackgroundSize(Vector2::Zero)
-        ,mBackgroundPosition(Vector2::Zero)
-{
-
-}
+    : mSceneManagerState(SceneManagerState::None),
+      mSceneManagerTimer(0.0f),
+      mSpatialHashing(nullptr),
+      mWindow(nullptr),
+      mRenderer(nullptr),
+      mAudio(nullptr),
+      mWindowWidth(windowWidth),
+      mWindowHeight(windowHeight),
+      mTicksCount(0),
+      mIsRunning(true),
+      mGamePlayState(GamePlayState::Playing),
+      mGameScene(GameScene::MainMenu),
+      mNextScene(GameScene::MainMenu),
+      mBackgroundColor(0, 0, 0),
+      mModColor(255, 255, 255),
+      mCameraPos(Vector2::Zero), mPlayer(nullptr),
+      mHUD(nullptr),
+      mGameTimer(0.0f),
+      mGameTimeLimit(0),
+      mBackgroundTexture(nullptr),
+      mBackgroundSize(Vector2::Zero),
+      mBackgroundPosition(Vector2::Zero) {}
 
 bool Game::Initialize()
 {
@@ -66,14 +60,20 @@ bool Game::Initialize()
         return false;
     }
 
-    mWindow = SDL_CreateWindow("TP4: Super Mario Bros", 20, 30, mWindowWidth, mWindowHeight, 0);
+    mWindow = SDL_CreateWindow("TP4: Super Player Bros",
+                               SDL_WINDOWPOS_CENTERED,
+                               SDL_WINDOWPOS_CENTERED,
+                               mWindowWidth,
+                               mWindowHeight, 0);
     if (!mWindow)
     {
         SDL_Log("Failed to create window: %s", SDL_GetError());
         return false;
     }
 
-    mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    mRenderer = SDL_CreateRenderer(mWindow, -1,
+                                   SDL_RENDERER_ACCELERATED |
+                                   SDL_RENDERER_PRESENTVSYNC);
     if (!mRenderer)
     {
         SDL_Log("Failed to create renderer: %s", SDL_GetError());
@@ -110,9 +110,6 @@ bool Game::Initialize()
                                          LEVEL_HEIGHT * TILE_SIZE);
     mTicksCount = SDL_GetTicks();
 
-    // Init all game actors
-    SetGameScene(GameScene::MainMenu);
-    //SetGameScene(GameScene::Level1);
     mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
     mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
     mParallax5 = LoadTexture("../Assets/Sprites/Background/5.png");
@@ -120,57 +117,34 @@ bool Game::Initialize()
     mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");
 
     // Initially, change scene to MainMenu
-    mCoinCount = 0;
+    SetGameScene(GameScene::MainMenu);
+
     return true;
 }
 
-void Game::SetGameScene(Game::GameScene scene, float transitionTime)
+void Game::SetGameScene(const GameScene scene, const float transitionTime)
 {
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Verifique se o estado do SceneManager mSceneManagerState é SceneManagerState::None.
-    //  Se sim, verifique se a cena passada scene passada como parâmetro é uma das cenas válidas (MainMenu, Level1, Level2).
-    //  Se a cena for válida, defina mNextScene como essa nova cena, mSceneManagerState como SceneManagerState::Entering e
-    //  mSceneManagerTimer como o tempo de transição passado como parâmetro.
-    //  Se a cena for inválida, registre um erro no log e retorne.
-    //  Se o estado do SceneManager não for SceneManagerState::None, registre um erro no log e retorne.
     if (mSceneManagerState == SceneManagerState::None)
     {
-        if (scene == GameScene::MainMenu || scene == GameScene::Level1 || scene == GameScene::Level2)
+        if (scene == GameScene::MainMenu || scene == GameScene::Level1 || scene
+            == GameScene::Level2)
         {
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
             mSceneManagerTimer = transitionTime;
         }
-        else
-        {
-            SDL_Log("Invalid scene passed to SetGameScene().");
-            return;
-        }
+        else { SDL_Log("Invalid scene passed to SetGameScene()."); }
     }
-    else
-    {
-        SDL_Log("Scene transition already underway. Ignoring new order.");
-        return;
-    }
+    else { SDL_Log("Scene transition already underway. Ignoring new order."); }
 }
 
-void Game::ResetGameScene(float transitionTime)
+void Game::ResetGameScene(const float transitionTime)
 {
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Chame SetGameScene passando o mGameScene atual e o tempo de transição.
-    mCoinCount = 0;
-
-    if (mSceneAttempts.find(mGameScene) != mSceneAttempts.end()) {
+    if (mSceneAttempts.find(mGameScene) != mSceneAttempts.end())
+    {
         mSceneAttempts[mGameScene]++;
-    } else {
-        mSceneAttempts[mGameScene] = 1;
     }
+    else { mSceneAttempts[mGameScene] = 1; }
 
     SetGameScene(mGameScene, transitionTime);
 }
@@ -186,13 +160,16 @@ void Game::ChangeScene()
     // Reset game timer
     mGameTimer = 0.0f;
 
-    // Reset gameplau state
+    // Reset gameplay state
     mGamePlayState = GamePlayState::Playing;
 
     // Reset scene manager state
-    mSpatialHashing = new SpatialHashing(TILE_SIZE * 4.0f, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE);
+    mSpatialHashing = new SpatialHashing(TILE_SIZE * 4.0f,
+                                         LEVEL_WIDTH * TILE_SIZE,
+                                         LEVEL_HEIGHT * TILE_SIZE);
 
-    if (mSceneAttempts.find(mNextScene) == mSceneAttempts.end()) {
+    if (mSceneAttempts.find(mNextScene) == mSceneAttempts.end())
+    {
         mSceneAttempts[mNextScene] = 1;
     }
 
@@ -207,77 +184,25 @@ void Game::ChangeScene()
     }
     else if (mNextScene == GameScene::Level1)
     {
-        // --------------
-        // TODO - PARTE 3
-        // --------------
-
-        // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf.
         mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-        // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial.
-        //  Em seguida, altere o nome do nível para "1-1" no HUD.
         mGameTimeLimit = 400;
-        //mHUD->SetTime(mGameTimeLimit);
-        //mHUD->SetCoinsCount(mCoinCount);
-        //mHUD->SetLevelName("1-1");
-        int tentativa = mSceneAttempts[mNextScene];
 
-        mHUD->SetAttemptCount(tentativa);
+        const int tryCount = mSceneAttempts[mNextScene];
+        mHUD->SetAttemptCount(tryCount);
 
         mMusicHandle = mAudio->PlaySound("Main_Level1.mp3", true);
 
         // Set background color
         mBackgroundColor.Set(55.0f, 68.0f, 110.0f);
 
-        // Set background color
-        SetBackgroundImage("../Assets/Sprites/Background_Level1.png", Vector2(0,0), Vector2(1600,600));
+        // Set background image
+        SetBackgroundImage("../Assets/Sprites/Background_Level1.png",
+                           Vector2(0, 0), Vector2(1600, 600));
 
-        // Draw Flag
-        //auto flag = new Actor(this);
-        //flag->SetPosition(Vector2(LEVEL_WIDTH * TILE_SIZE - (16 * TILE_SIZE) - 16, 3 * TILE_SIZE));
-
-        // Add a flag sprite
-        //new DrawSpriteComponent(flag, "../Assets/Sprites/Background_Flag.png", 32.0f, 32.0f, 1);
-
-        // Add a flag pole taking the entire height
-        //new AABBColliderComponent(flag, 30, 0, 4, TILE_SIZE * LEVEL_HEIGHT, ColliderLayer::Pole, true);
-
-        // Initialize actors
         LoadLevel("../Assets/Levels/level1.csv", LEVEL_WIDTH, LEVEL_HEIGHT);
     }
-    else if (mNextScene == GameScene::Level2)
-    {
-        // --------------
-        // TODO - PARTE 3
-        // --------------
-
-        // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf. Como
-        //  feito no nível 1-1.
-        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
-
-        // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial. Como
-        //  feito no nível 1-1.
-        mGameTimeLimit = 400;
-        //mHUD->SetTime(mGameTimeLimit);
-        mHUD->SetCoinsCount(mCoinCount);
-        mHUD->SetLevelName("1-2");
-
-        // --------------
-        // TODO - PARTE 4
-        // --------------
-
-        // TODO 1. Toque a música de fundo "MusicUnderground.ogg" em loop e armaze o SoundHandle retornado em mMusicHandle.
-        mMusicHandle = mAudio->PlaySound("MusicUnderground.ogg", true);
-
-        // Set background color
-        mBackgroundColor.Set(0.0f, 0.0f, 0.0f);
-
-        // Set mod color
-        mModColor.Set(0.0f, 255.0f, 200.0f);
-
-        // Initialize actors
-        LoadLevel("../Assets/Levels/level1-2.csv", LEVEL_WIDTH, LEVEL_HEIGHT);
-    }
+    else if (mNextScene == GameScene::Level2) {}
 
     // Set new scene
     mGameScene = mNextScene;
@@ -286,32 +211,38 @@ void Game::ChangeScene()
 
 void Game::LoadMainMenu()
 {
-    auto mainMenu = new UIScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
+    const auto mainMenu = new UIScreen(
+        this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-    const Vector2 menuImagePos = Vector2(0,0);
-    const Vector2 menuImageDims= Vector2(mWindowWidth,450);
+    const auto menuImagePos = Vector2(0, 0);
+    const auto menuImageDims = Vector2(mWindowWidth, 450);
 
-    mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo_ByteGuard.png", menuImagePos, menuImageDims);
+    mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo_ByteGuard.png",
+                       menuImagePos, menuImageDims);
 
     mMusicHandle = mAudio->PlaySound("Menu_Music.mp3", true);
 
     mainMenu->AddButton(
         "Jogar",
-        Vector2(mWindowWidth/2.0f - 150.0f, mWindowHeight/4.0f * 3.0f),
+        Vector2(mWindowWidth / 2.0f - 150.0f, mWindowHeight / 4.0f * 3.0f),
         Vector2(300.0f, 60.0f),
-        [this]() {
+        [this]()
+        {
             SetGameScene(GameScene::Level1);
             this->GetAudio()->StopAllSounds();
             mMusicHandle = mAudio->PlaySound("Click_Jogar.ogg", false);
-    });
+        });
 }
 
-void Game::LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight)
+void Game::LoadLevel(const std::string &levelName,
+                     const int levelWidth,
+                     const int levelHeight)
 {
     // Load level data
     int **mLevelData = ReadLevelData(levelName, levelWidth, levelHeight);
 
-    if (!mLevelData) {
+    if (!mLevelData)
+    {
         SDL_Log("Failed to load level data");
         return;
     }
@@ -320,48 +251,47 @@ void Game::LoadLevel(const std::string& levelName, const int levelWidth, const i
     BuildLevel(mLevelData, levelWidth, levelHeight);
 }
 
-void Game::BuildLevel(int** levelData, int width, int height)
+void Game::BuildLevel(int **levelData, int width, int height)
 {
-
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
-        {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
-        {1, "../Assets/Sprites/ScifiBlocks/BGTile_1.png"},
-        {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
-        {3, "../Assets/Sprites/ScifiBlocks/Fence_1.png"},
-        {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
-        {5, "../Assets/Sprites/ScifiBlocks/Spike8.png"},
-        {6, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
-        {7, "../Assets/Sprites/ScifiBlocks/Tile_9.png"},
-        {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
-        {9, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
-        {10, "../Assets/Sprites/ScifiBlocks/BGTile_7.png"},
-        {11, "../Assets/Sprites/ScifiBlocks/Spike1.png"},
-        {12, "../Assets/Sprites/ScifiBlocks/Spike7.png"},
-        {13, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
-        {14, "../Assets/Sprites/ScifiBlocks/Tile_8.png"},
-        {16, "../Assets/Sprites/ScifiBlocks/BGTile_2.png"},
-        {17, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
-        {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
-        {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
-        {20, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
-        {21, "../Assets/Sprites/ScifiBlocks/Tile_7.png"},
-        {24, "../Assets/Sprites/ScifiBlocks/BGTile_5.png"},
-        {25, "../Assets/Sprites/ScifiBlocks/Fence_3.png"},
-        {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
-        {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
-        {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
-        {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
-        {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
-        {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
-        {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
-        {40, "../Assets/Sprites/ScifiBlocks/Spike3.png"},
-        {41, "../Assets/Sprites/ScifiBlocks/Tile_10.png"},
-        {42, "../Assets/Sprites/ScifiBlocks/Tile_4.png"},
-        {48, "../Assets/Sprites/ScifiBlocks/Tile_1.png"},
-        {49, "../Assets/Sprites/ScifiBlocks/Tile_3.png"},
-        {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
-    };
+            {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
+            {1, "../Assets/Sprites/ScifiBlocks/BGTile_1.png"},
+            {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
+            {3, "../Assets/Sprites/ScifiBlocks/Fence_1.png"},
+            {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
+            {5, "../Assets/Sprites/ScifiBlocks/Spike8.png"},
+            {6, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+            {7, "../Assets/Sprites/ScifiBlocks/Tile_9.png"},
+            {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
+            {9, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+            {10, "../Assets/Sprites/ScifiBlocks/BGTile_7.png"},
+            {11, "../Assets/Sprites/ScifiBlocks/Spike1.png"},
+            {12, "../Assets/Sprites/ScifiBlocks/Spike7.png"},
+            {13, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+            {14, "../Assets/Sprites/ScifiBlocks/Tile_8.png"},
+            {16, "../Assets/Sprites/ScifiBlocks/BGTile_2.png"},
+            {17, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+            {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
+            {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
+            {20, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+            {21, "../Assets/Sprites/ScifiBlocks/Tile_7.png"},
+            {24, "../Assets/Sprites/ScifiBlocks/BGTile_5.png"},
+            {25, "../Assets/Sprites/ScifiBlocks/Fence_3.png"},
+            {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
+            {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+            {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
+            {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
+            {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
+            {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
+            {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
+            {40, "../Assets/Sprites/ScifiBlocks/Spike3.png"},
+            {41, "../Assets/Sprites/ScifiBlocks/Tile_10.png"},
+            {42, "../Assets/Sprites/ScifiBlocks/Tile_4.png"},
+            {48, "../Assets/Sprites/ScifiBlocks/Tile_1.png"},
+            {49, "../Assets/Sprites/ScifiBlocks/Tile_3.png"},
+            {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
+            };
 
     for (int y = 0; y < LEVEL_HEIGHT; ++y)
     {
@@ -369,46 +299,39 @@ void Game::BuildLevel(int** levelData, int width, int height)
         {
             int tile = levelData[y][x];
 
-            if(tile == 15) // Mario
+            if (tile == 15) // Player
             {
-                mMario = new Mario(this);
-                mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                mPlayer = new Player(this);
+                mPlayer->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            /*else if(tile == 10) // Spawner
+            else if (tile == 36) // Spawner
             {
-                Spawner* spawner = new Spawner(this, SPAWN_DISTANCE);
-                spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }*/
-            else if(tile == 3)
-            {
-                Collectible* coin = new Collectible(this);
-                coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }
-            else if(tile == 36) // Spawner
-            {
-                auto* press = new PressMachine(this, mRenderer);
+                const auto press = new PressMachine(this, mRenderer);
                 press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
             else if (
-                    tile == 0  || tile == 8  ||
-                    tile == 4  || tile == 5  || tile == 11 || tile == 12 ||
-                    tile == 18 || tile == 19 || tile == 26 || tile == 33 || tile == 40
-                ) {
-                auto it = tileMap.find(tile);
-                if (it != tileMap.end())
+                tile == 0 || tile == 8 ||
+                tile == 4 || tile == 5 || tile == 11 || tile == 12 ||
+                tile == 18 || tile == 19 || tile == 26 || tile == 33 || tile ==
+                40
+            )
+            {
+                if (const auto it = tileMap.find(tile);
+                    it != tileMap.end())
                 {
-                    // Create a enemy block actor
-                    EnemyBlock* enemyBlock= new EnemyBlock(this, it->second);
-                    enemyBlock->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                    // Create an enemy block actor
+                    const auto enemyBlock = new EnemyBlock(this, it->second);
+                    enemyBlock->SetPosition(
+                        Vector2(x * TILE_SIZE, y * TILE_SIZE));
                 }
             }
             else // Blocks
             {
-                auto it = tileMap.find(tile);
-                if (it != tileMap.end())
+                if (const auto it = tileMap.find(tile);
+                    it != tileMap.end())
                 {
                     // Create a block actor
-                    Block* block = new Block(this, it->second);
+                    const auto block = new Block(this, it->second);
                     block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
                 }
             }
@@ -416,7 +339,9 @@ void Game::BuildLevel(int** levelData, int width, int height)
     }
 }
 
-int **Game::ReadLevelData(const std::string& fileName, int width, int height)
+int **Game::ReadLevelData(const std::string &fileName,
+                          const int width,
+                          const int height)
 {
     std::ifstream file(fileName);
     if (!file.is_open())
@@ -426,11 +351,8 @@ int **Game::ReadLevelData(const std::string& fileName, int width, int height)
     }
 
     // Create a 2D array of size width and height to store the level data
-    int** levelData = new int*[height];
-    for (int i = 0; i < height; ++i)
-    {
-        levelData[i] = new int[width];
-    }
+    const auto levelData = new int *[height];
+    for (int i = 0; i < height; ++i) { levelData[i] = new int[width]; }
 
     // Read the file line by line
     int row = 0;
@@ -439,18 +361,17 @@ int **Game::ReadLevelData(const std::string& fileName, int width, int height)
     while (!file.eof())
     {
         std::getline(file, line);
-        if(!line.empty())
+        if (!line.empty())
         {
             auto tiles = CSVHelper::Split(line);
 
-            if (tiles.size() != width) {
+            if (tiles.size() != width)
+            {
                 SDL_Log("Invalid level data");
                 return nullptr;
             }
 
-            for (int i = 0; i < width; ++i) {
-                levelData[row][i] = tiles[i];
-            }
+            for (int i = 0; i < width; ++i) { levelData[row][i] = tiles[i]; }
         }
 
         ++row;
@@ -480,80 +401,80 @@ void Game::ProcessInput()
         switch (event.type)
         {
             case SDL_QUIT:
+            {
                 Quit();
                 break;
+            }
             case SDL_KEYDOWN:
+            {
                 // Handle key press for UI screens
-                if (!mUIStack.empty()) {
+                if (!mUIStack.empty())
+                {
                     mUIStack.back()->HandleKeyPress(event.key.keysym.sym);
                 }
 
-                HandleKeyPressActors(event.key.keysym.sym, event.key.repeat == 0);
+                HandleKeyPressActors(event.key.keysym.sym,
+                                     event.key.repeat == 0);
 
                 // Check if the Return key has been pressed to pause/unpause the game
-                if (event.key.keysym.sym == SDLK_RETURN)
-                {
-                    TogglePause();
-                }
+                if (event.key.keysym.sym == SDLK_RETURN) { TogglePause(); }
                 break;
+            }
+            default: break;
         }
     }
 
     ProcessInputActors();
 }
 
-void Game::ProcessInputActors()
+void Game::ProcessInputActors() const
 {
-    if(mGamePlayState == GamePlayState::Playing)
+    if (mGamePlayState == GamePlayState::Playing)
     {
         // Get actors on camera
-        std::vector<Actor*> actorsOnCamera =
-                mSpatialHashing->QueryOnCamera(mCameraPos,mWindowWidth,mWindowHeight);
+        std::vector<Actor *> actorsOnCamera =
+                mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
+                                               mWindowHeight);
 
-        const Uint8* state = SDL_GetKeyboardState(nullptr);
+        const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
-        bool isMarioOnCamera = false;
-        for (auto actor: actorsOnCamera)
+        bool isPlayerOnCamera = false;
+        for (const auto &actor: actorsOnCamera)
         {
             actor->ProcessInput(state);
 
-            if (actor == mMario) {
-                isMarioOnCamera = true;
-            }
+            if (actor == mPlayer) { isPlayerOnCamera = true; }
         }
 
-        // If Mario is not on camera, process input for him
-        if (!isMarioOnCamera && mMario) {
-            mMario->ProcessInput(state);
-        }
+        // If Player is not on camera, process input for him
+        if (!isPlayerOnCamera && mPlayer) { mPlayer->ProcessInput(state); }
     }
 }
 
-void Game::HandleKeyPressActors(const int key, const bool isPressed)
+void Game::HandleKeyPressActors(const int key, const bool isPressed) const
 {
-    if(mGamePlayState == GamePlayState::Playing)
+    if (mGamePlayState == GamePlayState::Playing)
     {
         // Get actors on camera
-        std::vector<Actor*> actorsOnCamera =
-                mSpatialHashing->QueryOnCamera(mCameraPos,mWindowWidth,mWindowHeight);
+        std::vector<Actor *> actorsOnCamera =
+                mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
+                                               mWindowHeight);
 
         // Handle key press for actors
-        bool isMarioOnCamera = false;
-        for (auto actor: actorsOnCamera) {
+        bool isPlayerOnCamera = false;
+        for (const auto &actor: actorsOnCamera)
+        {
             actor->HandleKeyPress(key, isPressed);
 
-            if (actor == mMario) {
-                isMarioOnCamera = true;
-            }
+            if (actor == mPlayer) { isPlayerOnCamera = true; }
         }
 
-        // If Mario is not on camera, handle key press for him
-        if (!isMarioOnCamera && mMario)
+        // If Player is not on camera, handle key press for him
+        if (!isPlayerOnCamera && mPlayer)
         {
-            mMario->HandleKeyPress(key, isPressed);
+            mPlayer->HandleKeyPress(key, isPressed);
         }
     }
-
 }
 
 void Game::TogglePause()
@@ -563,25 +484,11 @@ void Game::TogglePause()
         if (mGamePlayState == GamePlayState::Playing)
         {
             mGamePlayState = GamePlayState::Paused;
-
-            // --------------
-            // TODO - PARTE 4
-            // --------------
-
-            // TODO 1.: Pare a música de fundo atual usando PauseSound() e toque o som "Coin.wav" para indicar a pausa.
             mAudio->PauseSound(mMusicHandle);
-
         }
         else if (mGamePlayState == GamePlayState::Paused)
         {
             mGamePlayState = GamePlayState::Playing;
-
-            // --------------
-            // TODO - PARTE 4
-            // --------------
-
-            // TODO 1.: Retome a música de fundo atual usando ResumeSound() e toque o som "Coin.wav" para
-            //  indicar a retomada do jogo.
             mAudio->ResumeSound(mMusicHandle);
         }
     }
@@ -589,17 +496,15 @@ void Game::TogglePause()
 
 void Game::UpdateGame()
 {
-    while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16));
+    while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16)) {};
 
     float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
-    if (deltaTime > 0.05f)
-    {
-        deltaTime = 0.05f;
-    }
+    if (deltaTime > 0.05f) { deltaTime = 0.05f; }
 
     mTicksCount = SDL_GetTicks();
 
-    if(mGamePlayState != GamePlayState::Paused && mGamePlayState != GamePlayState::GameOver)
+    if (mGamePlayState != GamePlayState::Paused && mGamePlayState !=
+        GamePlayState::GameOver)
     {
         // Reinsert all actors and pending actors
         UpdateActors(deltaTime);
@@ -609,56 +514,38 @@ void Game::UpdateGame()
     mAudio->Update(deltaTime);
 
     // Reinsert UI screens
-    for (auto ui : mUIStack) {
-        if (ui->GetState() == UIScreen::UIState::Active) {
+    for (auto ui: mUIStack)
+    {
+        if (ui->GetState() == UIScreen::UIState::Active)
+        {
             ui->Update(deltaTime);
         }
     }
 
     // Delete any UIElements that are closed
     auto iter = mUIStack.begin();
-    while (iter != mUIStack.end()) {
-        if ((*iter)->GetState() == UIScreen::UIState::Closing) {
+    while (iter != mUIStack.end())
+    {
+        if ((*iter)->GetState() == UIScreen::UIState::Closing)
+        {
             delete *iter;
             iter = mUIStack.erase(iter);
-        } else {
-            ++iter;
         }
+        else { ++iter; }
     }
 
     // ---------------------
     // Game Specific Updates
     // ---------------------
     UpdateCamera(deltaTime);
-
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Chame UpdateSceneManager passando o deltaTime.
     UpdateSceneManager(deltaTime);
 
-    // --------------
-    // TODO - PARTE 3
-    // --------------
-
-    // TODO 1.: Verifique se a cena atual é diferente de GameScene::MainMenu e se o estado do jogo é
-    //  GamePlayState::Playing. Se sim, chame UpdateLevelTime passando o deltaTime.
-    if (mGameScene != GameScene::MainMenu && mGamePlayState == GamePlayState::Playing)
-    {
-        UpdateLevelTime(deltaTime);
-    }
+    if (mGameScene != GameScene::MainMenu && mGamePlayState ==
+        GamePlayState::Playing) { UpdateLevelTime(deltaTime); }
 }
 
-void Game::UpdateSceneManager(float deltaTime)
+void Game::UpdateSceneManager(const float deltaTime)
 {
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Verifique se o estado do SceneManager é SceneManagerState::Entering. Se sim, decremente o mSceneManagerTimer
-    //  usando o deltaTime. Em seguida, verifique se o mSceneManagerTimer é menor ou igual a 0. Se for, reinicie o
-    //  mSceneManagerTimer para TRANSITION_TIME e mude o estado do SceneManager para SceneManagerState::Active.
     if (mSceneManagerState == SceneManagerState::Entering)
     {
         mSceneManagerTimer -= deltaTime;
@@ -671,9 +558,6 @@ void Game::UpdateSceneManager(float deltaTime)
         }
     }
 
-    // TODO 2.: Verifique se o estado do SceneManager é SceneManagerState::Active. Se sim, decremente o mSceneManagerTimer
-    //  usando o deltaTime. Em seguida, verifique se o mSceneManagerTimer é menor ou igual a 0. Se for, chame ChangeScene()
-    //  e mude o estado do SceneManager para SceneManagerState::None.
     else if (mSceneManagerState == SceneManagerState::Active)
     {
         mSceneManagerTimer -= deltaTime;
@@ -683,20 +567,10 @@ void Game::UpdateSceneManager(float deltaTime)
             mSceneManagerState = SceneManagerState::None;
         }
     }
-
-    // TODO 3.: Remova a chamada da função ChangeScene() do método Initialize(), pois ela será chamada automaticamente
-    //  durante o UpdateSceneManager() quando o estado do SceneManager for SceneManagerState::Active.
 }
 
-void Game::UpdateLevelTime(float deltaTime)
+void Game::UpdateLevelTime(const float deltaTime)
 {
-    // --------------
-    // TODO - PARTE 3
-    // --------------
-
-    // TODO 1.: Incremente o mGameTimer com o deltaTime. Se o mGameTimer for maior ou igual a 1.0 segundos,
-    //  reinicie o mGameTimer para 0.0f e decremente o mGameTimeLimit de um e atualize o HUD com o novo tempo.
-    //  Se o mGameTimeLimit for menor ou igual a 0, mate o Mario chamando mMario->Kill().
     mGameTimer += deltaTime;
 
     if (mGameTimer >= 1.0f)
@@ -704,97 +578,63 @@ void Game::UpdateLevelTime(float deltaTime)
         mGameTimer = 0.0f;
         mGameTimeLimit--;
 
-        if (mHUD)
-        {
-            //mHUD->SetTime(mGameTimeLimit);
-        }
-        if (mGameTimeLimit <= 0 && mMario)
-        {
-            mMario->Kill();
-        }
+        if (mGameTimeLimit <= 0 && mPlayer) { mPlayer->Kill(); }
     }
 }
 
-void Game::UpdateCamera(float deltaTime)
+void Game::UpdateCamera(const float deltaTime)
 {
-    if (!mMario) return;
+    if (!mPlayer) return;
 
     if (mGamePlayState == GamePlayState::Playing)
     {
-
-        float horizontalPos = Math::Max(
-            mMario->GetPosition().x - mWindowWidth / 4,
+        const float horizontalPos = Math::Max(
+            mPlayer->GetPosition().x - mWindowWidth / 4,
             mCameraPos.x + deltaTime * CAMERA_X_SPEED);
         mCameraPos.x = horizontalPos;
     }
-    /*if (!mMario) return;
-
-    float horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
-
-    if (horizontalCameraPos > mCameraPos.x)
-    {
-        // Limit camera to the right side of the level
-        float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
-        horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
-
-        mCameraPos.x = horizontalCameraPos;
-    }*/
 }
 
-void Game::UpdateActors(float deltaTime)
+void Game::UpdateActors(const float deltaTime)
 {
     // Get actors on camera
-    std::vector<Actor*> actorsOnCamera =
-            mSpatialHashing->QueryOnCamera(mCameraPos,mWindowWidth,mWindowHeight);
+    std::vector<Actor *> actorsOnCamera =
+            mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
+                                           mWindowHeight);
 
-    bool isMarioOnCamera = false;
-    for (auto actor : actorsOnCamera)
+    bool isPlayerOnCamera = false;
+    for (const auto &actor: actorsOnCamera)
     {
         actor->Update(deltaTime);
-        if (actor == mMario)
-        {
-            isMarioOnCamera = true;
-        }
+        if (actor == mPlayer) { isPlayerOnCamera = true; }
     }
 
-    // If Mario is not on camera, reset camera position
-    if (!isMarioOnCamera && mMario)
-    {
-        mMario->Update(deltaTime);
-    }
+    // If Player is not on camera, reset camera position
+    if (!isPlayerOnCamera && mPlayer) { mPlayer->Update(deltaTime); }
 
-    for (auto actor : actorsOnCamera)
+    for (const auto &actor: actorsOnCamera)
     {
         if (actor->GetState() == ActorState::Destroy)
         {
             delete actor;
-            if (actor == mMario) {
-                mMario = nullptr;
-            }
+            if (actor == mPlayer) { mPlayer = nullptr; }
         }
     }
 }
 
-void Game::AddActor(Actor* actor)
-{
-    mSpatialHashing->Insert(actor);
-}
+void Game::AddActor(Actor *actor) const { mSpatialHashing->Insert(actor); }
 
-void Game::RemoveActor(Actor* actor)
-{
-    mSpatialHashing->Remove(actor);
-}
-void Game::Reinsert(Actor* actor)
-{
-    mSpatialHashing->Reinsert(actor);
-}
+void Game::RemoveActor(Actor *actor) const { mSpatialHashing->Remove(actor); }
+void Game::Reinsert(Actor *actor) const { mSpatialHashing->Reinsert(actor); }
 
-std::vector<Actor *> Game::GetNearbyActors(const Vector2& position, const int range)
+std::vector<Actor *>
+Game::GetNearbyActors(const Vector2 &position, const int range) const
 {
     return mSpatialHashing->Query(position, range);
 }
 
-std::vector<AABBColliderComponent *> Game::GetNearbyColliders(const Vector2& position, const int range)
+std::vector<AABBColliderComponent *>
+Game::GetNearbyColliders(const Vector2 &position, const int range) const
 {
     return mSpatialHashing->QueryColliders(position, range);
 }
@@ -802,69 +642,55 @@ std::vector<AABBColliderComponent *> Game::GetNearbyColliders(const Vector2& pos
 void Game::GenerateOutput()
 {
     // Clear frame with background color
-    SDL_SetRenderDrawColor(mRenderer, mBackgroundColor.x, mBackgroundColor.y, mBackgroundColor.z, 255);
+    SDL_SetRenderDrawColor(mRenderer, mBackgroundColor.x, mBackgroundColor.y,
+                           mBackgroundColor.z, 255);
 
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
-    if (mGameScene == GameScene::Level1) {
+    if (mGameScene == GameScene::Level1)
+    {
         DrawParallaxBackground(mRenderer, mCameraPos);
     }
 
-    // Draw background texture considering camera position
-    /*if (mBackgroundTexture)
-    {
-        SDL_Rect dstRect = { static_cast<int>(mBackgroundPosition.x - mCameraPos.x),
-                             static_cast<int>(mBackgroundPosition.y - mCameraPos.y),
-                             static_cast<int>(mBackgroundSize.x),
-                             static_cast<int>(mBackgroundSize.y) };
-
-        SDL_RenderCopy(mRenderer, mBackgroundTexture, nullptr, &dstRect);
-    }*/
-
     // Get actors on camera
-    std::vector<Actor*> actorsOnCamera =
-            mSpatialHashing->QueryOnCamera(mCameraPos,mWindowWidth,mWindowHeight);
+    const std::vector<Actor *> actorsOnCamera =
+            mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
+                                           mWindowHeight);
 
     // Get list of drawables in draw order
-    std::vector<DrawComponent*> drawables;
+    std::vector<DrawComponent *> drawables;
 
-    for (auto actor : actorsOnCamera)
+    for (const auto &actor: actorsOnCamera)
     {
-        auto drawable = actor->GetComponent<DrawComponent>();
-        if (drawable && drawable->IsVisible())
+        if (auto drawable = actor->GetComponent<DrawComponent>();
+            drawable && drawable->IsVisible())
         {
             drawables.emplace_back(drawable);
         }
     }
 
     // Sort drawables by draw order
-    std::sort(drawables.begin(), drawables.end(),
-              [](const DrawComponent* a, const DrawComponent* b) {
+    std::sort(drawables.begin(),
+              drawables.end(),
+              [](const DrawComponent *a, const DrawComponent *b)
+              {
                   return a->GetDrawOrder() < b->GetDrawOrder();
-              });
+              }
+    );
 
     // Draw all drawables
-    for (auto drawable : drawables)
+    for (const auto &drawable: drawables)
     {
         drawable->Draw(mRenderer, mModColor);
     }
 
     // Draw all UI screens
-    for (auto ui :mUIStack)
-    {
-        ui->Draw(mRenderer);
-    }
+    for (const auto &ui: mUIStack) { ui->Draw(mRenderer); }
 
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Verifique se o SceneManager está no estado ativo. Se estiver, desenhe um retângulo preto cobrindo
-    //  toda a tela.
-
-    // Customização 2: alterações para fazer o crosfade
-    if (mSceneManagerState == SceneManagerState::Entering || mSceneManagerState == SceneManagerState::Active)
+    // Crossfading transition
+    if (mSceneManagerState == SceneManagerState::Entering || mSceneManagerState
+        == SceneManagerState::Active)
     {
         float alphaRatio = mSceneManagerTimer / TRANSITION_TIME;
         if (alphaRatio < 0.0f) alphaRatio = 0.0f;
@@ -883,7 +709,7 @@ void Game::GenerateOutput()
 
         SDL_SetRenderDrawBlendMode(mRenderer, SDL_BLENDMODE_BLEND);
         SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, alpha);
-        SDL_Rect blackRect = { 0, 0, mWindowWidth, mWindowHeight };
+        const SDL_Rect blackRect = {0, 0, mWindowWidth, mWindowHeight};
         SDL_RenderFillRect(mRenderer, &blackRect);
 
         SDL_SetRenderDrawBlendMode(mRenderer, SDL_BLENDMODE_NONE);
@@ -893,17 +719,21 @@ void Game::GenerateOutput()
     SDL_RenderPresent(mRenderer);
 }
 
-void Game::SetBackgroundImage(const std::string& texturePath, const Vector2 &position, const Vector2 &size)
+void Game::SetBackgroundImage(const std::string &imagePath,
+                              const Vector2 &position,
+                              const Vector2 &size)
 {
-    if (mBackgroundTexture) {
+    if (mBackgroundTexture)
+    {
         SDL_DestroyTexture(mBackgroundTexture);
         mBackgroundTexture = nullptr;
     }
 
     // Load background texture
-    mBackgroundTexture = LoadTexture(texturePath);
-    if (!mBackgroundTexture) {
-        SDL_Log("Failed to load background texture: %s", texturePath.c_str());
+    mBackgroundTexture = LoadTexture(imagePath);
+    if (!mBackgroundTexture)
+    {
+        SDL_Log("Failed to load background texture: %s", imagePath.c_str());
     }
 
     // Set background position
@@ -913,19 +743,21 @@ void Game::SetBackgroundImage(const std::string& texturePath, const Vector2 &pos
     mBackgroundSize.Set(size.x, size.y);
 }
 
-SDL_Texture* Game::LoadTexture(const std::string& texturePath)
+SDL_Texture *Game::LoadTexture(const std::string &texturePath) const
 {
-    SDL_Surface* surface = IMG_Load(texturePath.c_str());
+    SDL_Surface *surface = IMG_Load(texturePath.c_str());
 
-    if (!surface) {
+    if (!surface)
+    {
         SDL_Log("Failed to load image: %s", IMG_GetError());
         return nullptr;
     }
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(mRenderer, surface);
     SDL_FreeSurface(surface);
 
-    if (!texture) {
+    if (!texture)
+    {
         SDL_Log("Failed to create texture: %s", SDL_GetError());
         return nullptr;
     }
@@ -933,94 +765,75 @@ SDL_Texture* Game::LoadTexture(const std::string& texturePath)
     return texture;
 }
 
-void Game::AddCoin() {
-    mCoinCount++;
-    if (mHUD) {
-        mHUD->SetCoinsCount(mCoinCount);
-    }
-}
-
-
-UIFont* Game::LoadFont(const std::string& fileName)
+UIFont *Game::LoadFont(const std::string &fileName)
 {
-    // --------------
-    // TODO - PARTE 1-1
-    // --------------
+    if (const auto iter = mFonts.find(fileName);
+        iter != mFonts.end()) { return iter->second; }
 
-    // TODO 1.: Verifique se o arquivo de fonte já está carregado no mapa mFonts.
-    //  Se sim, retorne o ponteiro para a fonte carregada.
-    //  Se não, crie um novo objeto UIFont, carregue a fonte do arquivo usando o método Load,
-    //  e se o carregamento for bem-sucedido, adicione a fonte ao mapa mFonts.
-    //  Se o carregamento falhar, descarregue a fonte com Unload e delete o objeto UIFont, retornando nullptr.
-    auto iter = mFonts.find(fileName);
-    if (iter != mFonts.end())
-    {
-        return iter->second;
-    }
-
-    UIFont* newFont = new UIFont(mRenderer);
+    const auto newFont = new UIFont(mRenderer);
     if (newFont->Load(fileName))
     {
         mFonts[fileName] = newFont;
         return newFont;
     }
-    else
-    {
-        newFont->Unload();
-        delete newFont;
-        SDL_Log("Failed to load font: %s", fileName.c_str());
-        return nullptr;
-    }
+
+    newFont->Unload();
+    delete newFont;
+    SDL_Log("Failed to load font: %s", fileName.c_str());
+    return nullptr;
 }
 
-void Game::DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos)
+void Game::DrawParallaxBackground(SDL_Renderer *renderer,
+                                  const Vector2 &cameraPos) const
 {
-    SDL_Texture* fixedBg1 = mBg1;
-    SDL_Texture* fixedBg2 = mBg2;
+    SDL_Texture *fixedBg1 = mBg1;
+    SDL_Texture *fixedBg2 = mBg2;
 
     int texW1, texH1;
     SDL_QueryTexture(fixedBg1, nullptr, nullptr, &texW1, &texH1);
-    SDL_Rect dst1 = { 0, 0, texW1, texH1 };
+    const SDL_Rect dst1 = {0, 0, texW1, texH1};
     SDL_RenderCopy(renderer, fixedBg1, nullptr, &dst1);
 
     int texW2, texH2;
     SDL_QueryTexture(fixedBg2, nullptr, nullptr, &texW2, &texH2);
-    SDL_Rect dst2 = { 0, 0, texW2, texH2 };
+    const SDL_Rect dst2 = {0, 0, texW2, texH2};
     SDL_RenderCopy(renderer, fixedBg2, nullptr, &dst2);
 
-    struct Layer {
-        SDL_Texture* texture;
+    struct Layer
+    {
+        SDL_Texture *texture;
         float parallaxFactor;
     };
 
     std::vector<Layer> layers = {
-        {mParallax3, 0.1f},
-        {mParallax4, 0.3f},
-        {mParallax5, 0.5f}
-    };
+            {mParallax3, 0.1f},
+            {mParallax4, 0.3f},
+            {mParallax5, 0.5f}
+            };
 
-    int screenWidth = GetWindowWidth();
+    const int screenWidth = GetWindowWidth();
 
-    for (auto& layer : layers)
+    for (const auto &[texture, parallaxFactor]: layers)
     {
         int texW, texH;
-        SDL_QueryTexture(layer.texture, nullptr, nullptr, &texW, &texH);
+        SDL_QueryTexture(texture, nullptr, nullptr, &texW, &texH);
 
-        float scrollX = fmod(cameraPos.x * layer.parallaxFactor, static_cast<float>(texW));
+        float scrollX = fmod(cameraPos.x * parallaxFactor,
+                             static_cast<float>(texW));
         if (scrollX < 0) scrollX += texW;
 
-        int numTiles = screenWidth / texW + 2;
+        const int numTiles = screenWidth / texW + 2;
 
         for (int i = 0; i < numTiles; ++i)
         {
             SDL_Rect dst = {
-                static_cast<int>(-scrollX + i * texW),
-                0,
-                texW,
-                texH
-            };
+                    static_cast<int>(-scrollX + i * texW),
+                    0,
+                    texW,
+                    texH
+                    };
 
-            SDL_RenderCopy(renderer, layer.texture, nullptr, &dst);
+            SDL_RenderCopy(renderer, texture, nullptr, &dst);
         }
     }
 }
@@ -1031,13 +844,12 @@ void Game::UnloadScene()
     delete mSpatialHashing;
 
     // Delete UI screens
-    for (auto ui : mUIStack) {
-        delete ui;
-    }
+    for (const auto &ui: mUIStack) { delete ui; }
     mUIStack.clear();
 
     // Delete background texture
-    if (mBackgroundTexture) {
+    if (mBackgroundTexture)
+    {
         SDL_DestroyTexture(mBackgroundTexture);
         mBackgroundTexture = nullptr;
     }
@@ -1047,7 +859,8 @@ void Game::Shutdown()
 {
     UnloadScene();
 
-    for (auto font : mFonts) {
+    for (const auto &font: mFonts)
+    {
         font.second->Unload();
         delete font.second;
     }

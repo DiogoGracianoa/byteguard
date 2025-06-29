@@ -3,25 +3,30 @@
 //
 
 #pragma once
+
 #include "Actor.h"
 #include "../Components/DrawComponents/DrawComponent.h"
 
-
-class Missile : public Actor {
+class Missile final : public Actor
+{
 public:
-    explicit Missile(Game* game, float dForceFactor = 330.0f, float sForceFactor = 5.0f);
+    explicit Missile(Game *game,
+                     float dForceFactor = 330.0f,
+                     float sForceFactor = 5.0f);
 
     void OnUpdate(float deltaTime) override;
 
-    void OnHorizontalCollision(float minOverlap, AABBColliderComponent *other) override;
+    void OnHorizontalCollision(float minOverlap,
+                               AABBColliderComponent *other) override;
 
-    void OnVerticalCollision(float minOverlap, AABBColliderComponent *other) override;
+    void OnVerticalCollision(float minOverlap,
+                             AABBColliderComponent *other) override;
 
     void Kill() override;
 
 private:
-    RigidBodyComponent* mRigidBodyComponent;
-    AABBColliderComponent* mColliderComponent;
+    RigidBodyComponent *mRigidBodyComponent;
+    AABBColliderComponent *mColliderComponent;
 
     // movement parameters
     float mDForceFactor;

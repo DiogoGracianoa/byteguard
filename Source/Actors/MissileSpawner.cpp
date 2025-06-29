@@ -3,22 +3,20 @@
 //
 
 #include "MissileSpawner.h"
-#include "../Game.h"
-#include "Mario.h"
 #include "Missile.h"
+#include "Player.h"
+#include "../Game.h"
 
-MissileSpawner::MissileSpawner(Game* game, float spawnDistance)
-        :Actor(game)
-        ,mSpawnDistance(spawnDistance)
-{
-
-}
+MissileSpawner::MissileSpawner(Game *game, const float spawnDistance)
+    : Actor(game),
+      mSpawnDistance(spawnDistance) {}
 
 void MissileSpawner::OnUpdate(float deltaTime)
 {
-    if (abs(GetGame()->GetMario()->GetPosition().x - GetPosition().x) < mSpawnDistance)
+    if (abs(GetGame()->GetPlayer()->GetPosition().x - GetPosition().x) <
+        mSpawnDistance)
     {
-        auto spawned = new Missile(GetGame());
+        const auto spawned = new Missile(GetGame());
         spawned->SetPosition(GetPosition());
         mState = ActorState::Destroy;
     }
