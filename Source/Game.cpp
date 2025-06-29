@@ -113,9 +113,8 @@ bool Game::Initialize()
     mTicksCount = SDL_GetTicks();
 
     // Init all game actors
-    //SetGameScene(GameScene::MainMenu, 0);
-    //SetGameScene(GameScene::Level1);
-    SetGameScene(GameScene::Level2);
+    SetGameScene(GameScene::MainMenu, 0);
+
     mParallaxCache[GameScene::Level1] = {
         LoadTexture("../Assets/Sprites/Background/1.png"),
         LoadTexture("../Assets/Sprites/Background/2.png"),
@@ -132,12 +131,6 @@ bool Game::Initialize()
         LoadTexture("../Assets/Sprites/Background/5_Level_2.png")
     };
 
-    /*mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
-    mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
-    mParallax5 = LoadTexture("../Assets/Sprites/Background/5.png");
-    mBg1 = LoadTexture("../Assets/Sprites/Background/1.png");
-    mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");*/
-
     return true;
 }
 
@@ -150,9 +143,6 @@ void Game::SetGameScene(Game::GameScene scene, float transitionTime)
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
             mSceneManagerTimer = transitionTime;
-            if (scene == GameScene::Level1 || scene == GameScene::Level2) {
-                mCurrentParallax = &mParallaxCache[scene];
-            }
         }
         else
         {
@@ -223,6 +213,7 @@ void Game::ChangeScene()
 
         // Set background color
         mBackgroundColor.Set(55.0f, 68.0f, 110.0f);
+        mCurrentParallax = &mParallaxCache[GameScene::Level1];
 
         // Set background color
         SetBackgroundImage("../Assets/Sprites/Background_Level1.png", Vector2(0,0), Vector2(1600,600));
@@ -241,6 +232,7 @@ void Game::ChangeScene()
 
         // Set background color
         mBackgroundColor.Set(128,24,27);
+        mCurrentParallax = &mParallaxCache[GameScene::Level2];
 
         // Initialize actors
         LoadLevel("../Assets/Levels/level2.csv", LEVEL_WIDTH, LEVEL_HEIGHT, 2);
@@ -345,6 +337,7 @@ void Game::BuildFirstLevel(int** levelData, int width, int height)
             {
                 mMario = new Mario(this);
                 mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                //mMario->SetPosition(Vector2(181 * TILE_SIZE,  10 * TILE_SIZE));
             }
             /*else if(tile == 3)
             {
@@ -699,34 +692,31 @@ void Game::UpdateGame()
     // ---------------------
     UpdateCamera();
 
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Chame UpdateSceneManager passando o deltaTime.
     UpdateSceneManager(deltaTime);
 
-    // --------------
-    // TODO - PARTE 3
-    // --------------
 
-    // TODO 1.: Verifique se a cena atual é diferente de GameScene::MainMenu e se o estado do jogo é
-    //  GamePlayState::Playing. Se sim, chame UpdateLevelTime passando o deltaTime.
     if (mGameScene != GameScene::MainMenu && mGamePlayState == GamePlayState::Playing)
     {
         UpdateLevelTime(deltaTime);
+        if (mMario)
+        {
+            float marioX = mMario->GetPosition().x;
+            float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+
+            if (mGameScene == GameScene::Level1 && marioX >= levelLimitX)
+            {
+                mMario = nullptr;
+                this->GetAudio()->StopAllSounds();
+
+                SetGameScene(GameScene::Level2, TRANSITION_TIME);
+                return;
+            }
+        }
     }
 }
 
 void Game::UpdateSceneManager(float deltaTime)
 {
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Verifique se o estado do SceneManager é SceneManagerState::Entering. Se sim, decremente o mSceneManagerTimer
-    //  usando o deltaTime. Em seguida, verifique se o mSceneManagerTimer é menor ou igual a 0. Se for, reinicie o
-    //  mSceneManagerTimer para TRANSITION_TIME e mude o estado do SceneManager para SceneManagerState::Active.
     if (mSceneManagerState == SceneManagerState::Entering)
     {
         mSceneManagerTimer -= deltaTime;
@@ -739,9 +729,6 @@ void Game::UpdateSceneManager(float deltaTime)
         }
     }
 
-    // TODO 2.: Verifique se o estado do SceneManager é SceneManagerState::Active. Se sim, decremente o mSceneManagerTimer
-    //  usando o deltaTime. Em seguida, verifique se o mSceneManagerTimer é menor ou igual a 0. Se for, chame ChangeScene()
-    //  e mude o estado do SceneManager para SceneManagerState::None.
     else if (mSceneManagerState == SceneManagerState::Active)
     {
         mSceneManagerTimer -= deltaTime;
@@ -751,9 +738,6 @@ void Game::UpdateSceneManager(float deltaTime)
             mSceneManagerState = SceneManagerState::None;
         }
     }
-
-    // TODO 3.: Remova a chamada da função ChangeScene() do método Initialize(), pois ela será chamada automaticamente
-    //  durante o UpdateSceneManager() quando o estado do SceneManager for SceneManagerState::Active.
 }
 
 void Game::UpdateLevelTime(float deltaTime)
@@ -913,14 +897,6 @@ void Game::GenerateOutput()
         ui->Draw(mRenderer);
     }
 
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Verifique se o SceneManager está no estado ativo. Se estiver, desenhe um retângulo preto cobrindo
-    //  toda a tela.
-
-    // Customização 2: alterações para fazer o crosfade
     if (mSceneManagerState == SceneManagerState::Entering || mSceneManagerState == SceneManagerState::Active)
     {
         float alphaRatio = mSceneManagerTimer / TRANSITION_TIME;
@@ -1000,15 +976,6 @@ void Game::AddCoin() {
 
 UIFont* Game::LoadFont(const std::string& fileName)
 {
-    // --------------
-    // TODO - PARTE 1-1
-    // --------------
-
-    // TODO 1.: Verifique se o arquivo de fonte já está carregado no mapa mFonts.
-    //  Se sim, retorne o ponteiro para a fonte carregada.
-    //  Se não, crie um novo objeto UIFont, carregue a fonte do arquivo usando o método Load,
-    //  e se o carregamento for bem-sucedido, adicione a fonte ao mapa mFonts.
-    //  Se o carregamento falhar, descarregue a fonte com Unload e delete o objeto UIFont, retornando nullptr.
     auto iter = mFonts.find(fileName);
     if (iter != mFonts.end())
     {
