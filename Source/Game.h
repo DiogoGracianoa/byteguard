@@ -22,6 +22,14 @@ public:
     static const int SPAWN_DISTANCE = 700;
     static const int TRANSITION_TIME = 1;
 
+    struct ParallaxSet {
+        SDL_Texture* bg1;
+        SDL_Texture* bg2;
+        SDL_Texture* layer3;
+        SDL_Texture* layer4;
+        SDL_Texture* layer5;
+    };
+
     enum class GameScene
     {
         MainMenu,
@@ -62,7 +70,7 @@ public:
 
     // Level functions
     void LoadMainMenu();
-    void LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight);
+    void LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight, int level);
 
     std::vector<Actor *> GetNearbyActors(const Vector2& position, const int range = 1);
     std::vector<class AABBColliderComponent *> GetNearbyColliders(const Vector2& position, const int range = 2);
@@ -121,7 +129,8 @@ private:
 
     // Load the level from a CSV file as a 2D array
     int **ReadLevelData(const std::string& fileName, int width, int height);
-    void BuildLevel(int** levelData, int width, int height);
+    void BuildFirstLevel(int** levelData, int width, int height);
+    void BuildSecondLevel(int** levelData, int width, int height);
 
     // Spatial Hashing for collision detection
     class SpatialHashing* mSpatialHashing;
@@ -169,11 +178,13 @@ private:
     Vector2 mBackgroundPosition;
 
     //Parallax camera
-    SDL_Texture* mParallax3 = nullptr;
+    std::map<GameScene, ParallaxSet> mParallaxCache;
+    ParallaxSet* mCurrentParallax = nullptr;
+    /*SDL_Texture* mParallax3 = nullptr;
     SDL_Texture *mParallax4 = nullptr;
     SDL_Texture *mParallax5 = nullptr;
     SDL_Texture *mBg1 = nullptr;
-    SDL_Texture *mBg2 = nullptr;
+    SDL_Texture *mBg2 = nullptr;*/
 
     int mCoinCount;
 

@@ -68,7 +68,7 @@ bool Game::Initialize()
         return false;
     }
 
-    mWindow = SDL_CreateWindow("TP4: Super Mario Bros", 20, 30, mWindowWidth, mWindowHeight, 0);
+    mWindow = SDL_CreateWindow("ByteGuard", 20, 30, mWindowWidth, mWindowHeight, 0);
     if (!mWindow)
     {
         SDL_Log("Failed to create window: %s", SDL_GetError());
@@ -113,16 +113,31 @@ bool Game::Initialize()
     mTicksCount = SDL_GetTicks();
 
     // Init all game actors
-    SetGameScene(GameScene::MainMenu, 0);
+    //SetGameScene(GameScene::MainMenu, 0);
     //SetGameScene(GameScene::Level1);
-    mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
+    SetGameScene(GameScene::Level2);
+    mParallaxCache[GameScene::Level1] = {
+        LoadTexture("../Assets/Sprites/Background/1.png"),
+        LoadTexture("../Assets/Sprites/Background/2.png"),
+        LoadTexture("../Assets/Sprites/Background/3.png"),
+        LoadTexture("../Assets/Sprites/Background/4.png"),
+        LoadTexture("../Assets/Sprites/Background/5.png")
+    };
+
+    mParallaxCache[GameScene::Level2] = {
+        LoadTexture("../Assets/Sprites/Background/1_Level_2.png"),
+        LoadTexture("../Assets/Sprites/Background/2_Level_2.png"),
+        LoadTexture("../Assets/Sprites/Background/3_Level_2.png"),
+        LoadTexture("../Assets/Sprites/Background/4_Level_2.png"),
+        LoadTexture("../Assets/Sprites/Background/5_Level_2.png")
+    };
+
+    /*mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
     mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
     mParallax5 = LoadTexture("../Assets/Sprites/Background/5.png");
     mBg1 = LoadTexture("../Assets/Sprites/Background/1.png");
-    mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");
+    mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");*/
 
-    // Initially, change scene to MainMenu
-    mCoinCount = 0;
     return true;
 }
 
@@ -135,6 +150,9 @@ void Game::SetGameScene(Game::GameScene scene, float transitionTime)
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
             mSceneManagerTimer = transitionTime;
+            if (scene == GameScene::Level1 || scene == GameScene::Level2) {
+                mCurrentParallax = &mParallaxCache[scene];
+            }
         }
         else
         {
@@ -151,11 +169,6 @@ void Game::SetGameScene(Game::GameScene scene, float transitionTime)
 
 void Game::ResetGameScene(float transitionTime)
 {
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Chame SetGameScene passando o mGameScene atual e o tempo de transição.
     mCoinCount = 0;
 
     if (mSceneAttempts.find(mGameScene) != mSceneAttempts.end()) {
@@ -199,19 +212,9 @@ void Game::ChangeScene()
     }
     else if (mNextScene == GameScene::Level1)
     {
-        // --------------
-        // TODO - PARTE 3
-        // --------------
-
-        // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf.
         mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-        // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial.
-        //  Em seguida, altere o nome do nível para "1-1" no HUD.
         mGameTimeLimit = 400;
-        //mHUD->SetTime(mGameTimeLimit);
-        //mHUD->SetCoinsCount(mCoinCount);
-        //mHUD->SetLevelName("1-1");
         int tentativa = mSceneAttempts[mNextScene];
 
         mHUD->SetAttemptCount(tentativa);
@@ -224,51 +227,23 @@ void Game::ChangeScene()
         // Set background color
         SetBackgroundImage("../Assets/Sprites/Background_Level1.png", Vector2(0,0), Vector2(1600,600));
 
-        // Draw Flag
-        //auto flag = new Actor(this);
-        //flag->SetPosition(Vector2(LEVEL_WIDTH * TILE_SIZE - (16 * TILE_SIZE) - 16, 3 * TILE_SIZE));
-
-        // Add a flag sprite
-        //new DrawSpriteComponent(flag, "../Assets/Sprites/Background_Flag.png", 32.0f, 32.0f, 1);
-
-        // Add a flag pole taking the entire height
-        //new AABBColliderComponent(flag, 30, 0, 4, TILE_SIZE * LEVEL_HEIGHT, ColliderLayer::Pole, true);
-
-        // Initialize actors
-        LoadLevel("../Assets/Levels/level1.csv", LEVEL_WIDTH, LEVEL_HEIGHT);
+        LoadLevel("../Assets/Levels/level1.csv", LEVEL_WIDTH, LEVEL_HEIGHT, 1);
     }
     else if (mNextScene == GameScene::Level2)
     {
-        // --------------
-        // TODO - PARTE 3
-        // --------------
-
-        // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf. Como
-        //  feito no nível 1-1.
         mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-        // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial. Como
-        //  feito no nível 1-1.
-        mGameTimeLimit = 400;
-        //mHUD->SetTime(mGameTimeLimit);
-        mHUD->SetCoinsCount(mCoinCount);
-        mHUD->SetLevelName("1-2");
+        int tentativa = mSceneAttempts[mNextScene];
 
-        // --------------
-        // TODO - PARTE 4
-        // --------------
+        mHUD->SetAttemptCount(tentativa);
 
-        // TODO 1. Toque a música de fundo "MusicUnderground.ogg" em loop e armaze o SoundHandle retornado em mMusicHandle.
         mMusicHandle = mAudio->PlaySound("MusicUnderground.ogg", true);
 
         // Set background color
-        mBackgroundColor.Set(0.0f, 0.0f, 0.0f);
-
-        // Set mod color
-        mModColor.Set(0.0f, 255.0f, 200.0f);
+        mBackgroundColor.Set(128,24,27);
 
         // Initialize actors
-        LoadLevel("../Assets/Levels/level1-2.csv", LEVEL_WIDTH, LEVEL_HEIGHT);
+        LoadLevel("../Assets/Levels/level2.csv", LEVEL_WIDTH, LEVEL_HEIGHT, 2);
     }
 
     // Set new scene
@@ -298,7 +273,7 @@ void Game::LoadMainMenu()
     });
 }
 
-void Game::LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight)
+void Game::LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight, int level)
 {
     // Load level data
     int **mLevelData = ReadLevelData(levelName, levelWidth, levelHeight);
@@ -309,10 +284,15 @@ void Game::LoadLevel(const std::string& levelName, const int levelWidth, const i
     }
 
     // Instantiate level actors
-    BuildLevel(mLevelData, levelWidth, levelHeight);
+    if (level == 1){
+        BuildFirstLevel(mLevelData, levelWidth, levelHeight);
+    }
+    else if (level == 2) {
+        BuildSecondLevel(mLevelData, levelWidth, levelHeight);
+    }
 }
 
-void Game::BuildLevel(int** levelData, int width, int height)
+void Game::BuildFirstLevel(int** levelData, int width, int height)
 {
 
     // Const map to convert tile ID to block type
@@ -363,22 +343,15 @@ void Game::BuildLevel(int** levelData, int width, int height)
 
             if(tile == 15) // Mario
             {
-                mRobotPlane = new RobotPlane(this);
-                mRobotPlane->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                //mMario = new Mario(this);
-                //mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                mMario = new Mario(this);
+                mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            /*else if(tile == 10) // Spawner
-            {
-                Spawner* spawner = new Spawner(this, SPAWN_DISTANCE);
-                spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }*/
-            else if(tile == 3)
+            /*else if(tile == 3)
             {
                 Collectible* coin = new Collectible(this);
                 coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }
-            else if(tile == 36) // Spawner
+            }*/
+            else if(tile == 36)
             {
                 auto* press = new PressMachine(this, mRenderer);
                 press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
@@ -391,7 +364,103 @@ void Game::BuildLevel(int** levelData, int width, int height)
                 auto it = tileMap.find(tile);
                 if (it != tileMap.end())
                 {
-                    // Create a enemy block actor
+                    EnemyBlock* enemyBlock= new EnemyBlock(this, it->second);
+                    enemyBlock->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+            else
+            {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
+                    Block* block = new Block(this, it->second);
+                    block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+        }
+    }
+}
+
+void Game::BuildSecondLevel(int** levelData, int width, int height)
+{
+
+    // Const map to convert tile ID to block type
+     const std::map<int, const std::string> tileMap = {
+        {0, "../Assets/Sprites/Level_2_Tileset/Acid_1.png"},
+        {1, "../Assets/Sprites/Level_2_Tileset/Barrel1.png"},
+        {2, "../Assets/Sprites/Level_2_Tileset/Entry.png"},
+        {3, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_23.png"},
+        {4, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_54.png"},
+        {5, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_63.png"},
+        {6, "../Assets/Sprites/Level_2_Tileset/Spike_12.png"},
+        {7, "../Assets/Sprites/Level_2_Tileset/Spike_2.png"},
+        {8, "../Assets/Sprites/Level_2_Tileset/Acid_2.png"},
+        {9, "../Assets/Sprites/Level_2_Tileset/Box2.png"},
+        {10, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_11.png"},
+        {11, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_52.png"},
+        {12, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_62.png"},
+        {13, "../Assets/Sprites/Level_2_Tileset/Spike_11.png"},
+        {14, "../Assets/Sprites/Level_2_Tileset/Spike_19.png"},
+        {15, "../Assets/Sprites/Level_2_Tileset/Spike_9.png"},
+        {16, "../Assets/Sprites/Level_2_Tileset/Box1.png"},
+        {18, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_45.png"},
+        {19, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_61.png"},
+        {20, "../Assets/Sprites/Level_2_Tileset/Spike_10.png"},
+        {21, "../Assets/Sprites/Level_2_Tileset/Spike_18.png"},
+        {22, "../Assets/Sprites/Level_2_Tileset/Spike_8.png"},
+        {25, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_36.png"},
+        {26, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_57.png"},
+        {27, "../Assets/Sprites/Level_2_Tileset/Spike_1.png"},
+        {28, "../Assets/Sprites/Level_2_Tileset/Spike_17.png"},
+        {29, "../Assets/Sprites/Level_2_Tileset/Spike_7.png"},
+        {32, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_32.png"},
+        {33, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_56.png"},
+        {34, "../Assets/Sprites/Level_2_Tileset/Locker4.png"},
+        {35, "../Assets/Sprites/Level_2_Tileset/Spike_16.png"},
+        {36, "../Assets/Sprites/Level_2_Tileset/Spike_6.png"},
+        {40, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_55.png"},
+        {41, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_71.png"},
+        {42, "../Assets/Sprites/Level_2_Tileset/Spike_15.png"},
+        {43, "../Assets/Sprites/Level_2_Tileset/Spike_5.png"},
+        {48, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_70.png"},
+        {49, "../Assets/Sprites/Level_2_Tileset/Spike_14.png"},
+        {50, "../Assets/Sprites/Level_2_Tileset/Spike_4.png"},
+        {56, "../Assets/Sprites/Level_2_Tileset/Spike_13.png"},
+        {57, "../Assets/Sprites/Level_2_Tileset/Spike_3.png"},
+        {64, "../Assets/Sprites/Level_2_Tileset/Spike_20.png"},
+    };
+
+    for (int y = 0; y < LEVEL_HEIGHT; ++y)
+    {
+        for (int x = 0; x < LEVEL_WIDTH; ++x)
+        {
+            int tile = levelData[y][x];
+
+            if(tile == 17) // Mario
+            {
+                mRobotPlane = new RobotPlane(this);
+                mRobotPlane->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            /*else if(tile == 3)
+            {
+                Collectible* coin = new Collectible(this);
+                coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }*/
+            else if(tile == 24)
+            {
+                auto* press = new PressMachine(this, mRenderer);
+                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (
+                tile == 0 || tile == 8 ||
+                tile == 6 || tile == 7 || tile == 13 || tile == 14 || tile == 15 ||
+                tile == 20 || tile == 21 || tile == 22 || tile == 27 || tile == 28 ||
+                tile == 29 || tile == 35 || tile == 36 || tile == 42 || tile == 43 ||
+                tile == 49 || tile == 50 || tile == 56 || tile == 57 || tile == 64 )
+            {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
                     EnemyBlock* enemyBlock= new EnemyBlock(this, it->second);
                     enemyBlock->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
                 }
@@ -689,13 +758,6 @@ void Game::UpdateSceneManager(float deltaTime)
 
 void Game::UpdateLevelTime(float deltaTime)
 {
-    // --------------
-    // TODO - PARTE 3
-    // --------------
-
-    // TODO 1.: Incremente o mGameTimer com o deltaTime. Se o mGameTimer for maior ou igual a 1.0 segundos,
-    //  reinicie o mGameTimer para 0.0f e decremente o mGameTimeLimit de um e atualize o HUD com o novo tempo.
-    //  Se o mGameTimeLimit for menor ou igual a 0, mate o Mario chamando mMario->Kill().
     mGameTimer += deltaTime;
 
     if (mGameTimer >= 1.0f)
@@ -716,15 +778,22 @@ void Game::UpdateLevelTime(float deltaTime)
 
 void Game::UpdateCamera()
 {
-    //if (!mMario ) return;
-    if(!mRobotPlane ) return;
+    if (!mMario && !mRobotPlane ) return;
 
-    //float horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
-    float horizontalCameraPos = mRobotPlane->GetPosition().x - (mWindowWidth / 2.0f);
+    float horizontalCameraPos;
+
+    if (mGameScene == GameScene::Level1) {
+        horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
+    }
+    else if (mGameScene == GameScene::Level2) {
+        horizontalCameraPos = mRobotPlane->GetPosition().x - (mWindowWidth / 2.0f);
+    }
+    else {
+        return;
+    }
 
     if (horizontalCameraPos > mCameraPos.x)
     {
-        // Limit camera to the right side of the level
         float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
         horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
 
@@ -742,7 +811,7 @@ void Game::UpdateActors(float deltaTime)
     for (auto actor : actorsOnCamera)
     {
         actor->Update(deltaTime);
-        if ((mMario && actor == mMario) || actor == mRobotPlane)
+        if ((mMario && actor == mMario) || (mRobotPlane && actor == mRobotPlane))
         {
             isMarioOnCamera = true;
         }
@@ -805,20 +874,10 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
-    if (mGameScene == GameScene::Level1) {
+    if (mGameScene == GameScene::Level1 || mGameScene == GameScene::Level2) {
         DrawParallaxBackground(mRenderer, mCameraPos);
     }
 
-    // Draw background texture considering camera position
-    /*if (mBackgroundTexture)
-    {
-        SDL_Rect dstRect = { static_cast<int>(mBackgroundPosition.x - mCameraPos.x),
-                             static_cast<int>(mBackgroundPosition.y - mCameraPos.y),
-                             static_cast<int>(mBackgroundSize.x),
-                             static_cast<int>(mBackgroundSize.y) };
-
-        SDL_RenderCopy(mRenderer, mBackgroundTexture, nullptr, &dstRect);
-    }*/
 
     // Get actors on camera
     std::vector<Actor*> actorsOnCamera =
@@ -973,8 +1032,9 @@ UIFont* Game::LoadFont(const std::string& fileName)
 
 void Game::DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos)
 {
-    SDL_Texture* fixedBg1 = mBg1;
-    SDL_Texture* fixedBg2 = mBg2;
+
+    SDL_Texture* fixedBg1 = mCurrentParallax->bg1;
+    SDL_Texture* fixedBg2 = mCurrentParallax->bg2;
 
     int texW1, texH1;
     SDL_QueryTexture(fixedBg1, nullptr, nullptr, &texW1, &texH1);
@@ -992,9 +1052,9 @@ void Game::DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraP
     };
 
     std::vector<Layer> layers = {
-        {mParallax3, 0.1f},
-        {mParallax4, 0.3f},
-        {mParallax5, 0.5f}
+        {mCurrentParallax->layer3, 0.1f},
+        {mCurrentParallax->layer4, 0.3f},
+        {mCurrentParallax->layer5, 0.5f}
     };
 
     int screenWidth = GetWindowWidth();
@@ -1060,12 +1120,15 @@ void Game::Shutdown()
     TTF_Quit();
     IMG_Quit();
 
+    for (auto& [scene, parallax] : mParallaxCache)
+    {
+        SDL_DestroyTexture(parallax.bg1);
+        SDL_DestroyTexture(parallax.bg2);
+        SDL_DestroyTexture(parallax.layer3);
+        SDL_DestroyTexture(parallax.layer4);
+        SDL_DestroyTexture(parallax.layer5);
+    }
     SDL_DestroyRenderer(mRenderer);
-    SDL_DestroyTexture(mParallax3);
-    SDL_DestroyTexture(mParallax4);
-    SDL_DestroyTexture(mParallax5);
-    SDL_DestroyTexture(mBg1);
-    SDL_DestroyTexture(mBg2);
     SDL_DestroyWindow(mWindow);
     SDL_Quit();
 }

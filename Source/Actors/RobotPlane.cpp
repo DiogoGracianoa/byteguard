@@ -13,9 +13,18 @@ RobotPlane::RobotPlane(Game* game, const float forwardSpeed, const float liftSpe
 {
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
 
+    float byteGuardPlaneColliderWidth = Game::TILE_SIZE - 10.0f;
+    float byteGuardPlaneColliderHeight = Game::TILE_SIZE;
+
+    float offsetX = 7.5f;
+    float offsetY = 0;
+
     mColliderComponent = new AABBColliderComponent(
-        this, 0.0f, 0.0f,
-        Game::TILE_SIZE, Game::TILE_SIZE,
+        this,
+        offsetX,
+        offsetY,
+        byteGuardPlaneColliderWidth,
+        byteGuardPlaneColliderHeight,
         ColliderLayer::Player
     );
 
@@ -70,8 +79,58 @@ void RobotPlane::OnUpdate(float deltaTime)
 void RobotPlane::Kill()
 {
     mState = ActorState::Destroy;
+    mDrawComponent->SetAnimation("idle");
+    //mRigidBodyComponent->SetEnabled(false);
+    //mColliderComponent->SetEnabled(false);
+
     mGame->SetGamePlayState(Game::GamePlayState::GameOver);
 
+    mGame->GetAudio()->StopAllSounds();
     mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
     mGame->ResetGameScene(0.5f);
+}
+
+void RobotPlane::OnHorizontalCollision(const float minOverlap, AABBColliderComponent* other)
+{
+    if (other->GetLayer() == ColliderLayer::Enemy || other->GetLayer() == ColliderLayer::EnemyBlocks)
+    {
+        Kill();
+    }
+    /*else if (other->GetLayer() == ColliderLayer::Pole)
+    {
+        mIsOnPole = true;
+        Win(other);
+    }*/
+    else if (other->GetLayer() == ColliderLayer::Collectible)
+    {
+        mGame->AddCoin();
+        other->SetEnabled(false);
+        other->GetOwner()->SetState(ActorState::Destroy);
+        mGame->GetAudio()->PlaySound("Coin.wav");
+    }
+}
+
+void RobotPlane::OnVerticalCollision(const float minOverlap, AABBColliderComponent* other)
+{
+    if (other->GetLayer() == ColliderLayer::Blocks)
+    {
+        if (!mIsOnGround)
+        {
+
+
+            // Cast actor to Block to call OnBump
+            //auto* block = dynamic_cast<Block*>(other->GetOwner());
+            //block->OnBump();
+        }
+    }
+    else if (other->GetLayer() == ColliderLayer::Collectible)
+    {
+        mGame->AddCoin();
+        other->GetOwner()->SetState(ActorState::Destroy);
+        mGame->GetAudio()->PlaySound("Coin.wav");
+    }
+    else if (other->GetLayer() == ColliderLayer::EnemyBlocks)
+    {
+        Kill();
+    }
 }

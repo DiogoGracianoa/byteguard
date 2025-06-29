@@ -12,6 +12,9 @@ public:
     void OnProcessInput(const Uint8* keyState) override;
     void OnUpdate(float deltaTime) override;
 
+    void OnHorizontalCollision(const float minOverlap, AABBColliderComponent* other) override;
+    void OnVerticalCollision(const float minOverlap, AABBColliderComponent* other) override;
+
     void Kill() override;
 
 private:
