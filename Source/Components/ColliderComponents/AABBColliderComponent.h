@@ -8,6 +8,7 @@
 #include "../RigidBodyComponent.h"
 #include <vector>
 #include <map>
+#include <SDL_render.h>
 #include <set>
 
 enum class ColliderLayer
@@ -50,6 +51,13 @@ public:
     Vector2 GetMax() const;
     Vector2 GetCenter() const;
     ColliderLayer GetLayer() const { return mLayer; }
+    // Novo método para alterar dimensões dinamicamente
+    void SetDimensions(int w, int h) { mWidth = w; mHeight = h; }
+
+    // Novo método para alterar apenas o offset (caso precise reposicionar)
+    void SetOffset(int dx, int dy) { mOffset = Vector2(dx, dy); }
+
+    void DrawDebug(SDL_Renderer* renderer);
 
 private:
     float GetMinVerticalOverlap(AABBColliderComponent* b) const;

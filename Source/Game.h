@@ -16,11 +16,12 @@
 class Game
 {
 public:
-    static const int LEVEL_WIDTH = 40;
+    static const int LEVEL_WIDTH = 200;
     static const int LEVEL_HEIGHT = 15;
     static const int TILE_SIZE = 40;
     static const int SPAWN_DISTANCE = 700;
     static const int TRANSITION_TIME = 1;
+    static constexpr float CAMERA_X_SPEED = 250.0f;
 
     enum class GameScene
     {
@@ -106,7 +107,7 @@ public:
 private:
     void ProcessInput();
     void UpdateGame();
-    void UpdateCamera();
+    void UpdateCamera(float deltaTime);
     void GenerateOutput();
 
     // Scene Manager
@@ -117,6 +118,7 @@ private:
 
     // HUD functions
     void UpdateLevelTime(float deltaTime);
+    void DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos);
 
     // Load the level from a CSV file as a 2D array
     int **ReadLevelData(const std::string& fileName, int width, int height);
@@ -166,5 +168,14 @@ private:
     Vector2 mBackgroundSize;
     Vector2 mBackgroundPosition;
 
+    //Parallax camera
+    SDL_Texture* mParallax3 = nullptr;
+    SDL_Texture *mParallax4 = nullptr;
+    SDL_Texture *mParallax5 = nullptr;
+    SDL_Texture *mBg1 = nullptr;
+    SDL_Texture *mBg2 = nullptr;
+
     int mCoinCount;
+
+    std::unordered_map<GameScene, int> mSceneAttempts;
 };

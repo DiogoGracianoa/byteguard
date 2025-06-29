@@ -42,7 +42,8 @@ void UIButton::Draw(SDL_Renderer *renderer, const Vector2 &screenPos)
     //  desenhe o retângulo usando SDL_RenderFillRect com o renderer passado como parâmetro.
     if (mHighlighted)
     {
-        SDL_SetRenderDrawColor(renderer, 200, 100, 0, 255);
+        auto color = this->mColor;
+        SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
         SDL_RenderFillRect(renderer, &buttonRect);
     }
 

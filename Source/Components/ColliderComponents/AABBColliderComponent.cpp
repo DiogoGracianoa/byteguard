@@ -161,3 +161,16 @@ void AABBColliderComponent::ResolveVerticalCollisions(RigidBodyComponent *rigidB
         mOwner->SetOnGround();
     }
 }
+
+void AABBColliderComponent::DrawDebug(SDL_Renderer* renderer)
+{
+    Vector2 pos = mOwner->GetPosition();
+    SDL_Rect rect;
+    rect.x = static_cast<int>(pos.x + mOffset.x - mWidth / 2.0f);
+    rect.y = static_cast<int>(pos.y + mOffset.y - mHeight / 2.0f);
+    rect.w = static_cast<int>(mWidth);
+    rect.h = static_cast<int>(mHeight);
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // verde
+    SDL_RenderDrawRect(renderer, &rect);
+}

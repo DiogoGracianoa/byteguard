@@ -30,6 +30,7 @@
 #include "Components/DrawComponents/DrawSpriteComponent.h"
 #include "Components/DrawComponents/DrawPolygonComponent.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
+#include "Actors/PressMachine.h"
 
 Game::Game(int windowWidth, int windowHeight)
         :mWindow(nullptr)
@@ -102,11 +103,6 @@ bool Game::Initialize()
     // Start random number generator
     Random::Init();
 
-    // --------------
-    // TODO - PARTE 4
-    // --------------
-
-    // TODO 1. Instancie um AudioSystem.
     mAudio = new AudioSystem();
 
     mSpatialHashing = new SpatialHashing(TILE_SIZE * 4.0f,
@@ -115,11 +111,15 @@ bool Game::Initialize()
     mTicksCount = SDL_GetTicks();
 
     // Init all game actors
-    //SetGameScene(GameScene::MainMenu);
-    SetGameScene(GameScene::Level1);
+    SetGameScene(GameScene::MainMenu);
+    //SetGameScene(GameScene::Level1);
+    mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
+    mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
+    mParallax5 = LoadTexture("../Assets/Sprites/Background/5.png");
+    mBg1 = LoadTexture("../Assets/Sprites/Background/1.png");
+    mBg2 = LoadTexture("../Assets/Sprites/Background/2.png");
 
     // Initially, change scene to MainMenu
-    //ChangeScene();
     mCoinCount = 0;
     return true;
 }
@@ -166,6 +166,12 @@ void Game::ResetGameScene(float transitionTime)
     // TODO 1.: Chame SetGameScene passando o mGameScene atual e o tempo de transição.
     mCoinCount = 0;
 
+    if (mSceneAttempts.find(mGameScene) != mSceneAttempts.end()) {
+        mSceneAttempts[mGameScene]++;
+    } else {
+        mSceneAttempts[mGameScene] = 1;
+    }
+
     SetGameScene(mGameScene, transitionTime);
 }
 
@@ -186,11 +192,15 @@ void Game::ChangeScene()
     // Reset scene manager state
     mSpatialHashing = new SpatialHashing(TILE_SIZE * 4.0f, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE);
 
+    if (mSceneAttempts.find(mNextScene) == mSceneAttempts.end()) {
+        mSceneAttempts[mNextScene] = 1;
+    }
+
     // Scene Manager FSM: using if/else instead of switch
     if (mNextScene == GameScene::MainMenu)
     {
         // Set background color
-        mBackgroundColor.Set(107.0f, 140.0f, 255.0f);
+        mBackgroundColor.Set(5.0f, 12.0f, 22.0f);
 
         // Initialize main menu actors
         LoadMainMenu();
@@ -202,25 +212,22 @@ void Game::ChangeScene()
         // --------------
 
         // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf.
-        mHUD = new HUD(this, "../Assets/Fonts/SMB.ttf");
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial.
         //  Em seguida, altere o nome do nível para "1-1" no HUD.
         mGameTimeLimit = 400;
-        mHUD->SetTime(mGameTimeLimit);
-        mHUD->SetCoinsCount(mCoinCount);
-        mHUD->SetLevelName("1-1");
+        //mHUD->SetTime(mGameTimeLimit);
+        //mHUD->SetCoinsCount(mCoinCount);
+        //mHUD->SetLevelName("1-1");
+        int tentativa = mSceneAttempts[mNextScene];
 
-        // --------------
-        // TODO - PARTE 4
-        // --------------
+        mHUD->SetAttemptCount(tentativa);
 
-        // TODO 1. Toque a música de fundo "MusicMain.ogg" em loop e armaze o SoundHandle retornado em mMusicHandle.
-        //aqui é a musica principal que vai tocar
-        //mMusicHandle = mAudio->PlaySound("MusicMain.ogg", true);
+        mMusicHandle = mAudio->PlaySound("Main_Level1.mp3", true);
 
         // Set background color
-        mBackgroundColor.Set(152.0f, 172.0f, 175.0f);
+        mBackgroundColor.Set(55.0f, 68.0f, 110.0f);
 
         // Set background color
         SetBackgroundImage("../Assets/Sprites/Background_Level1.png", Vector2(0,0), Vector2(1600,600));
@@ -246,12 +253,12 @@ void Game::ChangeScene()
 
         // TODO 1.: Crie um novo objeto HUD, passando o ponteiro do Game e o caminho para a fonte SMB.ttf. Como
         //  feito no nível 1-1.
-        mHUD = new HUD(this, "../Assets/Fonts/SMB.ttf");
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
         // TODO 2.: Altere o atributo mGameTimeLimit para 400 (400 segundos) e ajuste o HUD com esse tempo inicial. Como
         //  feito no nível 1-1.
         mGameTimeLimit = 400;
-        mHUD->SetTime(mGameTimeLimit);
+        //mHUD->SetTime(mGameTimeLimit);
         mHUD->SetCoinsCount(mCoinCount);
         mHUD->SetLevelName("1-2");
 
@@ -279,39 +286,24 @@ void Game::ChangeScene()
 
 void Game::LoadMainMenu()
 {
-    // --------------
-    // TODO - PARTE 1
-    // --------------
+    auto mainMenu = new UIScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-    // Esse método será usado para criar uma tela de UI e adicionar os elementos do menu principal.
-    auto mainMenu = new UIScreen(this, "../Assets/Fonts/SMB.ttf");
-    const Vector2 titleSize = Vector2(178.0f, 88.0f) * 2.0f;
-    const Vector2 titlePos = Vector2(mWindowWidth/2.0f - titleSize.x/2.0f, 50.0f);
+    const Vector2 menuImagePos = Vector2(0,0);
+    const Vector2 menuImageDims= Vector2(mWindowWidth,450);
 
-    const Vector2 backgroundPos = Vector2(0, mWindowHeight - 162);
+    mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo_ByteGuard.png", menuImagePos, menuImageDims);
 
-    mainMenu->AddImage(mRenderer, "../Assets/Sprites/Logo.png", titlePos, titleSize);
-    mainMenu->AddImage(mRenderer, "../Assets/Sprites/background_menu.png", backgroundPos, Vector2(640, 162.0f));
+    mMusicHandle = mAudio->PlaySound("Menu_Music.mp3", true);
 
-    /*mainMenu->AddText("Super Mario Bros",
-        Vector2(170.0f, 50.0f),
-        Vector2(300.0f, 30.0f),
-         60);*/
-
-    auto button1 = mainMenu->AddButton(
-        "1 Player",
-        Vector2(mWindowWidth/2.0f - 100.0f, 275.0f),
-        Vector2(200.0f, 40.0f),
+    mainMenu->AddButton(
+        "Jogar",
+        Vector2(mWindowWidth/2.0f - 150.0f, mWindowHeight/4.0f * 3.0f),
+        Vector2(300.0f, 60.0f),
         [this]() {
-         SetGameScene(GameScene::Level1);});
-
-    auto button2 = mainMenu->AddButton(
-        "2 Players",
-        Vector2(mWindowWidth/2.0f - 100.0f, 325.0f),
-        Vector2(200.0f, 40.0f),
-        nullptr);
-
-
+            SetGameScene(GameScene::Level1);
+            this->GetAudio()->StopAllSounds();
+            mMusicHandle = mAudio->PlaySound("Click_Jogar.ogg", false);
+    });
 }
 
 void Game::LoadLevel(const std::string& levelName, const int levelWidth, const int levelHeight)
@@ -333,17 +325,42 @@ void Game::BuildLevel(int** levelData, int width, int height)
 
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
-            {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
-            {9, "../Assets/Sprites/ScifiBlocks/BGTile_3.png"},
-            {17, "../Assets/Sprites/ScifiBlocks/BGTile_3.png"},
-            {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
-            {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
-            {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
-            {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
-            {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
-            {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
-            {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
-            {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
+        {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
+        {1, "../Assets/Sprites/ScifiBlocks/BGTile_1.png"},
+        {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
+        {3, "../Assets/Sprites/ScifiBlocks/Fence_1.png"},
+        {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
+        {5, "../Assets/Sprites/ScifiBlocks/Spike8.png"},
+        {6, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+        {7, "../Assets/Sprites/ScifiBlocks/Tile_9.png"},
+        {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
+        {9, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+        {10, "../Assets/Sprites/ScifiBlocks/BGTile_7.png"},
+        {11, "../Assets/Sprites/ScifiBlocks/Spike1.png"},
+        {12, "../Assets/Sprites/ScifiBlocks/Spike7.png"},
+        {13, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+        {14, "../Assets/Sprites/ScifiBlocks/Tile_8.png"},
+        {16, "../Assets/Sprites/ScifiBlocks/BGTile_2.png"},
+        {17, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+        {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
+        {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
+        {20, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+        {21, "../Assets/Sprites/ScifiBlocks/Tile_7.png"},
+        {24, "../Assets/Sprites/ScifiBlocks/BGTile_5.png"},
+        {25, "../Assets/Sprites/ScifiBlocks/Fence_3.png"},
+        {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
+        {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+        {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
+        {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
+        {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
+        {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
+        {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
+        {40, "../Assets/Sprites/ScifiBlocks/Spike3.png"},
+        {41, "../Assets/Sprites/ScifiBlocks/Tile_10.png"},
+        {42, "../Assets/Sprites/ScifiBlocks/Tile_4.png"},
+        {48, "../Assets/Sprites/ScifiBlocks/Tile_1.png"},
+        {49, "../Assets/Sprites/ScifiBlocks/Tile_3.png"},
+        {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
     };
 
     for (int y = 0; y < LEVEL_HEIGHT; ++y)
@@ -352,22 +369,31 @@ void Game::BuildLevel(int** levelData, int width, int height)
         {
             int tile = levelData[y][x];
 
-            if(tile == 25) // Mario
+            if(tile == 15) // Mario
             {
                 mMario = new Mario(this);
                 mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            else if(tile == 10) // Spawner
+            /*else if(tile == 10) // Spawner
             {
                 Spawner* spawner = new Spawner(this, SPAWN_DISTANCE);
                 spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }
-            else if(tile == 3) // Spawner
+            }*/
+            else if(tile == 3)
             {
                 Collectible* coin = new Collectible(this);
                 coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            else if(tile == 0 || tile == 8 || tile == 19 || tile == 33 || tile == 18 || tile == 4) {
+            else if(tile == 36) // Spawner
+            {
+                auto* press = new PressMachine(this, mRenderer);
+                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (
+                    tile == 0  || tile == 8  ||
+                    tile == 4  || tile == 5  || tile == 11 || tile == 12 ||
+                    tile == 18 || tile == 19 || tile == 26 || tile == 33 || tile == 40
+                ) {
                 auto it = tileMap.find(tile);
                 if (it != tileMap.end())
                 {
@@ -603,7 +629,7 @@ void Game::UpdateGame()
     // ---------------------
     // Game Specific Updates
     // ---------------------
-    UpdateCamera();
+    UpdateCamera(deltaTime);
 
     // --------------
     // TODO - PARTE 2
@@ -680,7 +706,7 @@ void Game::UpdateLevelTime(float deltaTime)
 
         if (mHUD)
         {
-            mHUD->SetTime(mGameTimeLimit);
+            //mHUD->SetTime(mGameTimeLimit);
         }
         if (mGameTimeLimit <= 0 && mMario)
         {
@@ -689,9 +715,19 @@ void Game::UpdateLevelTime(float deltaTime)
     }
 }
 
-void Game::UpdateCamera()
+void Game::UpdateCamera(float deltaTime)
 {
     if (!mMario) return;
+
+    if (mGamePlayState == GamePlayState::Playing)
+    {
+
+        float horizontalPos = Math::Max(
+            mMario->GetPosition().x - mWindowWidth / 4,
+            mCameraPos.x + deltaTime * CAMERA_X_SPEED);
+        mCameraPos.x = horizontalPos;
+    }
+    /*if (!mMario) return;
 
     float horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
 
@@ -702,7 +738,7 @@ void Game::UpdateCamera()
         horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
 
         mCameraPos.x = horizontalCameraPos;
-    }
+    }*/
 }
 
 void Game::UpdateActors(float deltaTime)
@@ -771,8 +807,12 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
+    if (mGameScene == GameScene::Level1) {
+        DrawParallaxBackground(mRenderer, mCameraPos);
+    }
+
     // Draw background texture considering camera position
-    if (mBackgroundTexture)
+    /*if (mBackgroundTexture)
     {
         SDL_Rect dstRect = { static_cast<int>(mBackgroundPosition.x - mCameraPos.x),
                              static_cast<int>(mBackgroundPosition.y - mCameraPos.y),
@@ -780,7 +820,7 @@ void Game::GenerateOutput()
                              static_cast<int>(mBackgroundSize.y) };
 
         SDL_RenderCopy(mRenderer, mBackgroundTexture, nullptr, &dstRect);
-    }
+    }*/
 
     // Get actors on camera
     std::vector<Actor*> actorsOnCamera =
@@ -933,6 +973,58 @@ UIFont* Game::LoadFont(const std::string& fileName)
     }
 }
 
+void Game::DrawParallaxBackground(SDL_Renderer* renderer, const Vector2& cameraPos)
+{
+    SDL_Texture* fixedBg1 = mBg1;
+    SDL_Texture* fixedBg2 = mBg2;
+
+    int texW1, texH1;
+    SDL_QueryTexture(fixedBg1, nullptr, nullptr, &texW1, &texH1);
+    SDL_Rect dst1 = { 0, 0, texW1, texH1 };
+    SDL_RenderCopy(renderer, fixedBg1, nullptr, &dst1);
+
+    int texW2, texH2;
+    SDL_QueryTexture(fixedBg2, nullptr, nullptr, &texW2, &texH2);
+    SDL_Rect dst2 = { 0, 0, texW2, texH2 };
+    SDL_RenderCopy(renderer, fixedBg2, nullptr, &dst2);
+
+    struct Layer {
+        SDL_Texture* texture;
+        float parallaxFactor;
+    };
+
+    std::vector<Layer> layers = {
+        {mParallax3, 0.1f},
+        {mParallax4, 0.3f},
+        {mParallax5, 0.5f}
+    };
+
+    int screenWidth = GetWindowWidth();
+
+    for (auto& layer : layers)
+    {
+        int texW, texH;
+        SDL_QueryTexture(layer.texture, nullptr, nullptr, &texW, &texH);
+
+        float scrollX = fmod(cameraPos.x * layer.parallaxFactor, static_cast<float>(texW));
+        if (scrollX < 0) scrollX += texW;
+
+        int numTiles = screenWidth / texW + 2;
+
+        for (int i = 0; i < numTiles; ++i)
+        {
+            SDL_Rect dst = {
+                static_cast<int>(-scrollX + i * texW),
+                0,
+                texW,
+                texH
+            };
+
+            SDL_RenderCopy(renderer, layer.texture, nullptr, &dst);
+        }
+    }
+}
+
 void Game::UnloadScene()
 {
     // Delete actors
@@ -971,6 +1063,11 @@ void Game::Shutdown()
     IMG_Quit();
 
     SDL_DestroyRenderer(mRenderer);
+    SDL_DestroyTexture(mParallax3);
+    SDL_DestroyTexture(mParallax4);
+    SDL_DestroyTexture(mParallax5);
+    SDL_DestroyTexture(mBg1);
+    SDL_DestroyTexture(mBg2);
     SDL_DestroyWindow(mWindow);
     SDL_Quit();
 }
