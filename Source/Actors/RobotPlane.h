@@ -4,6 +4,7 @@
 
 #pragma once
 #include "Actor.h"
+#include "../AudioSystem.h"
 
 class RobotPlane : public Actor {
 public:

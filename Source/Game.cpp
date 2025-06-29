@@ -237,7 +237,7 @@ void Game::ChangeScene()
 
         mHUD->SetAttemptCount(tentativa);
 
-        mMusicHandle = mAudio->PlaySound("MusicUnderground.ogg", true);
+        mMusicHandle = mAudio->PlaySound("Musica_Level2.mp3", true);
 
         // Set background color
         mBackgroundColor.Set(128,24,27);

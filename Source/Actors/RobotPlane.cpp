@@ -55,6 +55,9 @@ void RobotPlane::OnProcessInput(const uint8_t* state)
             mLiftSpeed
         ));
 
+        //TODO: Adicionar o som aqui depois. Tem que fazer um esquema para ele só tocar enquanto tiver com space pressionado
+        //Acho que dá pra fazer isso com o soundHandle, criando uma variável global dessa classe para o soundo handel desse som.
+        //Pra ele tocar em loop, mas parar de tocar quando soltar o espaço. E o principal, quando ficar segurando, só tocar uma vez o mesmo som
         mDrawComponent->SetAnimation("fly");
     }
     else
@@ -80,8 +83,8 @@ void RobotPlane::Kill()
 {
     mState = ActorState::Destroy;
     mDrawComponent->SetAnimation("idle");
-    //mRigidBodyComponent->SetEnabled(false);
-    //mColliderComponent->SetEnabled(false);
+    mRigidBodyComponent->SetEnabled(false);
+    mColliderComponent->SetEnabled(false);
 
     mGame->SetGamePlayState(Game::GamePlayState::GameOver);
 
