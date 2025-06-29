@@ -614,7 +614,6 @@ void Game::HandleKeyPressActors(const int key, const bool isPressed)
             mRobotPlane->HandleKeyPress(key, isPressed);
         }
     }
-
 }
 
 void Game::TogglePause()
@@ -624,25 +623,12 @@ void Game::TogglePause()
         if (mGamePlayState == GamePlayState::Playing)
         {
             mGamePlayState = GamePlayState::Paused;
-
-            // --------------
-            // TODO - PARTE 4
-            // --------------
-
-            // TODO 1.: Pare a música de fundo atual usando PauseSound() e toque o som "Coin.wav" para indicar a pausa.
             mAudio->PauseSound(mMusicHandle);
 
         }
         else if (mGamePlayState == GamePlayState::Paused)
         {
             mGamePlayState = GamePlayState::Playing;
-
-            // --------------
-            // TODO - PARTE 4
-            // --------------
-
-            // TODO 1.: Retome a música de fundo atual usando ResumeSound() e toque o som "Coin.wav" para
-            //  indicar a retomada do jogo.
             mAudio->ResumeSound(mMusicHandle);
         }
     }
@@ -690,7 +676,7 @@ void Game::UpdateGame()
     // ---------------------
     // Game Specific Updates
     // ---------------------
-    UpdateCamera();
+    UpdateCamera(deltaTime);
 
     UpdateSceneManager(deltaTime);
 
@@ -760,29 +746,44 @@ void Game::UpdateLevelTime(float deltaTime)
     }
 }
 
-void Game::UpdateCamera()
+void Game::UpdateCamera(float deltaTime)
 {
     if (!mMario && !mRobotPlane ) return;
 
     float horizontalCameraPos;
 
     if (mGameScene == GameScene::Level1) {
-        horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
+        if (mGamePlayState == GamePlayState::Playing)
+        {
+            float horizontalPos = Math::Max(
+                mMario->GetPosition().x - mWindowWidth / 4,
+                mCameraPos.x + deltaTime * CAMERA_X_SPEED);
+            float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
+            if (horizontalPos > maxCameraPos){
+                mCameraPos.x = maxCameraPos;
+            }
+            else {
+                mCameraPos.x = horizontalPos;
+            }
+        }
+        //horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
     }
     else if (mGameScene == GameScene::Level2) {
         horizontalCameraPos = mRobotPlane->GetPosition().x - (mWindowWidth / 2.0f);
+        if (horizontalCameraPos > mCameraPos.x)
+        {
+            // Limit camera to the right side of the level
+            float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
+            horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
+
+            mCameraPos.x = horizontalCameraPos;
+        }
     }
     else {
         return;
     }
 
-    if (horizontalCameraPos > mCameraPos.x)
-    {
-        float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
-        horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
 
-        mCameraPos.x = horizontalCameraPos;
-    }
 }
 
 void Game::UpdateActors(float deltaTime)

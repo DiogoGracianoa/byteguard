@@ -17,7 +17,8 @@ Mario::Mario(Game* game, const float forwardSpeed, const float jumpSpeed)
         , mJumpSpeed(jumpSpeed)
         , mPoleSlideTimer(0.0f)
 {
-    mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
+    mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 5.0f);
+    mRigidBodyComponent->SetVelocity(Vector2(mForwardSpeed, .0f));
 
     float byteGuardColliderWidth = Game::TILE_SIZE - 15.0f;
     float byteGuardColliderHeight = Game::TILE_SIZE;
@@ -47,16 +48,16 @@ void Mario::OnProcessInput(const uint8_t* state)
 {
     if(mGame->GetGamePlayState() != Game::GamePlayState::Playing) return;
 
-    /*if (state[SDL_SCANCODE_D])
+    if (state[SDL_SCANCODE_D])
     {
-        mRigidBodyComponent->ApplyForce(Vector2::UnitX * mForwardSpeed);
+        mRigidBodyComponent->ApplyForce(Vector2::UnitX * mForwardSpeed * 4.0f);
         mRotation = 0.0f;
         mIsRunning = true;
     }
 
     if (state[SDL_SCANCODE_A])
     {
-        mRigidBodyComponent->ApplyForce(Vector2::UnitX * -mForwardSpeed);
+        mRigidBodyComponent->ApplyForce(Vector2::UnitX * -mForwardSpeed * 4.0f);
         mRotation = Math::Pi;
         mIsRunning = true;
     }
@@ -64,7 +65,8 @@ void Mario::OnProcessInput(const uint8_t* state)
     if (!state[SDL_SCANCODE_D] && !state[SDL_SCANCODE_A])
     {
         mIsRunning = false;
-    }*/
+    }
+
     if (state[SDL_SCANCODE_SPACE] && mIsOnGround)
     {
         mRigidBodyComponent->SetVelocity(Vector2(mRigidBodyComponent->GetVelocity().x, mJumpSpeed));
@@ -101,58 +103,16 @@ void Mario::OnUpdate(float deltaTime)
         mIsOnGround = false;
     }
 
-    // Limit Mario's position to the camera view
-    mPosition.x = Math::Max(mPosition.x, mGame->GetCameraPos().x);
+    mRigidBodyComponent->ApplyForce(Vector2::UnitX * mForwardSpeed * 5);
+
+    if (mGame->GetGamePlayState() == Game::GamePlayState::Playing &&
+        mPosition.x < mGame->GetCameraPos().x) { Kill(); }
 
     // Kill mario if he falls below the screen
-    if (mGame->GetGamePlayState() == Game::GamePlayState::Playing && mPosition.y > mGame->GetWindowHeight())
-    {
-        Kill();
-    }
+    if (mGame->GetGamePlayState() == Game::GamePlayState::Playing &&
+        mPosition.y > mGame->GetWindowHeight()) { Kill(); }
 
-    if (mIsOnPole)
-    {
-        // If Mario is on the pole, update the pole slide timer
-        mPoleSlideTimer -= deltaTime;
-        if (mPoleSlideTimer <= 0.0f)
-        {
-            mRigidBodyComponent->SetApplyGravity(true);
-            mRigidBodyComponent->SetApplyFriction(false);
-            mRigidBodyComponent->SetVelocity(Vector2::UnitX * 100.0f);
-            mGame->SetGamePlayState(Game::GamePlayState::Leaving);
 
-            // --------------
-            // TODO - PARTE 4
-            // --------------
-
-            // TODO 1.: Toque o som "StageClear.wav"
-            mGame->GetAudio()->PlaySound("StageClear.wav");
-
-            mIsOnPole = false;
-            mIsRunning = true;
-        }
-    }
-
-    // If Mario is leaving the level, kill him if he enters the castle
-    const float castleDoorPos = Game::LEVEL_WIDTH * Game::TILE_SIZE - 10 * Game::TILE_SIZE;
-
-    if (mGame->GetGamePlayState() == Game::GamePlayState::Leaving &&
-        mPosition.x >= castleDoorPos)
-    {
-        // Stop Mario and set the game scene to Level 2
-        mState = ActorState::Destroy;
-        mGame->SetGameScene(Game::GameScene::Level2, 3.5f);
-
-        return;
-    }
-
-    if (!mIsDying && !mIsOnPole && mGame->GetGamePlayState() == Game::GamePlayState::Playing)
-    {
-        //AUTORUN
-        // Mario sempre corre pra frente com velocidade constante
-        mRigidBodyComponent->SetVelocity(Vector2(mForwardSpeed, mRigidBodyComponent->GetVelocity().y));
-        mIsRunning = true;
-    }
 
     ManageAnimations();
 }
@@ -194,7 +154,7 @@ void Mario::Kill()
     mGame->GetAudio()->StopAllSounds();
     mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
 
-    mGame->ResetGameScene(0.5f);
+    mGame->ResetGameScene(1.0f);
 }
 
 void Mario::Win(AABBColliderComponent *poleCollider)

@@ -66,6 +66,10 @@ add_executable(${PROJECT_NAME}
         Source/Actors/PressMachine.cpp
         Source/Actors/RobotPlane.cpp
         Source/Actors/RobotPlane.h
+        Source/Actors/Missile.cpp
+        Source/Actors/Missile.h
+        Source/Actors/MissileSpawner.cpp
+        Source/Actors/MissileSpawner.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer)

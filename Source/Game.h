@@ -21,6 +21,7 @@ public:
     static const int TILE_SIZE = 40;
     static const int SPAWN_DISTANCE = 700;
     static const int TRANSITION_TIME = 1;
+    static constexpr float CAMERA_X_SPEED = 250.0f;
 
     struct ParallaxSet {
         SDL_Texture* bg1;
@@ -114,7 +115,7 @@ public:
 private:
     void ProcessInput();
     void UpdateGame();
-    void UpdateCamera();
+    void UpdateCamera(float deltaTime);
     void GenerateOutput();
 
     // Scene Manager
