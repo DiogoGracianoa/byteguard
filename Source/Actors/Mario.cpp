@@ -38,7 +38,6 @@ Mario::Mario(Game* game, const float forwardSpeed, const float jumpSpeed)
     mDrawComponent->AddAnimation("run", {9,10,11,12,13});
     mDrawComponent->AddAnimation("win", {0});
 
-
     mDrawComponent->SetAnimation("idle");
     mDrawComponent->SetAnimFPS(10.0f);
 
@@ -112,8 +111,6 @@ void Mario::OnUpdate(float deltaTime)
     if (mGame->GetGamePlayState() == Game::GamePlayState::Playing &&
         mPosition.y > mGame->GetWindowHeight()) { Kill(); }
 
-
-
     ManageAnimations();
 }
 
@@ -154,7 +151,7 @@ void Mario::Kill()
     mGame->GetAudio()->StopAllSounds();
     mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
 
-    mGame->ResetGameScene(1.0f);
+    mGame->ResetGameScene(0.5f);
 }
 
 void Mario::Win(AABBColliderComponent *poleCollider)
