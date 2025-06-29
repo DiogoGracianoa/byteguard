@@ -31,6 +31,7 @@
 #include "Components/DrawComponents/DrawPolygonComponent.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
 #include "Actors/PressMachine.h"
+#include "Actors/RobotPlane.h"
 
 Game::Game(int windowWidth, int windowHeight)
         :mWindow(nullptr)
@@ -40,6 +41,7 @@ Game::Game(int windowWidth, int windowHeight)
         ,mWindowWidth(windowWidth)
         ,mWindowHeight(windowHeight)
         ,mMario(nullptr)
+        ,mRobotPlane(nullptr)
         ,mHUD(nullptr)
         ,mBackgroundColor(0, 0, 0)
         ,mModColor(255, 255, 255)
@@ -111,7 +113,7 @@ bool Game::Initialize()
     mTicksCount = SDL_GetTicks();
 
     // Init all game actors
-    SetGameScene(GameScene::MainMenu);
+    SetGameScene(GameScene::MainMenu, 0);
     //SetGameScene(GameScene::Level1);
     mParallax3 = LoadTexture("../Assets/Sprites/Background/3.png");
     mParallax4 = LoadTexture("../Assets/Sprites/Background/4.png");
@@ -126,16 +128,6 @@ bool Game::Initialize()
 
 void Game::SetGameScene(Game::GameScene scene, float transitionTime)
 {
-    // --------------
-    // TODO - PARTE 2
-    // --------------
-
-    // TODO 1.: Verifique se o estado do SceneManager mSceneManagerState é SceneManagerState::None.
-    //  Se sim, verifique se a cena passada scene passada como parâmetro é uma das cenas válidas (MainMenu, Level1, Level2).
-    //  Se a cena for válida, defina mNextScene como essa nova cena, mSceneManagerState como SceneManagerState::Entering e
-    //  mSceneManagerTimer como o tempo de transição passado como parâmetro.
-    //  Se a cena for inválida, registre um erro no log e retorne.
-    //  Se o estado do SceneManager não for SceneManagerState::None, registre um erro no log e retorne.
     if (mSceneManagerState == SceneManagerState::None)
     {
         if (scene == GameScene::MainMenu || scene == GameScene::Level1 || scene == GameScene::Level2)
@@ -371,8 +363,10 @@ void Game::BuildLevel(int** levelData, int width, int height)
 
             if(tile == 15) // Mario
             {
-                mMario = new Mario(this);
-                mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                mRobotPlane = new RobotPlane(this);
+                mRobotPlane->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                //mMario = new Mario(this);
+                //mMario->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
             /*else if(tile == 10) // Spawner
             {
@@ -517,7 +511,7 @@ void Game::ProcessInputActors()
         {
             actor->ProcessInput(state);
 
-            if (actor == mMario) {
+            if (actor == mMario || actor == mRobotPlane) {
                 isMarioOnCamera = true;
             }
         }
@@ -525,6 +519,8 @@ void Game::ProcessInputActors()
         // If Mario is not on camera, process input for him
         if (!isMarioOnCamera && mMario) {
             mMario->ProcessInput(state);
+        } else if (!isMarioOnCamera && mRobotPlane) {
+            mRobotPlane->ProcessInput(state);
         }
     }
 }
@@ -542,7 +538,7 @@ void Game::HandleKeyPressActors(const int key, const bool isPressed)
         for (auto actor: actorsOnCamera) {
             actor->HandleKeyPress(key, isPressed);
 
-            if (actor == mMario) {
+            if (actor == mMario || actor == mRobotPlane) {
                 isMarioOnCamera = true;
             }
         }
@@ -551,6 +547,9 @@ void Game::HandleKeyPressActors(const int key, const bool isPressed)
         if (!isMarioOnCamera && mMario)
         {
             mMario->HandleKeyPress(key, isPressed);
+        } else if (!isMarioOnCamera && mRobotPlane)
+        {
+            mRobotPlane->HandleKeyPress(key, isPressed);
         }
     }
 
@@ -708,18 +707,20 @@ void Game::UpdateLevelTime(float deltaTime)
         {
             //mHUD->SetTime(mGameTimeLimit);
         }
-        if (mGameTimeLimit <= 0 && mMario)
+        /*if (mGameTimeLimit <= 0 && mMario)
         {
             mMario->Kill();
-        }
+        }*/
     }
 }
 
 void Game::UpdateCamera()
 {
-    if (!mMario) return;
+    //if (!mMario ) return;
+    if(!mRobotPlane ) return;
 
-    float horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
+    //float horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
+    float horizontalCameraPos = mRobotPlane->GetPosition().x - (mWindowWidth / 2.0f);
 
     if (horizontalCameraPos > mCameraPos.x)
     {
@@ -741,7 +742,7 @@ void Game::UpdateActors(float deltaTime)
     for (auto actor : actorsOnCamera)
     {
         actor->Update(deltaTime);
-        if (actor == mMario)
+        if ((mMario && actor == mMario) || actor == mRobotPlane)
         {
             isMarioOnCamera = true;
         }
@@ -752,6 +753,10 @@ void Game::UpdateActors(float deltaTime)
     {
         mMario->Update(deltaTime);
     }
+    else if (!isMarioOnCamera && mRobotPlane)
+    {
+        mRobotPlane->Update(deltaTime);
+    }
 
     for (auto actor : actorsOnCamera)
     {
@@ -760,6 +765,9 @@ void Game::UpdateActors(float deltaTime)
             delete actor;
             if (actor == mMario) {
                 mMario = nullptr;
+            }
+            else if (actor == mRobotPlane) {
+                mRobotPlane = nullptr;
             }
         }
     }
