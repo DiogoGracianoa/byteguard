@@ -629,7 +629,7 @@ void Game::UpdateGame()
     // ---------------------
     // Game Specific Updates
     // ---------------------
-    UpdateCamera();
+    UpdateCamera(deltaTime);
 
     // --------------
     // TODO - PARTE 2
@@ -715,9 +715,19 @@ void Game::UpdateLevelTime(float deltaTime)
     }
 }
 
-void Game::UpdateCamera()
+void Game::UpdateCamera(float deltaTime)
 {
     if (!mMario) return;
+
+    if (mGamePlayState == GamePlayState::Playing)
+    {
+
+        float horizontalPos = Math::Max(
+            mMario->GetPosition().x - mWindowWidth / 4,
+            mCameraPos.x + deltaTime * CAMERA_X_SPEED);
+        mCameraPos.x = horizontalPos;
+    }
+    /*if (!mMario) return;
 
     float horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
 
@@ -728,7 +738,7 @@ void Game::UpdateCamera()
         horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
 
         mCameraPos.x = horizontalCameraPos;
-    }
+    }*/
 }
 
 void Game::UpdateActors(float deltaTime)
