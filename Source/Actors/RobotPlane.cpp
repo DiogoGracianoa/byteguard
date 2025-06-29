@@ -21,13 +21,14 @@ RobotPlane::RobotPlane(Game* game, const float forwardSpeed, const float liftSpe
 
     mDrawComponent = new DrawAnimatedComponent(
         this,
-        "../Assets/Sprites/ByteGuard/ByteGuard.png",
-        "../Assets/Sprites/ByteGuard/ByteGuard.json",
+        "../Assets/Sprites/ByteGuardPlane/ByteGuardPlane.png",
+        "../Assets/Sprites/ByteGuardPlane/ByteGuardPlane.json",
         200
     );
 
-    mDrawComponent->AddAnimation("fly", {0/*, 1, 2, 3*/});
-    mDrawComponent->AddAnimation("idle", {0});
+    mDrawComponent->AddAnimation("fly", {2});
+    mDrawComponent->AddAnimation("idle", {1});
+    mDrawComponent->AddAnimation("down", {0});
     mDrawComponent->SetAnimation("idle");
     mDrawComponent->SetAnimFPS(10.0f);
 
@@ -71,6 +72,6 @@ void RobotPlane::Kill()
     mState = ActorState::Destroy;
     mGame->SetGamePlayState(Game::GamePlayState::GameOver);
 
-    mGame->GetAudio()->PlaySound("Dead.ogg");
+    mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
     mGame->ResetGameScene(0.5f);
 }
