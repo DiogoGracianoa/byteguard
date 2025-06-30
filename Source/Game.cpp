@@ -24,12 +24,12 @@
 #include "Actors/EnemyBlock.h"
 #include "Actors/Player.h"
 #include "Actors/PressMachine.h"
+#include "Actors/RobotPlane.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
 #include "Components/DrawComponents/DrawComponent.h"
 #include "UIElements/UIScreen.h"
-#include "Actors/RobotPlane.h"
 
-Game::Game(int windowWidth, int windowHeight)
+Game::Game(const int windowWidth, const int windowHeight)
     : mSceneManagerState(SceneManagerState::None),
       mSceneManagerTimer(0.0f),
       mSpatialHashing(nullptr),
@@ -46,13 +46,13 @@ Game::Game(int windowWidth, int windowHeight)
       mBackgroundColor(0, 0, 0),
       mModColor(255, 255, 255),
       mCameraPos(Vector2::Zero), mPlayer(nullptr),
+      mRobotPlane(nullptr),
       mHUD(nullptr),
       mGameTimer(0.0f),
       mGameTimeLimit(0),
       mBackgroundTexture(nullptr),
       mBackgroundSize(Vector2::Zero),
-      mBackgroundPosition(Vector2::Zero),
-mRobotPlane(nullptr){}
+      mBackgroundPosition(Vector2::Zero) {}
 
 bool Game::Initialize()
 {
@@ -115,20 +115,20 @@ bool Game::Initialize()
     SetGameScene(GameScene::MainMenu, 0);
 
     mParallaxCache[GameScene::Level1] = {
-        LoadTexture("../Assets/Sprites/Background/1.png"),
-        LoadTexture("../Assets/Sprites/Background/2.png"),
-        LoadTexture("../Assets/Sprites/Background/3.png"),
-        LoadTexture("../Assets/Sprites/Background/4.png"),
-        LoadTexture("../Assets/Sprites/Background/5.png")
-    };
+            LoadTexture("../Assets/Sprites/Background/1.png"),
+            LoadTexture("../Assets/Sprites/Background/2.png"),
+            LoadTexture("../Assets/Sprites/Background/3.png"),
+            LoadTexture("../Assets/Sprites/Background/4.png"),
+            LoadTexture("../Assets/Sprites/Background/5.png")
+            };
 
     mParallaxCache[GameScene::Level2] = {
-        LoadTexture("../Assets/Sprites/Background/1_Level_2.png"),
-        LoadTexture("../Assets/Sprites/Background/2_Level_2.png"),
-        LoadTexture("../Assets/Sprites/Background/3_Level_2.png"),
-        LoadTexture("../Assets/Sprites/Background/4_Level_2.png"),
-        LoadTexture("../Assets/Sprites/Background/5_Level_2.png")
-    };
+            LoadTexture("../Assets/Sprites/Background/1_Level_2.png"),
+            LoadTexture("../Assets/Sprites/Background/2_Level_2.png"),
+            LoadTexture("../Assets/Sprites/Background/3_Level_2.png"),
+            LoadTexture("../Assets/Sprites/Background/4_Level_2.png"),
+            LoadTexture("../Assets/Sprites/Background/5_Level_2.png")
+            };
 
     return true;
 }
@@ -210,13 +210,13 @@ void Game::ChangeScene()
 
         // Set background image
         SetBackgroundImage("../Assets/Sprites/Background_Level1.png",
-            Vector2(0,0),
-            Vector2(1600,600));
+                           Vector2(0, 0),
+                           Vector2(1600, 600));
 
         LoadLevel("../Assets/Levels/level1.csv",
-            LEVEL_WIDTH,
-            LEVEL_HEIGHT,
-            1);
+                  LEVEL_WIDTH,
+                  LEVEL_HEIGHT,
+                  1);
     }
     else if (mNextScene == GameScene::Level2)
     {
@@ -229,7 +229,7 @@ void Game::ChangeScene()
         mMusicHandle = mAudio->PlaySound("Musica_Level2.mp3", true);
 
         // Set background color
-        mBackgroundColor.Set(128,24,27);
+        mBackgroundColor.Set(128, 24, 27);
         mCurrentParallax = &mParallaxCache[GameScene::Level2];
 
         // Initialize actors
@@ -251,7 +251,7 @@ void Game::LoadMainMenu()
     const auto menuImageDims = Vector2(mWindowWidth, 450);
 
     mainMenu->AddImage(mRenderer,
-        "../Assets/Sprites/Logo_ByteGuard.png",
+                       "../Assets/Sprites/Logo_ByteGuard.png",
                        menuImagePos,
                        menuImageDims);
 
@@ -270,10 +270,10 @@ void Game::LoadMainMenu()
     );
 }
 
-void Game::LoadLevel(const std::string& levelName,
-    const int levelWidth,
-    const int levelHeight,
-    int level)
+void Game::LoadLevel(const std::string &levelName,
+                     const int levelWidth,
+                     const int levelHeight,
+                     const int level)
 {
     // Load level data
     int **mLevelData = ReadLevelData(levelName, levelWidth, levelHeight);
@@ -285,55 +285,57 @@ void Game::LoadLevel(const std::string& levelName,
     }
 
     // Instantiate level actors
-    if (level == 1){
-        BuildFirstLevel(mLevelData, levelWidth, levelHeight);
-    }
-    else if (level == 2) {
+    if (level == 1) { BuildFirstLevel(mLevelData, levelWidth, levelHeight); }
+    else if (level == 2)
+    {
         BuildSecondLevel(mLevelData, levelWidth, levelHeight);
     }
+
+    for (int i = 0; i < levelHeight; ++i) { delete[] mLevelData[i]; }
+    delete[] mLevelData;
 }
 
-void Game::BuildFirstLevel(int** levelData, int width, int height)
+void Game::BuildFirstLevel(int **levelData, int width, int height)
 {
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
-        {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
-        {1, "../Assets/Sprites/ScifiBlocks/BGTile_1.png"},
-        {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
-        {3, "../Assets/Sprites/ScifiBlocks/Fence_1.png"},
-        {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
-        {5, "../Assets/Sprites/ScifiBlocks/Spike8.png"},
-        {6, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
-        {7, "../Assets/Sprites/ScifiBlocks/Tile_9.png"},
-        {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
-        {9, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
-        {10, "../Assets/Sprites/ScifiBlocks/BGTile_7.png"},
-        {11, "../Assets/Sprites/ScifiBlocks/Spike1.png"},
-        {12, "../Assets/Sprites/ScifiBlocks/Spike7.png"},
-        {13, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
-        {14, "../Assets/Sprites/ScifiBlocks/Tile_8.png"},
-        {16, "../Assets/Sprites/ScifiBlocks/BGTile_2.png"},
-        {17, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
-        {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
-        {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
-        {20, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
-        {21, "../Assets/Sprites/ScifiBlocks/Tile_7.png"},
-        {24, "../Assets/Sprites/ScifiBlocks/BGTile_5.png"},
-        {25, "../Assets/Sprites/ScifiBlocks/Fence_3.png"},
-        {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
-        {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
-        {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
-        {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
-        {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
-        {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
-        {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
-        {40, "../Assets/Sprites/ScifiBlocks/Spike3.png"},
-        {41, "../Assets/Sprites/ScifiBlocks/Tile_10.png"},
-        {42, "../Assets/Sprites/ScifiBlocks/Tile_4.png"},
-        {48, "../Assets/Sprites/ScifiBlocks/Tile_1.png"},
-        {49, "../Assets/Sprites/ScifiBlocks/Tile_3.png"},
-        {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
-    };
+            {0, "../Assets/Sprites/ScifiBlocks/Acid_1.png"},
+            {1, "../Assets/Sprites/ScifiBlocks/BGTile_1.png"},
+            {2, "../Assets/Sprites/ScifiBlocks/BGTile_4.png"},
+            {3, "../Assets/Sprites/ScifiBlocks/Fence_1.png"},
+            {4, "../Assets/Sprites/ScifiBlocks/Spike2.png"},
+            {5, "../Assets/Sprites/ScifiBlocks/Spike8.png"},
+            {6, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+            {7, "../Assets/Sprites/ScifiBlocks/Tile_9.png"},
+            {8, "../Assets/Sprites/ScifiBlocks/Acid_2.png"},
+            {9, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+            {10, "../Assets/Sprites/ScifiBlocks/BGTile_7.png"},
+            {11, "../Assets/Sprites/ScifiBlocks/Spike1.png"},
+            {12, "../Assets/Sprites/ScifiBlocks/Spike7.png"},
+            {13, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+            {14, "../Assets/Sprites/ScifiBlocks/Tile_8.png"},
+            {16, "../Assets/Sprites/ScifiBlocks/BGTile_2.png"},
+            {17, "../Assets/Sprites/ScifiBlocks/BGTile_6.png"},
+            {18, "../Assets/Sprites/ScifiBlocks/Spike0.png"},
+            {19, "../Assets/Sprites/ScifiBlocks/Spike6.png"},
+            {20, "../Assets/Sprites/ScifiBlocks/Tile_14.png"},
+            {21, "../Assets/Sprites/ScifiBlocks/Tile_7.png"},
+            {24, "../Assets/Sprites/ScifiBlocks/BGTile_5.png"},
+            {25, "../Assets/Sprites/ScifiBlocks/Fence_3.png"},
+            {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
+            {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
+            {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
+            {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
+            {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
+            {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
+            {35, "../Assets/Sprites/ScifiBlocks/Tile_5.png"},
+            {40, "../Assets/Sprites/ScifiBlocks/Spike3.png"},
+            {41, "../Assets/Sprites/ScifiBlocks/Tile_10.png"},
+            {42, "../Assets/Sprites/ScifiBlocks/Tile_4.png"},
+            {48, "../Assets/Sprites/ScifiBlocks/Tile_1.png"},
+            {49, "../Assets/Sprites/ScifiBlocks/Tile_3.png"},
+            {56, "../Assets/Sprites/ScifiBlocks/Tile_2.png"},
+            };
 
     for (int y = 0; y < LEVEL_HEIGHT; ++y)
     {
@@ -374,6 +376,108 @@ void Game::BuildFirstLevel(int** levelData, int width, int height)
                 {
                     // Create a block actor
                     const auto block = new Block(this, it->second);
+                    block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+        }
+    }
+}
+
+void Game::BuildSecondLevel(int **levelData, int width, int height)
+{
+    // Const map to convert tile ID to block type
+    const std::map<int, const std::string> tileMap = {
+            {0, "../Assets/Sprites/Level_2_Tileset/Acid_1.png"},
+            {1, "../Assets/Sprites/Level_2_Tileset/Barrel1.png"},
+            {2, "../Assets/Sprites/Level_2_Tileset/Entry.png"},
+            {3, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_23.png"},
+            {4, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_54.png"},
+            {5, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_63.png"},
+            {6, "../Assets/Sprites/Level_2_Tileset/Spike_12.png"},
+            {7, "../Assets/Sprites/Level_2_Tileset/Spike_2.png"},
+            {8, "../Assets/Sprites/Level_2_Tileset/Acid_2.png"},
+            {9, "../Assets/Sprites/Level_2_Tileset/Box2.png"},
+            {10, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_11.png"},
+            {11, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_52.png"},
+            {12, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_62.png"},
+            {13, "../Assets/Sprites/Level_2_Tileset/Spike_11.png"},
+            {14, "../Assets/Sprites/Level_2_Tileset/Spike_19.png"},
+            {15, "../Assets/Sprites/Level_2_Tileset/Spike_9.png"},
+            {16, "../Assets/Sprites/Level_2_Tileset/Box1.png"},
+            {18, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_45.png"},
+            {19, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_61.png"},
+            {20, "../Assets/Sprites/Level_2_Tileset/Spike_10.png"},
+            {21, "../Assets/Sprites/Level_2_Tileset/Spike_18.png"},
+            {22, "../Assets/Sprites/Level_2_Tileset/Spike_8.png"},
+            {25, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_36.png"},
+            {26, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_57.png"},
+            {27, "../Assets/Sprites/Level_2_Tileset/Spike_1.png"},
+            {28, "../Assets/Sprites/Level_2_Tileset/Spike_17.png"},
+            {29, "../Assets/Sprites/Level_2_Tileset/Spike_7.png"},
+            {32, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_32.png"},
+            {33, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_56.png"},
+            {34, "../Assets/Sprites/Level_2_Tileset/Locker4.png"},
+            {35, "../Assets/Sprites/Level_2_Tileset/Spike_16.png"},
+            {36, "../Assets/Sprites/Level_2_Tileset/Spike_6.png"},
+            {40, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_55.png"},
+            {41, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_71.png"},
+            {42, "../Assets/Sprites/Level_2_Tileset/Spike_15.png"},
+            {43, "../Assets/Sprites/Level_2_Tileset/Spike_5.png"},
+            {48, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_70.png"},
+            {49, "../Assets/Sprites/Level_2_Tileset/Spike_14.png"},
+            {50, "../Assets/Sprites/Level_2_Tileset/Spike_4.png"},
+            {56, "../Assets/Sprites/Level_2_Tileset/Spike_13.png"},
+            {57, "../Assets/Sprites/Level_2_Tileset/Spike_3.png"},
+            {64, "../Assets/Sprites/Level_2_Tileset/Spike_20.png"},
+            };
+
+    for (int y = 0; y < LEVEL_HEIGHT; ++y)
+    {
+        for (int x = 0; x < LEVEL_WIDTH; ++x)
+        {
+            int tile = levelData[y][x];
+
+            if (tile == 17) // Mario
+            {
+                mRobotPlane = new RobotPlane(this);
+                mRobotPlane->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            /*else if(tile == 3)
+            {
+                Collectible* coin = new Collectible(this);
+                coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }*/
+            else if (tile == 24)
+            {
+                auto *press = new PressMachine(this, mRenderer);
+                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (
+                tile == 0 || tile == 8 ||
+                tile == 6 || tile == 7 || tile == 13 || tile == 14 || tile == 15
+                ||
+                tile == 20 || tile == 21 || tile == 22 || tile == 27 || tile ==
+                28 ||
+                tile == 29 || tile == 35 || tile == 36 || tile == 42 || tile ==
+                43 ||
+                tile == 49 || tile == 50 || tile == 56 || tile == 57 || tile ==
+                64)
+            {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
+                    EnemyBlock *enemyBlock = new EnemyBlock(this, it->second);
+                    enemyBlock->SetPosition(
+                        Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+            else // Blocks
+            {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
+                    // Create a block actor
+                    Block *block = new Block(this, it->second);
                     block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
                 }
             }
@@ -485,15 +589,16 @@ void Game::ProcessInputActors() const
         {
             actor->ProcessInput(state);
 
-            if (actor == mPlayer || actor == mRobotPlane) {
+            if (actor == mPlayer || actor == mRobotPlane)
+            {
                 isPlayerOnCamera = true;
             }
         }
 
         // If Player is not on camera, process input for him
-        if (!isPlayerOnCamera && mMario) {
-            mPlayer->ProcessInput(state);
-        } else if (!isPlayerOnCamera && mRobotPlane) {
+        if (!isPlayerOnCamera && mPlayer) { mPlayer->ProcessInput(state); }
+        else if (!isPlayerOnCamera && mRobotPlane)
+        {
             mRobotPlane->ProcessInput(state);
         }
     }
@@ -514,7 +619,8 @@ void Game::HandleKeyPressActors(const int key, const bool isPressed) const
         {
             actor->HandleKeyPress(key, isPressed);
 
-            if (actor == mPlayer || actor == mRobotPlane) {
+            if (actor == mPlayer || actor == mRobotPlane)
+            {
                 isPlayerOnCamera = true;
             }
         }
@@ -523,7 +629,8 @@ void Game::HandleKeyPressActors(const int key, const bool isPressed) const
         if (!isPlayerOnCamera && mPlayer)
         {
             mPlayer->HandleKeyPress(key, isPressed);
-        } else if (!isPlayerOnCamera && mRobotPlane)
+        }
+        else if (!isPlayerOnCamera && mRobotPlane)
         {
             mRobotPlane->HandleKeyPress(key, isPressed);
         }
@@ -594,15 +701,16 @@ void Game::UpdateGame()
     UpdateSceneManager(deltaTime);
 
 
-    if (mGameScene != GameScene::MainMenu && mGamePlayState == GamePlayState::Playing)
+    if (mGameScene != GameScene::MainMenu && mGamePlayState ==
+        GamePlayState::Playing)
     {
         UpdateLevelTime(deltaTime);
         if (mPlayer)
         {
-            float playerX = mPlayer->GetPosition().x;
-            float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+            const float playerX = mPlayer->GetPosition().x;
 
-            if (mGameScene == GameScene::Level1 && playerX >= levelLimitX)
+            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                mGameScene == GameScene::Level1 && playerX >= levelLimitX)
             {
                 mPlayer->SetState(ActorState::Destroy);
                 this->GetAudio()->StopAllSounds();
@@ -656,34 +764,32 @@ void Game::UpdateLevelTime(const float deltaTime)
 
 void Game::UpdateCamera(const float deltaTime)
 {
-    if (!mPlayer && !mRobotPlane ) return;
+    if (!mPlayer && !mRobotPlane) return;
 
-    float horizontalCameraPos;
-
-    if (mGameScene == GameScene::Level1) {
+    if (mGameScene == GameScene::Level1)
+    {
         if (mGamePlayState == GamePlayState::Playing)
         {
             const float horizontalPos = Math::Max(
                 mPlayer->GetPosition().x - mWindowWidth / 4,
                 mCameraPos.x + deltaTime * CAMERA_X_SPEED);
-            if (const float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
-                horizontalPos > maxCameraPos)
-                {
-                mCameraPos.x = maxCameraPos;
-            }
-            else {
-                mCameraPos.x = horizontalPos;
-            }
+            if (const float maxCameraPos =
+                        (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
+                horizontalPos > maxCameraPos) { mCameraPos.x = maxCameraPos; }
+            else { mCameraPos.x = horizontalPos; }
         }
         //horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
     }
-    else if (mGameScene == GameScene::Level2) {
-        horizontalCameraPos = mRobotPlane->GetPosition().x - (mWindowWidth / 2.0f);
+    else if (mGameScene == GameScene::Level2)
+    {
+        float horizontalCameraPos =
+                mRobotPlane->GetPosition().x - (mWindowWidth / 2.0f);
         if (horizontalCameraPos > mCameraPos.x)
         {
             // Limit camera to the right side of the level
             float maxCameraPos = (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
-            horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f, maxCameraPos);
+            horizontalCameraPos = Math::Clamp(horizontalCameraPos, 0.0f,
+                                              maxCameraPos);
 
             mCameraPos.x = horizontalCameraPos;
         }
@@ -701,17 +807,15 @@ void Game::UpdateActors(const float deltaTime)
     for (const auto &actor: actorsOnCamera)
     {
         actor->Update(deltaTime);
-        if ((mMario && actor == mPlayer) || (mRobotPlane && actor == mRobotPlane))
+        if ((mPlayer && actor == mPlayer) || (
+                mRobotPlane && actor == mRobotPlane))
         {
             isPlayerOnCamera = true;
         }
     }
 
     // If Player is not on camera, reset camera position
-    if (!isPlayerOnCamera && mMario)
-    {
-        mPlayer->Update(deltaTime);
-    }
+    if (!isPlayerOnCamera && mPlayer) { mPlayer->Update(deltaTime); }
     else if (!isPlayerOnCamera && mRobotPlane)
     {
         mRobotPlane->Update(deltaTime);
@@ -722,12 +826,8 @@ void Game::UpdateActors(const float deltaTime)
         if (actor->GetState() == ActorState::Destroy)
         {
             delete actor;
-            if (actor == mPlayer) {
-                mPlayer = nullptr;
-            }
-            else if (actor == mRobotPlane) {
-                mRobotPlane = nullptr;
-            }
+            if (actor == mPlayer) { mPlayer = nullptr; }
+            else if (actor == mRobotPlane) { mRobotPlane = nullptr; }
         }
     }
 }
@@ -758,7 +858,8 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
-    if (mGameScene == GameScene::Level1 || mGameScene == GameScene::Level2) {
+    if (mGameScene == GameScene::Level1 || mGameScene == GameScene::Level2)
+    {
         DrawParallaxBackground(mRenderer, mCameraPos);
     }
 
@@ -895,8 +996,8 @@ UIFont *Game::LoadFont(const std::string &fileName)
 void Game::DrawParallaxBackground(SDL_Renderer *renderer,
                                   const Vector2 &cameraPos) const
 {
-    SDL_Texture* fixedBg1 = mCurrentParallax->bg1;
-    SDL_Texture* fixedBg2 = mCurrentParallax->bg2;
+    SDL_Texture *fixedBg1 = mCurrentParallax->bg1;
+    SDL_Texture *fixedBg2 = mCurrentParallax->bg2;
 
     int texW1, texH1;
     SDL_QueryTexture(fixedBg1, nullptr, nullptr, &texW1, &texH1);
@@ -915,10 +1016,10 @@ void Game::DrawParallaxBackground(SDL_Renderer *renderer,
     };
 
     std::vector<Layer> layers = {
-        {mCurrentParallax->layer3, 0.1f},
-        {mCurrentParallax->layer4, 0.3f},
-        {mCurrentParallax->layer5, 0.5f}
-    };
+            {mCurrentParallax->layer3, 0.1f},
+            {mCurrentParallax->layer4, 0.3f},
+            {mCurrentParallax->layer5, 0.5f}
+            };
 
     const int screenWidth = GetWindowWidth();
 
@@ -984,7 +1085,7 @@ void Game::Shutdown()
     TTF_Quit();
     IMG_Quit();
 
-    for (auto& [scene, parallax] : mParallaxCache)
+    for (auto &[scene, parallax]: mParallaxCache)
     {
         SDL_DestroyTexture(parallax.bg1);
         SDL_DestroyTexture(parallax.bg2);

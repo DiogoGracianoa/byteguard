@@ -23,12 +23,13 @@ public:
     static constexpr int TRANSITION_TIME = 1;
     static constexpr float CAMERA_X_SPEED = 250.0f;
 
-    struct ParallaxSet {
-        SDL_Texture* bg1;
-        SDL_Texture* bg2;
-        SDL_Texture* layer3;
-        SDL_Texture* layer4;
-        SDL_Texture* layer5;
+    struct ParallaxSet
+    {
+        SDL_Texture *bg1;
+        SDL_Texture *bg2;
+        SDL_Texture *layer3;
+        SDL_Texture *layer4;
+        SDL_Texture *layer5;
     };
 
     enum class GameScene
@@ -155,10 +156,12 @@ private:
                                 const Vector2 &cameraPos) const;
 
     // Load the level from a CSV file as a 2D array
-    static int **ReadLevelData(const std::string& fileName,
+    static int **ReadLevelData(const std::string &fileName,
                                int width,
                                int height);
-    void BuildFirstLevel(int** levelData, int width, int height);
+
+    void BuildFirstLevel(int **levelData, int width, int height);
+
     void BuildSecondLevel(int **levelData, int width, int height);
 
     // Spatial Hashing for collision detection
@@ -208,7 +211,7 @@ private:
 
     //Parallax camera
     std::map<GameScene, ParallaxSet> mParallaxCache;
-    ParallaxSet* mCurrentParallax = nullptr;
+    ParallaxSet *mCurrentParallax = nullptr;
 
     std::unordered_map<GameScene, int> mSceneAttempts;
 };

@@ -3,13 +3,15 @@
 //
 
 #include "RobotPlane.h"
-#include "RobotPlane.h"
 #include "../Game.h"
 #include "../Components/DrawComponents/DrawAnimatedComponent.h"
-RobotPlane::RobotPlane(Game* game, const float forwardSpeed, const float liftSpeed)
-        : Actor(game)
-        , mForwardSpeed(forwardSpeed)
-        , mLiftSpeed(liftSpeed)
+
+RobotPlane::RobotPlane(Game *game,
+                       const float forwardSpeed,
+                       const float liftSpeed)
+    : Actor(game)
+      , mForwardSpeed(forwardSpeed)
+      , mLiftSpeed(liftSpeed)
 {
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
 
@@ -44,7 +46,7 @@ RobotPlane::RobotPlane(Game* game, const float forwardSpeed, const float liftSpe
     mRigidBodyComponent->SetApplyGravity(true);
 }
 
-void RobotPlane::OnProcessInput(const uint8_t* state)
+void RobotPlane::OnProcessInput(const uint8_t *state)
 {
     if (mGame->GetGamePlayState() != Game::GamePlayState::Playing) return;
 
@@ -60,10 +62,7 @@ void RobotPlane::OnProcessInput(const uint8_t* state)
         //Pra ele tocar em loop, mas parar de tocar quando soltar o espaço. E o principal, quando ficar segurando, só tocar uma vez o mesmo som
         mDrawComponent->SetAnimation("fly");
     }
-    else
-    {
-        mDrawComponent->SetAnimation("idle");
-    }
+    else { mDrawComponent->SetAnimation("idle"); }
 }
 
 void RobotPlane::OnUpdate(float deltaTime)
@@ -73,10 +72,7 @@ void RobotPlane::OnUpdate(float deltaTime)
         mRigidBodyComponent->GetVelocity().y
     ));
 
-    if (mPosition.y > mGame->GetWindowHeight())
-    {
-        Kill();
-    }
+    if (mPosition.y > mGame->GetWindowHeight()) { Kill(); }
 }
 
 void RobotPlane::Kill()
@@ -93,12 +89,11 @@ void RobotPlane::Kill()
     mGame->ResetGameScene(0.5f);
 }
 
-void RobotPlane::OnHorizontalCollision(const float minOverlap, AABBColliderComponent* other)
+void RobotPlane::OnHorizontalCollision(const float minOverlap,
+                                       AABBColliderComponent *other)
 {
-    if (other->GetLayer() == ColliderLayer::Enemy || other->GetLayer() == ColliderLayer::EnemyBlocks)
-    {
-        Kill();
-    }
+    if (other->GetLayer() == ColliderLayer::Enemy || other->GetLayer() ==
+        ColliderLayer::EnemyBlocks) { Kill(); }
     /*else if (other->GetLayer() == ColliderLayer::Pole)
     {
         mIsOnPole = true;
@@ -106,21 +101,19 @@ void RobotPlane::OnHorizontalCollision(const float minOverlap, AABBColliderCompo
     }*/
     else if (other->GetLayer() == ColliderLayer::Collectible)
     {
-        mGame->AddCoin();
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);
         mGame->GetAudio()->PlaySound("Coin.wav");
     }
 }
 
-void RobotPlane::OnVerticalCollision(const float minOverlap, AABBColliderComponent* other)
+void RobotPlane::OnVerticalCollision(const float minOverlap,
+                                     AABBColliderComponent *other)
 {
     if (other->GetLayer() == ColliderLayer::Blocks)
     {
         if (!mIsOnGround)
         {
-
-
             // Cast actor to Block to call OnBump
             //auto* block = dynamic_cast<Block*>(other->GetOwner());
             //block->OnBump();
@@ -128,12 +121,8 @@ void RobotPlane::OnVerticalCollision(const float minOverlap, AABBColliderCompone
     }
     else if (other->GetLayer() == ColliderLayer::Collectible)
     {
-        mGame->AddCoin();
         other->GetOwner()->SetState(ActorState::Destroy);
         mGame->GetAudio()->PlaySound("Coin.wav");
     }
-    else if (other->GetLayer() == ColliderLayer::EnemyBlocks)
-    {
-        Kill();
-    }
+    else if (other->GetLayer() == ColliderLayer::EnemyBlocks) { Kill(); }
 }
