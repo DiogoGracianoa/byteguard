@@ -570,10 +570,8 @@ void Game::ProcessInput()
                 const bool isPlayingScene = (mGameScene == GameScene::Level1 ||
                                              mGameScene == GameScene::Level2);
 
-                if (event.key.keysym.sym == SDLK_RETURN && isPlayingScene && mGamePlayState == GamePlayState::Playing)
-                {
-                    TogglePause();
-                }
+                if (event.key.keysym.sym == SDLK_RETURN && isPlayingScene &&
+                    mGamePlayState == GamePlayState::Playing) { TogglePause(); }
 
                 else if (!mUIStack.empty())
                 {
