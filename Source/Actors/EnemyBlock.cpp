@@ -16,9 +16,9 @@ EnemyBlock::EnemyBlock(Game *game,
                        const bool isStatic)
     : Actor(game)
 {
-    constexpr float spikeColliderWidth = Game::TILE_SIZE - 15.0f;
+    constexpr float spikeColliderWidth = Game::TILE_SIZE - 20.0f;
     constexpr float spikeColliderHeight = Game::TILE_SIZE - 20.0f;
-    constexpr float offsetX = 7.5f;
+    constexpr float offsetX = 10;
     constexpr float offsetY = 10;
 
     new DrawSpriteComponent(this,

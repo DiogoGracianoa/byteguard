@@ -58,6 +58,8 @@ add_executable(${PROJECT_NAME}
         Source/Actors/EnemyBlock.cpp
         Source/Actors/EnemyBlock.h
         Source/Actors/PressMachine.cpp
+        Source/Actors/RobotPlane.cpp
+        Source/Actors/RobotPlane.h
         Source/Actors/Missile.cpp
         Source/Actors/Missile.h
         Source/Actors/MissileSpawner.cpp
