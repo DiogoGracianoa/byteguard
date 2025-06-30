@@ -7,8 +7,9 @@
 // ----------------------------------------------------------------
 
 #pragma once
-#include <vector>
+
 #include <SDL_stdinc.h>
+#include <vector>
 #include "../Math.h"
 #include "../Components/ColliderComponents/AABBColliderComponent.h"
 
@@ -47,7 +48,8 @@ public:
 
     // Scale getter/setter
     float GetScale() const { return mScale; }
-    void SetScale(float scale) { mScale = scale; }
+
+    void SetScale(const float scale) { mScale = scale; }
 
     // Rotation getter/setter
     float GetRotation() const { return mRotation; }

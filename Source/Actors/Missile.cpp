@@ -45,6 +45,8 @@ void Missile::OnUpdate(const float deltaTime)
             mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
 
     mRigidBodyComponent->ApplyForce(sForce);
+    const auto vel = mRigidBodyComponent->GetVelocity();
+    mRotation = Math::Atan2(vel.y, vel.x);
 }
 
 void Missile::OnHorizontalCollision(const float minOverlap,

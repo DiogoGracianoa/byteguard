@@ -22,6 +22,7 @@
 #include "Actors/Actor.h"
 #include "Actors/Block.h"
 #include "Actors/EnemyBlock.h"
+#include "Actors/MissileSpawner.h"
 #include "Actors/Player.h"
 #include "Actors/PressMachine.h"
 #include "Actors/RobotPlane.h"
@@ -213,7 +214,7 @@ void Game::ChangeScene()
                            Vector2(0, 0),
                            Vector2(1600, 600));
 
-        LoadLevel("../Assets/Levels/level1.csv",
+        LoadLevel("../Assets/Levels/level1_debug.csv",
                   LEVEL_WIDTH,
                   LEVEL_HEIGHT,
                   1);
@@ -222,7 +223,7 @@ void Game::ChangeScene()
     {
         mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-        int tryCount = mSceneAttempts[mNextScene];
+        const int tryCount = mSceneAttempts[mNextScene];
 
         mHUD->SetAttemptCount(tryCount);
 
@@ -325,6 +326,7 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
             {26, "../Assets/Sprites/ScifiBlocks/Spike5.png"},
             {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
             {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
+            {30, "../Assets/Sprites/Missile/missile.png"},
             {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
             {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
             {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
@@ -347,6 +349,11 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
             {
                 mPlayer = new Player(this);
                 mPlayer->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (tile == 30)
+            {
+                const auto spawner = new MissileSpawner(this, 50);
+                spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
             else if (tile == 36) // Spawner
             {
@@ -579,8 +586,10 @@ void Game::ProcessInputActors() const
     {
         // Get actors on camera
         std::vector<Actor *> actorsOnCamera =
-                mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
-                                               mWindowHeight);
+                mSpatialHashing->QueryOnCamera(mCameraPos,
+                                               mWindowWidth,
+                                               mWindowHeight,
+                                               TILE_SIZE);
 
         const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
@@ -610,7 +619,8 @@ void Game::HandleKeyPressActors(const int key, const bool isPressed) const
     {
         // Get actors on camera
         std::vector<Actor *> actorsOnCamera =
-                mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
+                mSpatialHashing->QueryOnCamera(mCameraPos,
+                                               mWindowWidth,
                                                mWindowHeight);
 
         // Handle key press for actors
@@ -800,8 +810,10 @@ void Game::UpdateActors(const float deltaTime)
 {
     // Get actors on camera
     std::vector<Actor *> actorsOnCamera =
-            mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
-                                           mWindowHeight);
+            mSpatialHashing->QueryOnCamera(mCameraPos,
+                                           mWindowWidth,
+                                           mWindowHeight,
+                                           TILE_SIZE);
 
     bool isPlayerOnCamera = false;
     for (const auto &actor: actorsOnCamera)
@@ -865,8 +877,10 @@ void Game::GenerateOutput()
 
     // Get actors on camera
     const std::vector<Actor *> actorsOnCamera =
-            mSpatialHashing->QueryOnCamera(mCameraPos, mWindowWidth,
-                                           mWindowHeight);
+            mSpatialHashing->QueryOnCamera(mCameraPos,
+                                           mWindowWidth,
+                                           mWindowHeight,
+                                           TILE_SIZE);
 
     // Get list of drawables in draw order
     std::vector<DrawComponent *> drawables;
