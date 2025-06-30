@@ -254,6 +254,15 @@ void Game::ChangeScene()
         // Initialize actors
         LoadLevel("../Assets/Levels/level2.csv", LEVEL_WIDTH, LEVEL_HEIGHT, 2);
     }
+    else if (mNextScene == GameScene::GameWinScreen)
+    {
+        mBackgroundColor.Set(40.0f, 80.0f, 120.0f); 
+
+        //TODO: setar uma música de vitória
+        //mAudio->PlaySound("Victory.ogg", false);
+
+        new GameWinScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
+    }
 
     // Set new scene
     mGameScene = mNextScene;
@@ -763,7 +772,15 @@ void Game::UpdateGame()
                 mPlayer->SetState(ActorState::Destroy);
                 this->GetAudio()->StopAllSounds();
 
-                SetGameScene(GameScene::Level2, TRANSITION_TIME);
+                SetGameScene(GameScene::Level2, 0.5);
+            }
+            else if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                mGameScene == GameScene::Level2 && playerX >= levelLimitX)
+            {
+                mPlayer->SetState(ActorState::Destroy);
+                this->GetAudio()->StopAllSounds();
+
+                SetGameScene(GameScene::GameWinScreen, 0.5);
             }
         }
     }
