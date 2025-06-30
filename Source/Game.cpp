@@ -22,6 +22,7 @@
 #include "Actors/Actor.h"
 #include "Actors/Block.h"
 #include "Actors/EnemyBlock.h"
+#include "Actors/PauseMenu.h"
 #include "Actors/MissileSpawner.h"
 #include "Actors/Player.h"
 #include "Actors/PressMachine.h"
@@ -165,6 +166,12 @@ void Game::ChangeScene()
 {
     // Unload current Scene
     UnloadScene();
+
+    while (!mUIStack.empty())
+    {
+        delete mUIStack.back();
+        mUIStack.pop_back();
+    }
 
     // Reset camera position
     mCameraPos.Set(0.0f, 0.0f);
@@ -560,17 +567,24 @@ void Game::ProcessInput()
             }
             case SDL_KEYDOWN:
             {
-                // Handle key press for UI screens
-                if (!mUIStack.empty())
+                const bool isPlayingScene = (mGameScene == GameScene::Level1 ||
+                                             mGameScene == GameScene::Level2);
+
+                if (event.key.keysym.sym == SDLK_RETURN && isPlayingScene && mGamePlayState == GamePlayState::Playing)
+                {
+                    TogglePause();
+                }
+
+                else if (!mUIStack.empty())
                 {
                     mUIStack.back()->HandleKeyPress(event.key.keysym.sym);
                 }
 
-                HandleKeyPressActors(event.key.keysym.sym,
-                                     event.key.repeat == 0);
-
-                // Check if the Return key has been pressed to pause/unpause the game
-                if (event.key.keysym.sym == SDLK_RETURN) { TogglePause(); }
+                if (mGamePlayState == GamePlayState::Playing)
+                {
+                    HandleKeyPressActors(event.key.keysym.sym,
+                                         event.key.repeat == 0);
+                }
                 break;
             }
             default: break;
@@ -655,6 +669,7 @@ void Game::TogglePause()
         {
             mGamePlayState = GamePlayState::Paused;
             mAudio->PauseSound(mMusicHandle);
+            new PauseMenu(this);
         }
         else if (mGamePlayState == GamePlayState::Paused)
         {
@@ -908,6 +923,8 @@ void Game::GenerateOutput()
     {
         drawable->Draw(mRenderer, mModColor);
     }
+
+    for (const auto &ui: mUIStack) { ui->Draw(mRenderer); }
 
     // Draw all UI screens
     for (const auto &ui: mUIStack) { ui->Draw(mRenderer); }
