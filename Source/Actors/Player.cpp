@@ -4,6 +4,8 @@
 
 #include "Player.h"
 #include "Block.h"
+#include "Collectible.h"
+#include "../Components/PowerupComponents/TimePowerupComponent.h"
 #include "../Game.h"
 #include "../Components/DrawComponents/DrawAnimatedComponent.h"
 #include "../Components/DrawComponents/DrawPolygonComponent.h"
@@ -18,10 +20,10 @@ Player::Player(Game *game, const float forwardSpeed, const float jumpSpeed)
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 5.0f);
     mRigidBodyComponent->SetVelocity(Vector2(mForwardSpeed, .0f));
 
-    float byteGuardColliderWidth = Game::TILE_SIZE - 15.0f;
-    float byteGuardColliderHeight = Game::TILE_SIZE;
-    float offsetX = 7.5f;
-    float offsetY = 0;
+    constexpr float byteGuardColliderWidth = Game::TILE_SIZE - 15.0f;
+    constexpr float byteGuardColliderHeight = Game::TILE_SIZE;
+    constexpr float offsetX = 7.5f;
+    constexpr float offsetY = 0;
 
     mColliderComponent = new AABBColliderComponent(
         this, offsetX, offsetY, byteGuardColliderWidth, byteGuardColliderHeight,
@@ -41,6 +43,10 @@ Player::Player(Game *game, const float forwardSpeed, const float jumpSpeed)
 
     mDrawComponent->SetAnimation("idle");
     mDrawComponent->SetAnimFPS(10.0f);
+
+    mCollectibles = {
+            {Powerups::TimePowerup, new TimePowerupComponent(this, 5.0f, 2.0f)}
+            };
 }
 
 void Player::OnProcessInput(const uint8_t *state)
@@ -76,6 +82,19 @@ void Player::OnProcessInput(const uint8_t *state)
         mIsOnGround = false;
 
         mGame->GetAudio()->PlaySound("ByteGuard_Jump.ogg");
+    }
+
+    if (state[SDL_SCANCODE_Q])
+    {
+        if (mCollectibles[Powerups::TimePowerup]->IsUsable())
+        {
+            const auto powerup =
+                    dynamic_cast<TimePowerupComponent *>(
+                        mCollectibles[Powerups::TimePowerup]
+                    );
+
+            powerup->ReleasePower();
+        };
     }
 }
 
@@ -125,6 +144,10 @@ void Player::Kill()
     mGame->GetAudio()->StopAllSounds();
     mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
 
+    mCollectibles[Powerups::TimePowerup]->Disable();
+    mCollectibles[Powerups::TimePowerup]->SetUsable(false);
+    mCollectibles[Powerups::TimePowerup]->SetEnabled(false);
+
     mGame->ResetGameScene(1.0f);
 }
 
@@ -141,6 +164,14 @@ void Player::OnHorizontalCollision(const float minOverlap,
         ColliderLayer::EnemyBlocks) { Kill(); }
     else if (other->GetLayer() == ColliderLayer::Collectible)
     {
+        if (const auto collectible = dynamic_cast<Collectible *>(other->
+                GetOwner());
+            collectible &&
+            collectible->GetPowerupType() == Powerups::TimePowerup &&
+            !mCollectibles[Powerups::TimePowerup]->IsUsable())
+        {
+            mCollectibles[Powerups::TimePowerup]->SetUsable(true);
+        }
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);
     }
@@ -153,6 +184,14 @@ void Player::OnVerticalCollision(const float minOverlap,
         ColliderLayer::EnemyBlocks) { Kill(); }
     else if (other->GetLayer() == ColliderLayer::Collectible)
     {
+        if (const auto collectible = dynamic_cast<Collectible *>(other->
+                GetOwner());
+            collectible &&
+            collectible->GetPowerupType() == Powerups::TimePowerup &&
+            !mCollectibles[Powerups::TimePowerup]->IsUsable())
+        {
+            mCollectibles[Powerups::TimePowerup]->SetUsable(true);
+        }
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);
     }

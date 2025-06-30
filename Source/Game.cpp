@@ -21,6 +21,7 @@
 #include "SpatialHashing.h"
 #include "Actors/Actor.h"
 #include "Actors/Block.h"
+#include "Actors/Collectible.h"
 #include "Actors/EnemyBlock.h"
 #include "Actors/PauseMenu.h"
 #include "Actors/MissileSpawner.h"
@@ -28,6 +29,7 @@
 #include "Actors/PressMachine.h"
 #include "Actors/RobotPlane.h"
 #include "Actors/StoryScreen.h"
+#include "Components/PowerupComponents/TimePowerupComponent.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
 #include "Components/DrawComponents/DrawComponent.h"
 #include "UIElements/UIScreen.h"
@@ -55,7 +57,8 @@ Game::Game(const int windowWidth, const int windowHeight)
       mGameTimeLimit(0),
       mBackgroundTexture(nullptr),
       mBackgroundSize(Vector2::Zero),
-      mBackgroundPosition(Vector2::Zero) {}
+      mBackgroundPosition(Vector2::Zero),
+      mSlowingFactor(1.0f) {}
 
 bool Game::Initialize()
 {
@@ -140,7 +143,8 @@ void Game::SetGameScene(const GameScene scene, const float transitionTime)
 {
     if (mSceneManagerState == SceneManagerState::None)
     {
-        if (scene == GameScene::MainMenu || scene==GameScene::StoryScreen || scene == GameScene::Level1 || scene
+        if (scene == GameScene::MainMenu || scene == GameScene::StoryScreen ||
+            scene == GameScene::Level1 || scene
             == GameScene::Level2)
         {
             mNextScene = scene;
@@ -341,6 +345,7 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
             {27, "../Assets/Sprites/ScifiBlocks/Tile_15.png"},
             {28, "../Assets/Sprites/ScifiBlocks/Tile_6.png"},
             {30, "../Assets/Sprites/Missile/missile.png"},
+            {31, "../Assets/Sprites/Missile/missile.png"},
             {32, "../Assets/Sprites/ScifiBlocks/Fence_2.png"},
             {33, "../Assets/Sprites/ScifiBlocks/Spike4.png"},
             {34, "../Assets/Sprites/ScifiBlocks/Tile_11.png"},
@@ -368,6 +373,15 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
             {
                 const auto spawner = new MissileSpawner(this, 50);
                 spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (tile == 31)
+            {
+                const auto timePowerup =
+                        new Collectible(this,
+                                        Powerups::TimePowerup,
+                                        "../Assets/Sprites/Missile/missile.png");
+
+                timePowerup->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
             else if (tile == 36) // Spawner
             {
@@ -690,6 +704,10 @@ void Game::UpdateGame()
 
     float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
     if (deltaTime > 0.05f) { deltaTime = 0.05f; }
+
+    // Slows time down depending on time powerup.
+    // By default, mSlowingFactor = 1
+    deltaTime /= mSlowingFactor;
 
     mTicksCount = SDL_GetTicks();
 

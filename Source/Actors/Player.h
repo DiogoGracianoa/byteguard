@@ -4,6 +4,12 @@
 
 #pragma once
 #include "Actor.h"
+#include "../Components/PowerupComponents/PowerupComponent.h"
+
+enum class Powerups
+{
+    TimePowerup
+};
 
 class Player final : public Actor
 {
@@ -37,4 +43,6 @@ private:
     class RigidBodyComponent *mRigidBodyComponent;
     class DrawAnimatedComponent *mDrawComponent;
     class AABBColliderComponent *mColliderComponent;
+
+    std::map<Powerups, PowerupComponent *> mCollectibles;
 };

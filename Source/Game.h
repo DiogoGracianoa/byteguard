@@ -133,6 +133,10 @@ public:
     void SetGamePlayState(GamePlayState state) { mGamePlayState = state; }
     GamePlayState GetGamePlayState() const { return mGamePlayState; }
 
+    // Time powerup methods
+    void SetSlowingFactor(const float factor) { mSlowingFactor = factor; }
+    void ResetSlowingFactor() {mSlowingFactor = 1.0f;}
+
 private:
     void ProcessInput();
 
@@ -215,4 +219,7 @@ private:
     ParallaxSet *mCurrentParallax = nullptr;
 
     std::unordered_map<GameScene, int> mSceneAttempts;
+
+    // time powerup slowing factor
+    float mSlowingFactor;
 };
