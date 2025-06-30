@@ -64,6 +64,8 @@ add_executable(${PROJECT_NAME}
         Source/Actors/Missile.h
         Source/Actors/MissileSpawner.cpp
         Source/Actors/MissileSpawner.h
+        Source/Actors/PauseMenu.cpp
+        Source/Actors/PauseMenu.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer)
