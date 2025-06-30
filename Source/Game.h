@@ -35,6 +35,7 @@ public:
     enum class GameScene
     {
         MainMenu,
+        StoryScreen,
         Level1,
         Level2
     };

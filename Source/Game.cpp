@@ -26,6 +26,7 @@
 #include "Actors/Player.h"
 #include "Actors/PressMachine.h"
 #include "Actors/RobotPlane.h"
+#include "Actors/StoryScreen.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
 #include "Components/DrawComponents/DrawComponent.h"
 #include "UIElements/UIScreen.h"
@@ -138,7 +139,7 @@ void Game::SetGameScene(const GameScene scene, const float transitionTime)
 {
     if (mSceneManagerState == SceneManagerState::None)
     {
-        if (scene == GameScene::MainMenu || scene == GameScene::Level1 || scene
+        if (scene == GameScene::MainMenu || scene==GameScene::StoryScreen || scene == GameScene::Level1 || scene
             == GameScene::Level2)
         {
             mNextScene = scene;
@@ -199,6 +200,12 @@ void Game::ChangeScene()
 
         // Initialize main menu actors
         LoadMainMenu();
+    }
+    else if (mNextScene == GameScene::StoryScreen)
+    {
+        mBackgroundColor.Set(0.0f, 0.0f, 0.0f);
+
+        new StoryScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
     }
     else if (mNextScene == GameScene::Level1)
     {
@@ -270,7 +277,7 @@ void Game::LoadMainMenu()
         Vector2(300.0f, 60.0f),
         [this]()
         {
-            SetGameScene(GameScene::Level1);
+            SetGameScene(GameScene::StoryScreen);
             this->GetAudio()->StopAllSounds();
             mMusicHandle = mAudio->PlaySound("Click_Jogar.ogg", false);
         }
