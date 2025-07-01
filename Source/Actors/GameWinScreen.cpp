@@ -11,26 +11,28 @@ GameWinScreen::GameWinScreen(Game* game, const std::string& fontName)
     float windowWidth = static_cast<float>(mGame->GetWindowWidth());
     float windowHeight = static_cast<float>(mGame->GetWindowHeight());
 
+    auto titlePointSize = 40;
+    auto titleWidth = 15 * titlePointSize;
+
     AddText(
         u8"MISSÃO CUMPRIDA!",
-        Vector2(0.0f, windowHeight * 0.15f),
-        Vector2(windowWidth, 50.0f),
+        Vector2(windowWidth/2 - (titleWidth/2), windowHeight * 0.10f),
+        Vector2(titleWidth, 50.0f),
         48,
         windowWidth
     );
 
     std::string winText = 
-        "Parabéns! Você navegou pelos perigos e superou a IA hostil.\n"
-        "O sistema central foi restaurado e a cidade, lentamente, \n"
-        "voltará à vida.\n\n"
-        "Graças à sua coragem e velocidade, a ordem foi restabelecida.\n"
-        "A metrópole futurista está salva... por enquanto.";
+        "       Parabéns! Você navegou pelos perigos e superou a IA hostil.\n"
+        "O sistema central foi restaurado e a cidade, lentamente voltará à vida, \n\n "
+        "  Graças à sua coragem e velocidade, a ordem foi restabelecida.\n"
+        "            A metrópole futurista está salva... por enquanto.";
 
     AddText(
         winText,
-        Vector2(0.0f, windowHeight * 0.35f),
-        Vector2(windowWidth, windowHeight * 0.4f),
-        28,
+        Vector2(130.0f, windowHeight * 0.25f),
+        Vector2(windowWidth - 160, windowHeight * 0.6f),
+        20,
         static_cast<int>(windowWidth * 0.8f)
     );
 

@@ -23,6 +23,7 @@
 #include "Actors/Block.h"
 #include "Actors/Collectible.h"
 #include "Actors/EnemyBlock.h"
+#include "Actors/GameWinScreen.h"
 #include "Actors/PauseMenu.h"
 #include "Actors/MissileSpawner.h"
 #include "Actors/Player.h"
@@ -145,7 +146,8 @@ void Game::SetGameScene(const GameScene scene, const float transitionTime)
     {
         if (scene == GameScene::MainMenu || scene == GameScene::StoryScreen ||
             scene == GameScene::Level1 || scene
-            == GameScene::Level2)
+            == GameScene::Level2 || scene
+            == GameScene::GameWinScreen )
         {
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
@@ -256,12 +258,12 @@ void Game::ChangeScene()
     }
     else if (mNextScene == GameScene::GameWinScreen)
     {
-        mBackgroundColor.Set(40.0f, 80.0f, 120.0f); 
+        mBackgroundColor.Set(10.0f, 15.0f, 30.0f);
 
         //TODO: setar uma música de vitória
         //mAudio->PlaySound("Victory.ogg", false);
 
-        new GameWinScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
+        new GameWinScreen(this);
     }
 
     // Set new scene
@@ -486,11 +488,6 @@ void Game::BuildSecondLevel(int **levelData, int width, int height)
                 mRobotPlane = new RobotPlane(this);
                 mRobotPlane->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            /*else if(tile == 3)
-            {
-                Collectible* coin = new Collectible(this);
-                coin->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }*/
             else if (tile == 24)
             {
                 auto *press = new PressMachine(this, mRenderer);
@@ -774,14 +771,18 @@ void Game::UpdateGame()
 
                 SetGameScene(GameScene::Level2, 0.5);
             }
-            else if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+        }
+        else if (mRobotPlane) {
+            const float playerX = mRobotPlane->GetPosition().x;
+            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
                 mGameScene == GameScene::Level2 && playerX >= levelLimitX)
-            {
-                mPlayer->SetState(ActorState::Destroy);
-                this->GetAudio()->StopAllSounds();
+                {
+                    mRobotPlane->SetState(ActorState::Destroy);
+                    mRobotPlane = nullptr;
+                    this->GetAudio()->StopAllSounds();
 
-                SetGameScene(GameScene::GameWinScreen, 0.5);
-            }
+                    SetGameScene(GameScene::GameWinScreen, 0.5);
+                }
         }
     }
 }

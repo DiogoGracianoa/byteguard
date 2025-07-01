@@ -5,9 +5,9 @@
 #pragma once
 #include "../UIElements/UIScreen.h"
 
-class GamewinScreen : public UIScreen
+class GameWinScreen : public UIScreen
 {
 public:
-    GamewinScreen(class Game* game, const std::string& fontName);
-    ~GamewinScreen();
+    GameWinScreen(class Game* game, const std::string& fontName = "../Assets/Fonts/Rajdhani-Bold.ttf"        );
+    ~GameWinScreen();
 };
