@@ -761,6 +761,7 @@ void Game::UpdateGame()
                 mGameScene == GameScene::Level1 && playerX >= levelLimitX)
             {
                 mPlayer->SetState(ActorState::Destroy);
+                mPlayer = nullptr;
                 this->GetAudio()->StopAllSounds();
 
                 SetGameScene(GameScene::Level2, TRANSITION_TIME);
