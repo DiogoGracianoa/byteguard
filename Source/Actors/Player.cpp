@@ -32,7 +32,8 @@ Player::Player(Game *game, const float forwardSpeed, const float jumpSpeed)
     mDrawComponent = new DrawAnimatedComponent(this,
                                                "../Assets/Sprites/ByteGuard/ByteGuard.png",
                                                "../Assets/Sprites/ByteGuard/ByteGuard.json",
-                                               200);
+                                               200,
+                                               false);
 
     mDrawComponent->AddAnimation("Dead", {0});
     mDrawComponent->AddAnimation("idle", {0});
@@ -94,6 +95,7 @@ void Player::OnProcessInput(const uint8_t *state)
                     );
 
             powerup->ReleasePower();
+            mGame->SetHUDPowerupUsable(false);
         };
     }
 }
@@ -171,6 +173,7 @@ void Player::OnHorizontalCollision(const float minOverlap,
             !mCollectibles[Powerups::TimePowerup]->IsUsable())
         {
             mCollectibles[Powerups::TimePowerup]->SetUsable(true);
+            mGame->SetHUDPowerupUsable(true);
         }
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);

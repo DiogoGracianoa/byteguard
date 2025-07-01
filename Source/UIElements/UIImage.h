@@ -18,9 +18,12 @@ public:
 
     ~UIImage() override;
 
+    void SetVisibility(const bool visible) { mVisible = visible; };
+
     void Draw(SDL_Renderer *renderer, const Vector2 &screenPos) override;
 
 private:
     SDL_Texture *mTexture; // Texture for the image
     SDL_Renderer *mRenderer;
+    bool mVisible;
 };

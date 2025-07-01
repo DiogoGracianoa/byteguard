@@ -15,9 +15,9 @@ public:
                          Powerups powerupType,
                          const std::string &imagePath);
 
-    void Kill() override { mState = ActorState::Destroy; };
+    void Kill() override;
 
-    Powerups GetPowerupType() const {return mPowerupType;}
+    Powerups GetPowerupType() const { return mPowerupType; }
 
 private:
     class AABBColliderComponent *mColliderComponent;

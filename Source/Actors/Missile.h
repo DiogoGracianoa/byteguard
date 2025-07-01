@@ -5,6 +5,7 @@
 #pragma once
 
 #include "Actor.h"
+#include "../Components/DrawComponents/DrawAnimatedComponent.h"
 #include "../Components/DrawComponents/DrawComponent.h"
 
 class Missile final : public Actor
@@ -27,8 +28,10 @@ public:
 private:
     RigidBodyComponent *mRigidBodyComponent;
     AABBColliderComponent *mColliderComponent;
+    DrawAnimatedComponent *mDrawComponent;
 
     // movement parameters
+
     float mDForceFactor;
     float mSForceFactor;
 };

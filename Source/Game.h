@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <vector>
 #include "AudioSystem.h"
+#include "HUD.h"
 #include "Math.h"
 
 class Game
@@ -135,7 +136,10 @@ public:
 
     // Time powerup methods
     void SetSlowingFactor(const float factor) { mSlowingFactor = factor; }
-    void ResetSlowingFactor() {mSlowingFactor = 1.0f;}
+    void ResetSlowingFactor() { mSlowingFactor = 1.0f; }
+
+    // Set HUD powerup
+    void SetHUDPowerupUsable(bool isUsable) const;
 
 private:
     void ProcessInput();

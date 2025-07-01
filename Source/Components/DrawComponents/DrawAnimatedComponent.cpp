@@ -11,8 +11,10 @@
 DrawAnimatedComponent::DrawAnimatedComponent(class Actor *owner,
                                              const std::string &spriteSheetPath,
                                              const std::string &spriteSheetData,
-                                             const int drawOrder)
-    : DrawSpriteComponent(owner, spriteSheetPath, 0, 0, drawOrder)
+                                             const int drawOrder,
+                                             const bool canRotate)
+    : DrawSpriteComponent(owner, spriteSheetPath, 0, 0, drawOrder),
+      mCanRotate(canRotate)
 {
     LoadSpriteSheet(spriteSheetPath, spriteSheetData);
 }
@@ -77,8 +79,13 @@ void DrawAnimatedComponent::Draw(SDL_Renderer *renderer,
                            static_cast<Uint8>(modColor.y),
                            static_cast<Uint8>(modColor.z));
 
-    SDL_RenderCopyEx(renderer, mSpriteSheetSurface, srcRect, &dstRect,
-                     mOwner->GetRotation(), nullptr, flip);
+    SDL_RenderCopyEx(renderer,
+                     mSpriteSheetSurface,
+                     srcRect,
+                     &dstRect,
+                     mCanRotate ? Math::ToDegrees(mOwner->GetRotation()) : 0,
+                     nullptr,
+                     flip);
 }
 
 void DrawAnimatedComponent::Update(const float deltaTime)

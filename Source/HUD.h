@@ -21,12 +21,9 @@ public:
 
     ~HUD() override;
 
-    // Reinsert the HUD elements
-    void SetTime(int time);
-
-    void SetLevelName(const std::string &levelName);
-
     void SetAttemptCount(int count) const;
+
+    void SetPowerupUsable(bool isUsable) const;
 
     void CreateAttemptTextWithOutline(const std::string &text,
                                       const Vector2 &basePos,
@@ -34,8 +31,6 @@ public:
 
 private:
     // HUD elements
-    UIText *mScoreCounter;
-    UIText *mLivesCount;
-    UIText *mTimeText;
     UIText *mAttemptText;
+    UIImage *mTimePowerupImage;
 };

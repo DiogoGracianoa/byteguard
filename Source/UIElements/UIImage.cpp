@@ -12,7 +12,8 @@ UIImage::UIImage(SDL_Renderer *renderer,
                  const Vector3 &color)
     : UIElement(pos, size, color),
       mTexture(nullptr),
-      mRenderer(renderer)
+      mRenderer(renderer),
+      mVisible(true)
 {
     SDL_Surface *surface = IMG_Load(imagePath.c_str());
     if (!surface)
@@ -38,7 +39,7 @@ UIImage::~UIImage()
 
 void UIImage::Draw(SDL_Renderer *renderer, const Vector2 &screenPos)
 {
-    if (!mTexture) return;
+    if (!mTexture || !mVisible) return;
 
     SDL_Rect destRect;
     destRect.x = static_cast<int>(screenPos.x + mPosition.x);
