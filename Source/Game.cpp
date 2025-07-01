@@ -379,7 +379,7 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
                 const auto timePowerup =
                         new Collectible(this,
                                         Powerups::TimePowerup,
-                                        "../Assets/Sprites/Missile/missile.png");
+                                        "../Assets/Sprites/Collectibles/Time_Powerup.png");
 
                 timePowerup->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
@@ -1101,6 +1101,11 @@ void Game::DrawParallaxBackground(SDL_Renderer *renderer,
             SDL_RenderCopy(renderer, texture, nullptr, &dst);
         }
     }
+}
+
+void Game::SetHUDPowerupUsable(bool isUsable) const
+{
+    mHUD->SetPowerupUsable(isUsable);
 }
 
 void Game::UnloadScene()

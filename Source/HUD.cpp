@@ -18,7 +18,7 @@ HUD::HUD(SDL_Renderer *renderer,
     constexpr float imageWidth = (HUD_CharWidth * 15) + 30;
     constexpr float imageHeight = HUD_CharHeight * 2 + 15;
 
-    const Vector2 imagePos(offsetTextAttempt_x, HUD_POS_Y);
+    const Vector2 imagePos(offsetTextAttempt_x, static_cast<float>(HUD_POS_Y));
 
     AddImage(
         renderer,
@@ -42,17 +42,39 @@ HUD::HUD(SDL_Renderer *renderer,
         Vector2(textWidth, textHeight),
         POINT_SIZE
     );
+
+    constexpr float powerupContainerWidth = 100.0f;
+    constexpr float powerupContainerHeight = 50.0f;
+
+    const auto powerupContainerPos = textPos + Vector2(textWidth + 50, -15);
+
+    AddImage(renderer,
+             "../Assets/Sprites/Powerup_HUD.png",
+             powerupContainerPos,
+             Vector2(powerupContainerWidth, powerupContainerHeight)
+    );
+
+    constexpr float powerupSize = 30;
+
+    const auto powerupPos = powerupContainerPos +
+                            Vector2(powerupSize - 15,
+                                    (powerupContainerHeight - powerupSize) / 2);
+
+    AddText("Q",
+            powerupContainerPos +
+            Vector2(powerupContainerWidth / 2 + 5,
+                    (powerupContainerHeight - powerupSize) / 2),
+            Vector2(HUD_CharWidth * 2, HUD_CharHeight * 2));
+
+    mTimePowerupImage = AddImage(renderer,
+                                 "../Assets/Sprites/Collectibles/Time_Powerup.png",
+                                 powerupPos,
+                                 Vector2(powerupSize, powerupSize)
+    );
+    mTimePowerupImage->SetVisibility(false);
 }
 
-HUD::~HUD() {}
-
-void HUD::SetTime(const int time) {}
-
-void HUD::SetLevelName(const std::string &levelName)
-{
-    //mLevelName->SetText(levelName);
-}
-
+HUD::~HUD() = default;
 
 void HUD::SetAttemptCount(const int count) const
 {
@@ -60,3 +82,9 @@ void HUD::SetAttemptCount(const int count) const
     mAttemptText->SetText(text);
 }
 
+void HUD::SetPowerupUsable(const bool isUsable) const
+{
+    isUsable
+        ? mTimePowerupImage->SetVisibility(true)
+        : mTimePowerupImage->SetVisibility(false);
+}

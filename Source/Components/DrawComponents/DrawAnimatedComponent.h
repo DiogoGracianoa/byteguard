@@ -15,7 +15,8 @@ public:
     DrawAnimatedComponent(class Actor *owner,
                           const std::string &spriteSheetPath,
                           const std::string &spriteSheetData,
-                          int drawOrder = 100);
+                          int drawOrder = 100,
+                          bool canRotate = true);
 
     ~DrawAnimatedComponent() override;
 
@@ -59,4 +60,7 @@ private:
 
     // Whether or not the animation is paused (defaults to false)
     bool mIsPaused = false;
+
+    // Choose if draws with rotation
+    bool mCanRotate;
 };

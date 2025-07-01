@@ -14,12 +14,6 @@ Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
       mSForceFactor(sForceFactor)
 
 {
-    new DrawSpriteComponent(this,
-                            "../Assets/Sprites/Missile/missile.png",
-                            Game::TILE_SIZE,
-                            Game::TILE_SIZE,
-                            10);
-
     mRigidBodyComponent = new RigidBodyComponent(this,
                                                  1.0f,
                                                  0.0f,
@@ -31,6 +25,16 @@ Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
                                                    Game::TILE_SIZE / 2,
                                                    Game::TILE_SIZE / 2,
                                                    ColliderLayer::Enemy);
+
+    mDrawComponent = new DrawAnimatedComponent(this,
+                                               "../Assets/Sprites/Missile/Missile.png",
+                                               "../Assets/Sprites/Missile/Missile.json");
+
+    mDrawComponent->AddAnimation("seek", {0, 1, 2});
+    // mDrawComponent->AddAnimation("explode", {3, 4});
+
+    mDrawComponent->SetAnimation("seek");
+    mDrawComponent->SetAnimFPS(10.0f);
 }
 
 void Missile::OnUpdate(const float deltaTime)
@@ -46,6 +50,7 @@ void Missile::OnUpdate(const float deltaTime)
 
     mRigidBodyComponent->ApplyForce(sForce);
     const auto vel = mRigidBodyComponent->GetVelocity();
+
     mRotation = Math::Atan2(vel.y, vel.x);
 }
 

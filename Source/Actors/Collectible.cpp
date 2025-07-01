@@ -25,7 +25,13 @@ Collectible::Collectible(Game *game,
 
     new DrawSpriteComponent(this,
                             imagePath,
-                            Game::TILE_SIZE,
-                            Game::TILE_SIZE,
+                            Game::TILE_SIZE - 10,
+                            Game::TILE_SIZE - 10,
                             10);
+}
+
+void Collectible::Kill()
+{
+    mState = ActorState::Destroy;
+    mGame->GetAudio()->PlaySound("Pick_powerup.wav");
 }
