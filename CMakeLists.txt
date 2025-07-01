@@ -68,6 +68,8 @@ add_executable(${PROJECT_NAME}
         Source/Actors/PauseMenu.h
         Source/Actors/StoryScreen.cpp
         Source/Actors/StoryScreen.h
+        Source/Actors/GameWinScreen.cpp
+        Source/Actors/GameWinScreen.h
         Source/Actors/Collectible.cpp
         Source/Actors/Collectible.h
         Source/Components/PowerupComponents/PowerupComponent.cpp
