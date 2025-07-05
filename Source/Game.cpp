@@ -24,12 +24,16 @@
 #include "Actors/Collectible.h"
 #include "Actors/EnemyBlock.h"
 #include "Actors/GameWinScreen.h"
+#include "Actors/LaserSpikes.h"
+#include "Actors/LaserTurret.h"
 #include "Actors/PauseMenu.h"
 #include "Actors/MissileSpawner.h"
 #include "Actors/Player.h"
 #include "Actors/PressMachine.h"
 #include "Actors/RobotPlane.h"
+#include "Actors/Saw.h"
 #include "Actors/StoryScreen.h"
+#include "Actors/WallBlades.h"
 #include "Components/PowerupComponents/TimePowerupComponent.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
 #include "Components/DrawComponents/DrawComponent.h"
@@ -402,14 +406,14 @@ void Game::BuildTutorialLevel(int **levelData, int width, int height)
     {32, "../Assets/Sprites/Tutorial_Tileset/tile032.png"},
     {33, "../Assets/Sprites/Tutorial_Tileset/tile033.png"},
     {34, "../Assets/Sprites/Tutorial_Tileset/tile034.png"},
-    {35, "../Assets/Sprites/Tutorial_Tileset/tile035.png"},
+    {35, "../Assets/Sprites/Tutorial_Tileset/Acid_2.png"},
     {36, "../Assets/Sprites/Tutorial_Tileset/tile036.png"},
     {37, "../Assets/Sprites/Tutorial_Tileset/tile037.png"},
     {38, "../Assets/Sprites/Tutorial_Tileset/tile038.png"},
     {39, "../Assets/Sprites/Tutorial_Tileset/tile039.png"},
     {40, "../Assets/Sprites/Tutorial_Tileset/tile040.png"},
     {41, "../Assets/Sprites/Tutorial_Tileset/tile041.png"},
-    {42, "../Assets/Sprites/Tutorial_Tileset/tile042.png"},
+    {42, "../Assets/Sprites/Tutorial_Tileset/Acid_1.png"},
     {43, "../Assets/Sprites/Tutorial_Tileset/tile043.png"},
     {44, "../Assets/Sprites/Tutorial_Tileset/tile044.png"},
     {45, "../Assets/Sprites/Tutorial_Tileset/tile045.png"},
@@ -475,13 +479,31 @@ void Game::BuildTutorialLevel(int **levelData, int width, int height)
 
                 timePowerup->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
-            else if (tile == 36) // Spawner
+            else if (tile == 67)
             {
-                const auto press = new PressMachine(this, mRenderer);
-                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                const auto laserTurret = new LaserTurret(this, mRenderer);
+                laserTurret->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+
+            else if (tile == 74)
+            {
+                const auto saw = new Saw(this, mRenderer);
+                saw->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (tile == 75)
+            {
+                const auto wallBlades = new WallBlades(this, mRenderer);
+                wallBlades->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
             else if (
-                tile == 78 || tile == 74 ||  tile == 75 || tile == 67
+                tile == 78
+            )
+            {
+                const auto laserSpikes = new LaserSpikes(this, mRenderer);
+                laserSpikes->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (
+                tile == 42 || tile == 35
             )
             {
                 if (const auto it = tileMap.find(tile);
