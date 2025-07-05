@@ -121,6 +121,14 @@ bool Game::Initialize()
 
     SetGameScene(GameScene::MainMenu, 0);
 
+    mParallaxCache[GameScene::TutorialLevel] = {
+        LoadTexture("../Assets/Sprites/Background/1_Tutorial.png"),
+        LoadTexture("../Assets/Sprites/Background/2_Tutorial.png"),
+        LoadTexture("../Assets/Sprites/Background/3_Tutorial.png"),
+        LoadTexture("../Assets/Sprites/Background/4_Tutorial.png"),
+        LoadTexture("../Assets/Sprites/Background/5_Tutorial.png")
+        };
+
     mParallaxCache[GameScene::Level1] = {
             LoadTexture("../Assets/Sprites/Background/1.png"),
             LoadTexture("../Assets/Sprites/Background/2.png"),
@@ -137,6 +145,7 @@ bool Game::Initialize()
             LoadTexture("../Assets/Sprites/Background/5_Level_2.png")
             };
 
+
     return true;
 }
 
@@ -144,10 +153,12 @@ void Game::SetGameScene(const GameScene scene, const float transitionTime)
 {
     if (mSceneManagerState == SceneManagerState::None)
     {
-        if (scene == GameScene::MainMenu || scene == GameScene::StoryScreen ||
-            scene == GameScene::Level1 || scene
-            == GameScene::Level2 || scene
-            == GameScene::GameWinScreen )
+        if (scene == GameScene::MainMenu ||
+            scene == GameScene::StoryScreen ||
+            scene == GameScene::TutorialLevel ||
+            scene == GameScene::Level1 ||
+            scene == GameScene::Level2 ||
+            scene == GameScene::GameWinScreen )
         {
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
@@ -213,6 +224,28 @@ void Game::ChangeScene()
         mBackgroundColor.Set(0.0f, 0.0f, 0.0f);
 
         new StoryScreen(this, "../Assets/Fonts/Rajdhani-Bold.ttf");
+    }
+    else if (mNextScene == GameScene::TutorialLevel)
+    {
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
+
+        mGameTimeLimit = 400;
+
+        const int tryCount = mSceneAttempts[mNextScene];
+        mHUD->SetAttemptCount(tryCount);
+
+        //mMusicHandle = mAudio->PlaySound("Main_Level1.mp3", true);
+
+        // Set background color
+        mBackgroundColor.Set(131.0f, 66.0f, 61.0f);
+        mCurrentParallax = &mParallaxCache[GameScene::TutorialLevel];
+
+        // Set background image
+
+        LoadLevel("../Assets/Levels/tutorial_level.csv",
+                  TUTORIAL_LEVEL_WIDTH,
+                  LEVEL_HEIGHT,
+                  0);
     }
     else if (mNextScene == GameScene::Level1)
     {
@@ -315,7 +348,12 @@ void Game::LoadLevel(const std::string &levelName,
     }
 
     // Instantiate level actors
-    if (level == 1) { BuildFirstLevel(mLevelData, levelWidth, levelHeight); }
+    if (level == 0) {
+        BuildTutorialLevel(mLevelData, levelWidth, levelHeight);
+    }
+    else if (level == 1) {
+        BuildFirstLevel(mLevelData, levelWidth, levelHeight);
+    }
     else if (level == 2)
     {
         BuildSecondLevel(mLevelData, levelWidth, levelHeight);
@@ -323,6 +361,150 @@ void Game::LoadLevel(const std::string &levelName,
 
     for (int i = 0; i < levelHeight; ++i) { delete[] mLevelData[i]; }
     delete[] mLevelData;
+}
+
+void Game::BuildTutorialLevel(int **levelData, int width, int height)
+{
+    // Const map to convert tile ID to block type
+    const std::map<int, const std::string> tileMap = {
+    {0, "../Assets/Sprites/Tutorial_Tileset/tile000.png"},
+    {1, "../Assets/Sprites/Tutorial_Tileset/tile001.png"},
+    {2, "../Assets/Sprites/Tutorial_Tileset/tile002.png"},
+    {3, "../Assets/Sprites/Tutorial_Tileset/tile003.png"},
+    {4, "../Assets/Sprites/Tutorial_Tileset/tile004.png"},
+    {5, "../Assets/Sprites/Tutorial_Tileset/tile005.png"},
+    {6, "../Assets/Sprites/Tutorial_Tileset/tile006.png"},
+    {7, "../Assets/Sprites/Tutorial_Tileset/tile007.png"},
+    {8, "../Assets/Sprites/Tutorial_Tileset/tile008.png"},
+    {9, "../Assets/Sprites/Tutorial_Tileset/tile009.png"},
+    {10, "../Assets/Sprites/Tutorial_Tileset/tile010.png"},
+    {11, "../Assets/Sprites/Tutorial_Tileset/tile011.png"},
+    {12, "../Assets/Sprites/Tutorial_Tileset/tile012.png"},
+    {13, "../Assets/Sprites/Tutorial_Tileset/tile013.png"},
+    {14, "../Assets/Sprites/Tutorial_Tileset/tile014.png"},
+    {15, "../Assets/Sprites/Tutorial_Tileset/tile015.png"},
+    {16, "../Assets/Sprites/Tutorial_Tileset/tile016.png"},
+    {17, "../Assets/Sprites/Tutorial_Tileset/tile017.png"},
+    {18, "../Assets/Sprites/Tutorial_Tileset/tile018.png"},
+    {19, "../Assets/Sprites/Tutorial_Tileset/tile019.png"},
+    {20, "../Assets/Sprites/Tutorial_Tileset/tile020.png"},
+    {21, "../Assets/Sprites/Tutorial_Tileset/tile021.png"},
+    {22, "../Assets/Sprites/Tutorial_Tileset/tile022.png"},
+    {23, "../Assets/Sprites/Tutorial_Tileset/tile023.png"},
+    {24, "../Assets/Sprites/Tutorial_Tileset/tile024.png"},
+    {25, "../Assets/Sprites/Tutorial_Tileset/tile025.png"},
+    {26, "../Assets/Sprites/Tutorial_Tileset/tile026.png"},
+    {27, "../Assets/Sprites/Tutorial_Tileset/tile027.png"},
+    {28, "../Assets/Sprites/Tutorial_Tileset/tile028.png"},
+    {29, "../Assets/Sprites/Tutorial_Tileset/tile029.png"},
+    {30, "../Assets/Sprites/Tutorial_Tileset/tile030.png"},
+    {31, "../Assets/Sprites/Tutorial_Tileset/tile031.png"},
+    {32, "../Assets/Sprites/Tutorial_Tileset/tile032.png"},
+    {33, "../Assets/Sprites/Tutorial_Tileset/tile033.png"},
+    {34, "../Assets/Sprites/Tutorial_Tileset/tile034.png"},
+    {35, "../Assets/Sprites/Tutorial_Tileset/tile035.png"},
+    {36, "../Assets/Sprites/Tutorial_Tileset/tile036.png"},
+    {37, "../Assets/Sprites/Tutorial_Tileset/tile037.png"},
+    {38, "../Assets/Sprites/Tutorial_Tileset/tile038.png"},
+    {39, "../Assets/Sprites/Tutorial_Tileset/tile039.png"},
+    {40, "../Assets/Sprites/Tutorial_Tileset/tile040.png"},
+    {41, "../Assets/Sprites/Tutorial_Tileset/tile041.png"},
+    {42, "../Assets/Sprites/Tutorial_Tileset/tile042.png"},
+    {43, "../Assets/Sprites/Tutorial_Tileset/tile043.png"},
+    {44, "../Assets/Sprites/Tutorial_Tileset/tile044.png"},
+    {45, "../Assets/Sprites/Tutorial_Tileset/tile045.png"},
+    {46, "../Assets/Sprites/Tutorial_Tileset/tile046.png"},
+    {47, "../Assets/Sprites/Tutorial_Tileset/tile047.png"},
+    {48, "../Assets/Sprites/Tutorial_Tileset/tile048.png"},
+    {49, "../Assets/Sprites/Tutorial_Tileset/tile049.png"},
+    {50, "../Assets/Sprites/Tutorial_Tileset/tile050.png"},
+    {51, "../Assets/Sprites/Tutorial_Tileset/tile051.png"},
+    {52, "../Assets/Sprites/Tutorial_Tileset/tile052.png"},
+    {53, "../Assets/Sprites/Tutorial_Tileset/tile053.png"},
+    {54, "../Assets/Sprites/Tutorial_Tileset/tile054.png"},
+    {55, "../Assets/Sprites/Tutorial_Tileset/tile055.png"},
+    {56, "../Assets/Sprites/Tutorial_Tileset/tile056.png"},
+    {57, "../Assets/Sprites/Tutorial_Tileset/tile057.png"},
+    {58, "../Assets/Sprites/Tutorial_Tileset/tile058.png"},
+    {59, "../Assets/Sprites/Tutorial_Tileset/tile059.png"},
+    {60, "../Assets/Sprites/Tutorial_Tileset/tile060.png"},
+    {61, "../Assets/Sprites/Tutorial_Tileset/tile061.png"},
+    {62, "../Assets/Sprites/Tutorial_Tileset/tile062.png"},
+    {63, "../Assets/Sprites/Tutorial_Tileset/tile063.png"},
+    {64, "../Assets/Sprites/Tutorial_Tileset/tile064.png"},
+    {65, "../Assets/Sprites/Tutorial_Tileset/tile065.png"},
+    {66, "../Assets/Sprites/Tutorial_Tileset/tile066.png"},
+    {67, "../Assets/Sprites/Tutorial_Tileset/tile067.png"},
+    {68, "../Assets/Sprites/Tutorial_Tileset/tile068.png"},
+    {69, "../Assets/Sprites/Tutorial_Tileset/tile069.png"},
+    {70, "../Assets/Sprites/Tutorial_Tileset/tile070.png"},
+    {71, "../Assets/Sprites/Tutorial_Tileset/tile071.png"},
+    {72, "../Assets/Sprites/Tutorial_Tileset/tile072.png"},
+    {74, "../Assets/Sprites/Tutorial_Tileset/tile074.png"},
+    {75, "../Assets/Sprites/Tutorial_Tileset/tile075.png"},
+    {76, "../Assets/Sprites/Tutorial_Tileset/tile076.png"},
+    {77, "../Assets/Sprites/Tutorial_Tileset/tile077.png"},
+    {78, "../Assets/Sprites/Tutorial_Tileset/tile078.png"},
+    {79, "../Assets/Sprites/Tutorial_Tileset/tile079.png"},
+    {80, "../Assets/Sprites/Tutorial_Tileset/tile080.png"}
+    };
+
+    for (int y = 0; y < LEVEL_HEIGHT; ++y)
+    {
+        for (int x = 0; x < TUTORIAL_LEVEL_WIDTH; ++x)
+        {
+            int tile = levelData[y][x];
+
+            if (tile == 72) // Player
+            {
+                mPlayer = new Player(this);
+                mPlayer->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (tile == 73)
+            {
+                const auto spawner = new MissileSpawner(this, 50);
+                spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+
+            else if (tile == 26)
+            {
+                const auto timePowerup =
+                        new Collectible(this,
+                                        Powerups::TimePowerup,
+                                        "../Assets/Sprites/Collectibles/Time_Powerup.png");
+
+                timePowerup->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (tile == 36) // Spawner
+            {
+                const auto press = new PressMachine(this, mRenderer);
+                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (
+                tile == 78 || tile == 74 ||  tile == 75 || tile == 67
+            )
+            {
+                if (const auto it = tileMap.find(tile);
+                    it != tileMap.end())
+                {
+                    // Create an enemy block actor
+                    const auto enemyBlock = new EnemyBlock(this, it->second);
+                    enemyBlock->SetPosition(
+                        Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+            else
+            {
+                if (const auto it = tileMap.find(tile);
+                    it != tileMap.end())
+                {
+                    // Create a block actor
+                    const auto block = new Block(this, it->second);
+                    block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+        }
+    }
 }
 
 void Game::BuildFirstLevel(int **levelData, int width, int height)
@@ -770,6 +952,15 @@ void Game::UpdateGame()
                 mPlayer = nullptr;
                 this->GetAudio()->StopAllSounds();
 
+                SetGameScene(GameScene::GameWinScreen, 0.5);
+            }
+            if (constexpr float levelLimitX = TUTORIAL_LEVEL_WIDTH * TILE_SIZE;
+                mGameScene == GameScene::TutorialLevel && playerX >= levelLimitX)
+            {
+                mPlayer->SetState(ActorState::Destroy);
+                mPlayer = nullptr;
+                this->GetAudio()->StopAllSounds();
+
                 SetGameScene(GameScene::Level2, 0.5);
             }
         }
@@ -782,7 +973,7 @@ void Game::UpdateGame()
                     mRobotPlane = nullptr;
                     this->GetAudio()->StopAllSounds();
 
-                    SetGameScene(GameScene::GameWinScreen, 0.5);
+                    SetGameScene(GameScene::Level1, 0.5);
                 }
         }
     }
@@ -833,15 +1024,19 @@ void Game::UpdateCamera(const float deltaTime)
 {
     if (!mPlayer && !mRobotPlane) return;
 
-    if (mGameScene == GameScene::Level1)
+    if (mGameScene == GameScene::Level1 || mGameScene == GameScene::TutorialLevel )
     {
         if (mGamePlayState == GamePlayState::Playing)
         {
+            int levelWidth = mGameScene == GameScene::Level1
+                ? LEVEL_WIDTH
+                : TUTORIAL_LEVEL_WIDTH;
+
             const float horizontalPos = Math::Max(
                 mPlayer->GetPosition().x - mWindowWidth / 4,
                 mCameraPos.x + deltaTime * CAMERA_X_SPEED);
             if (const float maxCameraPos =
-                        (LEVEL_WIDTH * TILE_SIZE) - mWindowWidth;
+                        (levelWidth * TILE_SIZE) - mWindowWidth;
                 horizontalPos > maxCameraPos) { mCameraPos.x = maxCameraPos; }
             else { mCameraPos.x = horizontalPos; }
         }
@@ -927,7 +1122,7 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
-    if (mGameScene == GameScene::Level1 || mGameScene == GameScene::Level2)
+    if (mGameScene == GameScene::TutorialLevel || mGameScene == GameScene::Level1 || mGameScene == GameScene::Level2)
     {
         DrawParallaxBackground(mRenderer, mCameraPos);
     }
