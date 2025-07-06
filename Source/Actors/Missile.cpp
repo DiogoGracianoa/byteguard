@@ -87,6 +87,6 @@ void Missile::Kill()
     int numParticles = 15;
     for (int i = 0; i < numParticles; i++)
     {
-        new ExplosionParticles(mGame, mPosition, 2.5f);
+        new ExplosionParticles(mGame, mPosition, 1.0f);
     }
 }
