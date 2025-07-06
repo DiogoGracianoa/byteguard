@@ -15,11 +15,11 @@ RobotPlane::RobotPlane(Game *game,
 {
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
 
-    float byteGuardPlaneColliderWidth = Game::TILE_SIZE - 10.0f;
-    float byteGuardPlaneColliderHeight = Game::TILE_SIZE;
+    float byteGuardPlaneColliderWidth = Game::TILE_SIZE - 15.0f;
+    float byteGuardPlaneColliderHeight = Game::TILE_SIZE - 10.0f;
 
     float offsetX = 7.5f;
-    float offsetY = 0;
+    float offsetY = 5.0f;
 
     mColliderComponent = new AABBColliderComponent(
         this,

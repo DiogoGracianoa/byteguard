@@ -248,7 +248,7 @@ void Game::ChangeScene()
         mMusicHandle = mAudio->PlaySound("Musica_Easy_Level.mp3", true);
 
         // Set background color
-        mBackgroundColor.Set(131.0f, 66.0f, 61.0f);
+        mBackgroundColor.Set(55.0f, 68.0f, 110.0f);
         mCurrentParallax = &mParallaxCache[GameScene::Level1];
 
         // Set background image
