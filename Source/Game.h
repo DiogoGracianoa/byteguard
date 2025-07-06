@@ -18,6 +18,7 @@ class Game
 {
 public:
     static constexpr int LEVEL_WIDTH = 200;
+    static constexpr int TUTORIAL_LEVEL_WIDTH = 100;
     static constexpr int LEVEL_HEIGHT = 15;
     static constexpr int TILE_SIZE = 40;
     static constexpr int SPAWN_DISTANCE = 700;
@@ -37,6 +38,7 @@ public:
     {
         MainMenu,
         StoryScreen,
+        TutorialLevel,
         Level1,
         Level2,
         GameWinScreen
@@ -56,7 +58,8 @@ public:
         Paused,
         GameOver,
         LevelComplete,
-        Leaving
+        Leaving,
+        ShowingTutorial,
     };
 
     Game(int windowWidth, int windowHeight);
@@ -129,6 +132,8 @@ public:
 
     void TogglePause();
 
+    void ToggleTutorial();
+
     // Game-specific
     const class Player *GetPlayer() const { return mPlayer; }
 
@@ -169,6 +174,8 @@ private:
     static int **ReadLevelData(const std::string &fileName,
                                int width,
                                int height);
+
+    void BuildTutorialLevel(int **levelData, int width, int height);
 
     void BuildFirstLevel(int **levelData, int width, int height);
 

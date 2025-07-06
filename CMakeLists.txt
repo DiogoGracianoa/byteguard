@@ -74,6 +74,16 @@ add_executable(${PROJECT_NAME}
         Source/Actors/Collectible.h
         Source/Components/PowerupComponents/PowerupComponent.cpp
         Source/Components/PowerupComponents/PowerupComponent.h
+        Source/Actors/Saw.cpp
+        Source/Actors/Saw.h
+        Source/Actors/WallBlades.cpp
+        Source/Actors/WallBlades.h
+        Source/Actors/LaserSpikes.cpp
+        Source/Actors/LaserSpikes.h
+        Source/Actors/LaserTurret.cpp
+        Source/Actors/LaserTurret.h
+        Source/Actors/TutorialGuide.cpp
+        Source/Actors/TutorialGuide.h
         Source/Actors/ExplosionParticles.cpp
         Source/Actors/ExplosionParticles.h
 )

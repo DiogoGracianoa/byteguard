@@ -41,14 +41,24 @@ Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
 
 void Missile::OnUpdate(const float deltaTime)
 {
+    if (mGame == nullptr) {
+        Kill();
+        return;
+    }
+
     const auto player = mGame->GetPlayer();
+    if (player == nullptr) {
+        Kill();
+        return;
+    }
+
     const auto dForce =
-            mDForceFactor * Vector2::Normalize(
-                player->GetPosition() - GetPosition()
-            );
+        mDForceFactor * Vector2::Normalize(
+            player->GetPosition() - GetPosition()
+        );
 
     const auto sForce =
-            mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
+        mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
 
     mRigidBodyComponent->ApplyForce(sForce);
     const auto vel = mRigidBodyComponent->GetVelocity();
