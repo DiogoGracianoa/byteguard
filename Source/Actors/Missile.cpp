@@ -3,6 +3,8 @@
 //
 
 #include "Missile.h"
+
+#include "ExplosionParticles.h"
 #include "Player.h"
 #include "../Game.h"
 #include "../Components/ColliderComponents/AABBColliderComponent.h"
@@ -82,4 +84,9 @@ void Missile::Kill()
 {
     mState = ActorState::Destroy;
     mGame->GetAudio()->PlaySound("Missile_Explosion.ogg");
+    int numParticles = 15;
+    for (int i = 0; i < numParticles; i++)
+    {
+        new ExplosionParticles(mGame, mPosition, 2.5f);
+    }
 }
