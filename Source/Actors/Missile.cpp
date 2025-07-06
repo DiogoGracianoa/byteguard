@@ -33,7 +33,6 @@ Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
                                                "../Assets/Sprites/Missile/Missile.json");
 
     mDrawComponent->AddAnimation("seek", {0, 1, 2});
-    // mDrawComponent->AddAnimation("explode", {3, 4});
 
     mDrawComponent->SetAnimation("seek");
     mDrawComponent->SetAnimFPS(10.0f);

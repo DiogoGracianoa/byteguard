@@ -1114,7 +1114,6 @@ void Game::UpdateCamera(const float deltaTime)
                 horizontalPos > maxCameraPos) { mCameraPos.x = maxCameraPos; }
             else { mCameraPos.x = horizontalPos; }
         }
-        //horizontalCameraPos = mMario->GetPosition().x - (mWindowWidth / 2.0f);
     }
     else if (mGameScene == GameScene::Level2)
     {
