@@ -19,9 +19,9 @@ LaserSpikes::LaserSpikes(Game *game, SDL_Renderer *renderer)
     mAnim->SetAnimFPS(10.0f);
 
     mColliderComponent = new AABBColliderComponent(this,
-                                                   0,
+                                                   5,
                                                    20,
-                                                   40,
+                                                   30,
                                                    20,
                                                    ColliderLayer::EnemyBlocks,
                                                    true);

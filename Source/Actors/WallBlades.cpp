@@ -23,7 +23,7 @@ WallBlades::WallBlades(Game *game, SDL_Renderer *renderer)
                                                    5,
                                                    0,
                                                    30,
-                                                   40,
+                                                   30,
                                                    ColliderLayer::EnemyBlocks,
                                                    true);
 }
