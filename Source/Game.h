@@ -38,7 +38,8 @@ public:
         MainMenu,
         StoryScreen,
         Level1,
-        Level2
+        Level2,
+        GameWinScreen
     };
 
     enum class SceneManagerState
