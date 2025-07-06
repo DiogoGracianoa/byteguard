@@ -102,13 +102,6 @@ bool Game::Initialize()
         return false;
     }
 
-    // Initialize SDL_mixer
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
-    {
-        SDL_Log("Failed to initialize SDL_mixer");
-        return false;
-    }
-
     // Start random number generator
     Random::Init();
 
@@ -147,7 +140,7 @@ void Game::SetGameScene(const GameScene scene, const float transitionTime)
         if (scene == GameScene::MainMenu || scene == GameScene::StoryScreen ||
             scene == GameScene::Level1 || scene
             == GameScene::Level2 || scene
-            == GameScene::GameWinScreen )
+            == GameScene::GameWinScreen)
         {
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
@@ -382,6 +375,11 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
             }
             else if (tile == 30)
             {
+                const auto block = new Block(this,
+                                             "../Assets/Sprites/ScifiBlocks/Tile_6.png");
+                block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                block->GetComponent<AABBColliderComponent>()->SetEnabled(false);
+
                 const auto spawner = new MissileSpawner(this, 50);
                 spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
@@ -773,17 +771,18 @@ void Game::UpdateGame()
                 SetGameScene(GameScene::Level2, 0.5);
             }
         }
-        else if (mRobotPlane) {
+        else if (mRobotPlane)
+        {
             const float playerX = mRobotPlane->GetPosition().x;
             if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
                 mGameScene == GameScene::Level2 && playerX >= levelLimitX)
-                {
-                    mRobotPlane->SetState(ActorState::Destroy);
-                    mRobotPlane = nullptr;
-                    this->GetAudio()->StopAllSounds();
+            {
+                mRobotPlane->SetState(ActorState::Destroy);
+                mRobotPlane = nullptr;
+                this->GetAudio()->StopAllSounds();
 
-                    SetGameScene(GameScene::GameWinScreen, 0.5);
-                }
+                SetGameScene(GameScene::GameWinScreen, 0.5);
+            }
         }
     }
 }

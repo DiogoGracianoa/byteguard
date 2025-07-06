@@ -15,6 +15,7 @@ TimePowerupComponent::TimePowerupComponent(Actor *owner,
 void TimePowerupComponent::ReleasePower()
 {
     PowerupComponent::ReleasePower();
+    mOwner->GetGame()->GetAudio()->PlaySound("Time_Powerup.ogg");
     mOwner->GetGame()->SetSlowingFactor(2.0f);
 }
 
