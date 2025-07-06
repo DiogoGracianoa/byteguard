@@ -819,6 +819,7 @@ void Game::ProcessInput()
             {
                 const bool isPlayingScene = (
                     mGameScene == GameScene::TutorialLevel ||
+                    mGameScene == GameScene::EasyLevel ||
                     mGameScene == GameScene::Level1 ||
                     mGameScene == GameScene::Level2);
 
@@ -830,7 +831,7 @@ void Game::ProcessInput()
                     mUIStack.back()->HandleKeyPress(event.key.keysym.sym);
                 }
 
-                if (mGamePlayState == GamePlayState::Playing)
+                if (mGamePlayState == GamePlayState::Playing && mSceneManagerState == SceneManagerState::None)
                 {
                     HandleKeyPressActors(event.key.keysym.sym,
                                          event.key.repeat == 0);
@@ -840,8 +841,9 @@ void Game::ProcessInput()
             default: break;
         }
     }
-
-    ProcessInputActors();
+    if (mSceneManagerState == SceneManagerState::None) {
+        ProcessInputActors();
+    }
 }
 
 void Game::ProcessInputActors() const
@@ -961,14 +963,77 @@ void Game::UpdateGame()
     deltaTime /= mSlowingFactor;
 
     mTicksCount = SDL_GetTicks();
-
-    if (mGamePlayState != GamePlayState::Paused
+    if (mSceneManagerState == SceneManagerState::None) {
+        if (mGamePlayState != GamePlayState::Paused
         && mGamePlayState != GamePlayState::ShowingTutorial
         && mGamePlayState != GamePlayState::GameOver)
-    {
-        // Reinsert all actors and pending actors
-        UpdateActors(deltaTime);
+        {
+            // Reinsert all actors and pending actors
+            UpdateActors(deltaTime);
+        }
+
+        UpdateCamera(deltaTime);
+
+        if (mGameScene != GameScene::MainMenu && mGamePlayState ==
+            GamePlayState::Playing)
+        {
+            if (mPlayer)
+            {
+                const float playerX = mPlayer->GetPosition().x;
+                if (constexpr float levelLimitX = TUTORIAL_LEVEL_WIDTH * TILE_SIZE;
+                    mGameScene == GameScene::TutorialLevel && playerX >=
+                    levelLimitX)
+                {
+                    mPlayer->SetState(ActorState::Destroy);
+                    mPlayer = nullptr;
+                    this->GetAudio()->StopAllSounds();
+
+                    SetGameScene(GameScene::EasyLevel, 0.5);
+                }
+                if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                    mGameScene == GameScene::EasyLevel && playerX >= levelLimitX)
+                {
+                    mPlayer->SetState(ActorState::Destroy);
+                    mPlayer = nullptr;
+                    this->GetAudio()->StopAllSounds();
+
+                    SetGameScene(GameScene::Level2, 0.5);
+                }
+
+                if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                    mGameScene == GameScene::Level2 && playerX >= levelLimitX)
+                {
+                    mPlayer->SetState(ActorState::Destroy);
+                    mPlayer = nullptr;
+                    this->GetAudio()->StopAllSounds();
+
+                    SetGameScene(GameScene::Level1, 0.5);
+                }
+                if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                    mGameScene == GameScene::Level1 && playerX >= levelLimitX)
+                {
+                    mPlayer->SetState(ActorState::Destroy);
+                    mPlayer = nullptr;
+                    this->GetAudio()->StopAllSounds();
+
+                    SetGameScene(GameScene::GameWinScreen, 0.5);
+                }
+            }
+            else if (mRobotPlane)
+            {
+                const float playerX = mRobotPlane->GetPosition().x;
+                if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                    mGameScene == GameScene::Level2 && playerX >= levelLimitX)
+                {
+                    mRobotPlane->SetState(ActorState::Destroy);
+                    mRobotPlane = nullptr;
+                    this->GetAudio()->StopAllSounds();
+                    SetGameScene(GameScene::Level1, 0.5);
+                }
+            }
+        }
     }
+
 
     // Reinsert audio system
     mAudio->Update(deltaTime);
@@ -997,68 +1062,8 @@ void Game::UpdateGame()
     // ---------------------
     // Game Specific Updates
     // ---------------------
-    UpdateCamera(deltaTime);
+
     UpdateSceneManager(deltaTime);
-
-
-    if (mGameScene != GameScene::MainMenu && mGamePlayState ==
-        GamePlayState::Playing)
-    {
-        if (mPlayer)
-        {
-            const float playerX = mPlayer->GetPosition().x;
-            if (constexpr float levelLimitX = TUTORIAL_LEVEL_WIDTH * TILE_SIZE;
-                mGameScene == GameScene::TutorialLevel && playerX >=
-                levelLimitX)
-            {
-                mPlayer->SetState(ActorState::Destroy);
-                mPlayer = nullptr;
-                this->GetAudio()->StopAllSounds();
-
-                SetGameScene(GameScene::EasyLevel, 0.5);
-            }
-            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
-                mGameScene == GameScene::EasyLevel && playerX >= levelLimitX)
-            {
-                mPlayer->SetState(ActorState::Destroy);
-                mPlayer = nullptr;
-                this->GetAudio()->StopAllSounds();
-
-                SetGameScene(GameScene::Level2, 0.5);
-            }
-
-            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
-                mGameScene == GameScene::Level2 && playerX >= levelLimitX)
-            {
-                mPlayer->SetState(ActorState::Destroy);
-                mPlayer = nullptr;
-                this->GetAudio()->StopAllSounds();
-
-                SetGameScene(GameScene::Level1, 0.5);
-            }
-            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
-                mGameScene == GameScene::Level1 && playerX >= levelLimitX)
-            {
-                mPlayer->SetState(ActorState::Destroy);
-                mPlayer = nullptr;
-                this->GetAudio()->StopAllSounds();
-
-                SetGameScene(GameScene::GameWinScreen, 0.5);
-            }
-        }
-        else if (mRobotPlane)
-        {
-            const float playerX = mRobotPlane->GetPosition().x;
-            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
-                mGameScene == GameScene::Level2 && playerX >= levelLimitX)
-            {
-                mRobotPlane->SetState(ActorState::Destroy);
-                mRobotPlane = nullptr;
-                this->GetAudio()->StopAllSounds();
-                SetGameScene(GameScene::Level1, 0.5);
-            }
-        }
-    }
 }
 
 void Game::UpdateSceneManager(const float deltaTime)
@@ -1070,7 +1075,7 @@ void Game::UpdateSceneManager(const float deltaTime)
         if (mSceneManagerTimer <= 0.0f)
         {
             ChangeScene();
-            mSceneManagerTimer = TRANSITION_TIME;
+            mSceneManagerTimer = 0;
             mSceneManagerState = SceneManagerState::Active;
         }
     }

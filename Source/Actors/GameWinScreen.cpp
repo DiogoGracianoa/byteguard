@@ -32,13 +32,13 @@ GameWinScreen::GameWinScreen(Game* game, const std::string& fontName)
         winText,
         Vector2(130.0f, windowHeight * 0.25f),
         Vector2(windowWidth - 160, windowHeight * 0.4f),
-        18,
+        20,
         static_cast<int>(windowWidth * 0.8f)
     );
 
     AddButton(
         "Sair do Jogo",
-        Vector2(windowWidth / 2.0f - 150.0f, windowHeight * 0.75f + 70.0f),
+        Vector2(windowWidth / 2.0f - 150.0f, windowHeight * 0.75f),
         Vector2(300.0f, 60.0f),
         [this]() {
             mGame->Quit();
