@@ -59,8 +59,6 @@ Game::Game(const int windowWidth, const int windowHeight)
       mCameraPos(Vector2::Zero), mPlayer(nullptr),
       mRobotPlane(nullptr),
       mHUD(nullptr),
-      mGameTimer(0.0f),
-      mGameTimeLimit(0),
       mBackgroundTexture(nullptr),
       mBackgroundSize(Vector2::Zero),
       mBackgroundPosition(Vector2::Zero),
@@ -120,12 +118,12 @@ bool Game::Initialize()
     SetGameScene(GameScene::MainMenu, 0);
 
     mParallaxCache[GameScene::TutorialLevel] = {
-        LoadTexture("../Assets/Sprites/Background/1_Tutorial.png"),
-        LoadTexture("../Assets/Sprites/Background/2_Tutorial.png"),
-        LoadTexture("../Assets/Sprites/Background/3_Tutorial.png"),
-        LoadTexture("../Assets/Sprites/Background/4_Tutorial.png"),
-        LoadTexture("../Assets/Sprites/Background/5_Tutorial.png")
-        };
+            LoadTexture("../Assets/Sprites/Background/1_Tutorial.png"),
+            LoadTexture("../Assets/Sprites/Background/2_Tutorial.png"),
+            LoadTexture("../Assets/Sprites/Background/3_Tutorial.png"),
+            LoadTexture("../Assets/Sprites/Background/4_Tutorial.png"),
+            LoadTexture("../Assets/Sprites/Background/5_Tutorial.png")
+            };
 
     mParallaxCache[GameScene::Level1] = {
             LoadTexture("../Assets/Sprites/Background/1.png"),
@@ -153,9 +151,10 @@ void Game::SetGameScene(const GameScene scene, const float transitionTime)
         if (scene == GameScene::MainMenu ||
             scene == GameScene::StoryScreen ||
             scene == GameScene::TutorialLevel ||
+            scene == GameScene::EasyLevel ||
             scene == GameScene::Level1 ||
             scene == GameScene::Level2 ||
-            scene == GameScene::GameWinScreen )
+            scene == GameScene::GameWinScreen)
         {
             mNextScene = scene;
             mSceneManagerState = SceneManagerState::Entering;
@@ -191,9 +190,6 @@ void Game::ChangeScene()
     // Reset camera position
     mCameraPos.Set(0.0f, 0.0f);
 
-    // Reset game timer
-    mGameTimer = 0.0f;
-
     // Reset gameplay state
     mGamePlayState = GamePlayState::Playing;
 
@@ -226,8 +222,6 @@ void Game::ChangeScene()
     {
         mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
 
-        mGameTimeLimit = 400;
-
         const int tryCount = mSceneAttempts[mNextScene];
         mHUD->SetAttemptCount(tryCount);
 
@@ -242,13 +236,31 @@ void Game::ChangeScene()
         LoadLevel("../Assets/Levels/tutorial_level.csv",
                   TUTORIAL_LEVEL_WIDTH,
                   LEVEL_HEIGHT,
+                  -1);
+    }
+    else if (mNextScene == GameScene::EasyLevel)
+    {
+        mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
+
+        const int tryCount = mSceneAttempts[mNextScene];
+        mHUD->SetAttemptCount(tryCount);
+
+        mMusicHandle = mAudio->PlaySound("Musica_Easy_Level.mp3", true);
+
+        // Set background color
+        mBackgroundColor.Set(131.0f, 66.0f, 61.0f);
+        mCurrentParallax = &mParallaxCache[GameScene::Level1];
+
+        // Set background image
+
+        LoadLevel("../Assets/Levels/easy_level.csv",
+                  LEVEL_WIDTH,
+                  LEVEL_HEIGHT,
                   0);
     }
     else if (mNextScene == GameScene::Level1)
     {
         mHUD = new HUD(mRenderer, this, "../Assets/Fonts/Rajdhani-Bold.ttf");
-
-        mGameTimeLimit = 400;
 
         const int tryCount = mSceneAttempts[mNextScene];
         mHUD->SetAttemptCount(tryCount);
@@ -264,7 +276,7 @@ void Game::ChangeScene()
                            Vector2(0, 0),
                            Vector2(1600, 600));
 
-        LoadLevel("../Assets/Levels/level1_debug.csv",
+        LoadLevel("../Assets/Levels/level1.csv",
                   LEVEL_WIDTH,
                   LEVEL_HEIGHT,
                   1);
@@ -290,8 +302,7 @@ void Game::ChangeScene()
     {
         mBackgroundColor.Set(10.0f, 15.0f, 30.0f);
 
-        //TODO: setar uma música de vitória
-        //mAudio->PlaySound("Victory.ogg", false);
+        mAudio->PlaySound("Victory.mp3", false);
 
         new GameWinScreen(this);
     }
@@ -345,15 +356,21 @@ void Game::LoadLevel(const std::string &levelName,
     }
 
     // Instantiate level actors
-    if (level == 0) {
+    if (level == -1)
+    {
         BuildTutorialLevel(mLevelData, levelWidth, levelHeight);
     }
-    else if (level == 1) {
-        BuildFirstLevel(mLevelData, levelWidth, levelHeight);
+    else if (level == 0)
+    {
+        BuildIndustrialLevel(mLevelData, levelWidth, levelHeight);
+    }
+    else if (level == 1)
+    {
+        BuildIndustrialLevel(mLevelData, levelWidth, levelHeight);
     }
     else if (level == 2)
     {
-        BuildSecondLevel(mLevelData, levelWidth, levelHeight);
+        BuildRobotPlaneLevel(mLevelData, levelWidth, levelHeight);
     }
 
     for (int i = 0; i < levelHeight; ++i) { delete[] mLevelData[i]; }
@@ -364,87 +381,87 @@ void Game::BuildTutorialLevel(int **levelData, int width, int height)
 {
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
-    {0, "../Assets/Sprites/Tutorial_Tileset/tile000.png"},
-    {1, "../Assets/Sprites/Tutorial_Tileset/tile001.png"},
-    {2, "../Assets/Sprites/Tutorial_Tileset/tile002.png"},
-    {3, "../Assets/Sprites/Tutorial_Tileset/tile003.png"},
-    {4, "../Assets/Sprites/Tutorial_Tileset/tile004.png"},
-    {5, "../Assets/Sprites/Tutorial_Tileset/tile005.png"},
-    {6, "../Assets/Sprites/Tutorial_Tileset/tile006.png"},
-    {7, "../Assets/Sprites/Tutorial_Tileset/tile007.png"},
-    {8, "../Assets/Sprites/Tutorial_Tileset/tile008.png"},
-    {9, "../Assets/Sprites/Tutorial_Tileset/tile009.png"},
-    {10, "../Assets/Sprites/Tutorial_Tileset/tile010.png"},
-    {11, "../Assets/Sprites/Tutorial_Tileset/tile011.png"},
-    {12, "../Assets/Sprites/Tutorial_Tileset/tile012.png"},
-    {13, "../Assets/Sprites/Tutorial_Tileset/tile013.png"},
-    {14, "../Assets/Sprites/Tutorial_Tileset/tile014.png"},
-    {15, "../Assets/Sprites/Tutorial_Tileset/tile015.png"},
-    {16, "../Assets/Sprites/Tutorial_Tileset/tile016.png"},
-    {17, "../Assets/Sprites/Tutorial_Tileset/tile017.png"},
-    {18, "../Assets/Sprites/Tutorial_Tileset/tile018.png"},
-    {19, "../Assets/Sprites/Tutorial_Tileset/tile019.png"},
-    {20, "../Assets/Sprites/Tutorial_Tileset/tile020.png"},
-    {21, "../Assets/Sprites/Tutorial_Tileset/tile021.png"},
-    {22, "../Assets/Sprites/Tutorial_Tileset/tile022.png"},
-    {23, "../Assets/Sprites/Tutorial_Tileset/tile023.png"},
-    {24, "../Assets/Sprites/Tutorial_Tileset/tile024.png"},
-    {25, "../Assets/Sprites/Tutorial_Tileset/tile025.png"},
-    {26, "../Assets/Sprites/Tutorial_Tileset/tile026.png"},
-    {27, "../Assets/Sprites/Tutorial_Tileset/tile027.png"},
-    {28, "../Assets/Sprites/Tutorial_Tileset/tile028.png"},
-    {29, "../Assets/Sprites/Tutorial_Tileset/tile029.png"},
-    {30, "../Assets/Sprites/Tutorial_Tileset/tile030.png"},
-    {31, "../Assets/Sprites/Tutorial_Tileset/tile031.png"},
-    {32, "../Assets/Sprites/Tutorial_Tileset/tile032.png"},
-    {33, "../Assets/Sprites/Tutorial_Tileset/tile033.png"},
-    {34, "../Assets/Sprites/Tutorial_Tileset/tile034.png"},
-    {35, "../Assets/Sprites/Tutorial_Tileset/Acid_2.png"},
-    {36, "../Assets/Sprites/Tutorial_Tileset/tile036.png"},
-    {37, "../Assets/Sprites/Tutorial_Tileset/tile037.png"},
-    {38, "../Assets/Sprites/Tutorial_Tileset/tile038.png"},
-    {39, "../Assets/Sprites/Tutorial_Tileset/tile039.png"},
-    {40, "../Assets/Sprites/Tutorial_Tileset/tile040.png"},
-    {41, "../Assets/Sprites/Tutorial_Tileset/tile041.png"},
-    {42, "../Assets/Sprites/Tutorial_Tileset/Acid_1.png"},
-    {43, "../Assets/Sprites/Tutorial_Tileset/tile043.png"},
-    {44, "../Assets/Sprites/Tutorial_Tileset/tile044.png"},
-    {45, "../Assets/Sprites/Tutorial_Tileset/tile045.png"},
-    {46, "../Assets/Sprites/Tutorial_Tileset/tile046.png"},
-    {47, "../Assets/Sprites/Tutorial_Tileset/tile047.png"},
-    {48, "../Assets/Sprites/Tutorial_Tileset/tile048.png"},
-    {49, "../Assets/Sprites/Tutorial_Tileset/tile049.png"},
-    {50, "../Assets/Sprites/Tutorial_Tileset/tile050.png"},
-    {51, "../Assets/Sprites/Tutorial_Tileset/tile051.png"},
-    {52, "../Assets/Sprites/Tutorial_Tileset/tile052.png"},
-    {53, "../Assets/Sprites/Tutorial_Tileset/tile053.png"},
-    {54, "../Assets/Sprites/Tutorial_Tileset/tile054.png"},
-    {55, "../Assets/Sprites/Tutorial_Tileset/tile055.png"},
-    {56, "../Assets/Sprites/Tutorial_Tileset/tile056.png"},
-    {57, "../Assets/Sprites/Tutorial_Tileset/tile057.png"},
-    {58, "../Assets/Sprites/Tutorial_Tileset/tile058.png"},
-    {59, "../Assets/Sprites/Tutorial_Tileset/tile059.png"},
-    {60, "../Assets/Sprites/Tutorial_Tileset/tile060.png"},
-    {61, "../Assets/Sprites/Tutorial_Tileset/tile061.png"},
-    {62, "../Assets/Sprites/Tutorial_Tileset/tile062.png"},
-    {63, "../Assets/Sprites/Tutorial_Tileset/tile063.png"},
-    {64, "../Assets/Sprites/Tutorial_Tileset/tile064.png"},
-    {65, "../Assets/Sprites/Tutorial_Tileset/tile065.png"},
-    {66, "../Assets/Sprites/Tutorial_Tileset/tile066.png"},
-    {67, "../Assets/Sprites/Tutorial_Tileset/tile067.png"},
-    {68, "../Assets/Sprites/Tutorial_Tileset/tile068.png"},
-    {69, "../Assets/Sprites/Tutorial_Tileset/tile069.png"},
-    {70, "../Assets/Sprites/Tutorial_Tileset/tile070.png"},
-    {71, "../Assets/Sprites/Tutorial_Tileset/tile071.png"},
-    {72, "../Assets/Sprites/Tutorial_Tileset/tile072.png"},
-    {74, "../Assets/Sprites/Tutorial_Tileset/tile074.png"},
-    {75, "../Assets/Sprites/Tutorial_Tileset/tile075.png"},
-    {76, "../Assets/Sprites/Tutorial_Tileset/tile076.png"},
-    {77, "../Assets/Sprites/Tutorial_Tileset/tile077.png"},
-    {78, "../Assets/Sprites/Tutorial_Tileset/tile078.png"},
-    {79, "../Assets/Sprites/Tutorial_Tileset/tile079.png"},
-    {80, "../Assets/Sprites/Tutorial_Tileset/tile080.png"}
-    };
+            {0, "../Assets/Sprites/Tutorial_Tileset/tile000.png"},
+            {1, "../Assets/Sprites/Tutorial_Tileset/tile001.png"},
+            {2, "../Assets/Sprites/Tutorial_Tileset/tile002.png"},
+            {3, "../Assets/Sprites/Tutorial_Tileset/tile003.png"},
+            {4, "../Assets/Sprites/Tutorial_Tileset/tile004.png"},
+            {5, "../Assets/Sprites/Tutorial_Tileset/tile005.png"},
+            {6, "../Assets/Sprites/Tutorial_Tileset/tile006.png"},
+            {7, "../Assets/Sprites/Tutorial_Tileset/tile007.png"},
+            {8, "../Assets/Sprites/Tutorial_Tileset/tile008.png"},
+            {9, "../Assets/Sprites/Tutorial_Tileset/tile009.png"},
+            {10, "../Assets/Sprites/Tutorial_Tileset/tile010.png"},
+            {11, "../Assets/Sprites/Tutorial_Tileset/tile011.png"},
+            {12, "../Assets/Sprites/Tutorial_Tileset/tile012.png"},
+            {13, "../Assets/Sprites/Tutorial_Tileset/tile013.png"},
+            {14, "../Assets/Sprites/Tutorial_Tileset/tile014.png"},
+            {15, "../Assets/Sprites/Tutorial_Tileset/tile015.png"},
+            {16, "../Assets/Sprites/Tutorial_Tileset/tile016.png"},
+            {17, "../Assets/Sprites/Tutorial_Tileset/tile017.png"},
+            {18, "../Assets/Sprites/Tutorial_Tileset/tile018.png"},
+            {19, "../Assets/Sprites/Tutorial_Tileset/tile019.png"},
+            {20, "../Assets/Sprites/Tutorial_Tileset/tile020.png"},
+            {21, "../Assets/Sprites/Tutorial_Tileset/tile021.png"},
+            {22, "../Assets/Sprites/Tutorial_Tileset/tile022.png"},
+            {23, "../Assets/Sprites/Tutorial_Tileset/tile023.png"},
+            {24, "../Assets/Sprites/Tutorial_Tileset/tile024.png"},
+            {25, "../Assets/Sprites/Tutorial_Tileset/tile025.png"},
+            {26, "../Assets/Sprites/Tutorial_Tileset/tile026.png"},
+            {27, "../Assets/Sprites/Tutorial_Tileset/tile027.png"},
+            {28, "../Assets/Sprites/Tutorial_Tileset/tile028.png"},
+            {29, "../Assets/Sprites/Tutorial_Tileset/tile029.png"},
+            {30, "../Assets/Sprites/Tutorial_Tileset/tile030.png"},
+            {31, "../Assets/Sprites/Tutorial_Tileset/tile031.png"},
+            {32, "../Assets/Sprites/Tutorial_Tileset/tile032.png"},
+            {33, "../Assets/Sprites/Tutorial_Tileset/tile033.png"},
+            {34, "../Assets/Sprites/Tutorial_Tileset/tile034.png"},
+            {35, "../Assets/Sprites/Tutorial_Tileset/Acid_2.png"},
+            {36, "../Assets/Sprites/Tutorial_Tileset/tile036.png"},
+            {37, "../Assets/Sprites/Tutorial_Tileset/tile037.png"},
+            {38, "../Assets/Sprites/Tutorial_Tileset/tile038.png"},
+            {39, "../Assets/Sprites/Tutorial_Tileset/tile039.png"},
+            {40, "../Assets/Sprites/Tutorial_Tileset/tile040.png"},
+            {41, "../Assets/Sprites/Tutorial_Tileset/tile041.png"},
+            {42, "../Assets/Sprites/Tutorial_Tileset/Acid_1.png"},
+            {43, "../Assets/Sprites/Tutorial_Tileset/tile043.png"},
+            {44, "../Assets/Sprites/Tutorial_Tileset/tile044.png"},
+            {45, "../Assets/Sprites/Tutorial_Tileset/tile045.png"},
+            {46, "../Assets/Sprites/Tutorial_Tileset/tile046.png"},
+            {47, "../Assets/Sprites/Tutorial_Tileset/tile047.png"},
+            {48, "../Assets/Sprites/Tutorial_Tileset/tile048.png"},
+            {49, "../Assets/Sprites/Tutorial_Tileset/tile049.png"},
+            {50, "../Assets/Sprites/Tutorial_Tileset/tile050.png"},
+            {51, "../Assets/Sprites/Tutorial_Tileset/tile051.png"},
+            {52, "../Assets/Sprites/Tutorial_Tileset/tile052.png"},
+            {53, "../Assets/Sprites/Tutorial_Tileset/tile053.png"},
+            {54, "../Assets/Sprites/Tutorial_Tileset/tile054.png"},
+            {55, "../Assets/Sprites/Tutorial_Tileset/tile055.png"},
+            {56, "../Assets/Sprites/Tutorial_Tileset/tile056.png"},
+            {57, "../Assets/Sprites/Tutorial_Tileset/tile057.png"},
+            {58, "../Assets/Sprites/Tutorial_Tileset/tile058.png"},
+            {59, "../Assets/Sprites/Tutorial_Tileset/tile059.png"},
+            {60, "../Assets/Sprites/Tutorial_Tileset/tile060.png"},
+            {61, "../Assets/Sprites/Tutorial_Tileset/tile061.png"},
+            {62, "../Assets/Sprites/Tutorial_Tileset/tile062.png"},
+            {63, "../Assets/Sprites/Tutorial_Tileset/tile063.png"},
+            {64, "../Assets/Sprites/Tutorial_Tileset/tile064.png"},
+            {65, "../Assets/Sprites/Tutorial_Tileset/tile065.png"},
+            {66, "../Assets/Sprites/Tutorial_Tileset/tile066.png"},
+            {67, "../Assets/Sprites/Tutorial_Tileset/tile067.png"},
+            {68, "../Assets/Sprites/Tutorial_Tileset/tile068.png"},
+            {69, "../Assets/Sprites/Tutorial_Tileset/tile069.png"},
+            {70, "../Assets/Sprites/Tutorial_Tileset/tile070.png"},
+            {71, "../Assets/Sprites/Tutorial_Tileset/tile071.png"},
+            {72, "../Assets/Sprites/Tutorial_Tileset/tile072.png"},
+            {74, "../Assets/Sprites/Tutorial_Tileset/tile074.png"},
+            {75, "../Assets/Sprites/Tutorial_Tileset/tile075.png"},
+            {76, "../Assets/Sprites/Tutorial_Tileset/tile076.png"},
+            {77, "../Assets/Sprites/Tutorial_Tileset/tile077.png"},
+            {78, "../Assets/Sprites/Tutorial_Tileset/tile078.png"},
+            {79, "../Assets/Sprites/Tutorial_Tileset/tile079.png"},
+            {80, "../Assets/Sprites/Tutorial_Tileset/tile080.png"}
+            };
 
     for (int y = 0; y < LEVEL_HEIGHT; ++y)
     {
@@ -459,7 +476,9 @@ void Game::BuildTutorialLevel(int **levelData, int width, int height)
             }
             else if (tile == 73)
             {
-                const auto spawner = new MissileSpawner(this, 50);
+                const auto spawner = new MissileSpawner(this,
+                    50,
+                    3);
                 spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
 
@@ -522,7 +541,106 @@ void Game::BuildTutorialLevel(int **levelData, int width, int height)
     }
 }
 
-void Game::BuildFirstLevel(int **levelData, int width, int height)
+
+void Game::BuildRobotPlaneLevel(int **levelData, int width, int height)
+{
+    // Const map to convert tile ID to block type
+    const std::map<int, const std::string> tileMap = {
+            {0, "../Assets/Sprites/Level_2_Tileset/Acid_1.png"},
+            {1, "../Assets/Sprites/Level_2_Tileset/Barrel1.png"},
+            {2, "../Assets/Sprites/Level_2_Tileset/Entry.png"},
+            {3, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_23.png"},
+            {4, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_54.png"},
+            {5, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_63.png"},
+            {6, "../Assets/Sprites/Level_2_Tileset/Spike_12.png"},
+            {7, "../Assets/Sprites/Level_2_Tileset/Spike_2.png"},
+            {8, "../Assets/Sprites/Level_2_Tileset/Acid_2.png"},
+            {9, "../Assets/Sprites/Level_2_Tileset/Box2.png"},
+            {10, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_11.png"},
+            {11, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_52.png"},
+            {12, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_62.png"},
+            {13, "../Assets/Sprites/Level_2_Tileset/Spike_11.png"},
+            {14, "../Assets/Sprites/Level_2_Tileset/Spike_19.png"},
+            {15, "../Assets/Sprites/Level_2_Tileset/Spike_9.png"},
+            {16, "../Assets/Sprites/Level_2_Tileset/Box1.png"},
+            {18, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_45.png"},
+            {19, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_61.png"},
+            {20, "../Assets/Sprites/Level_2_Tileset/Spike_10.png"},
+            {21, "../Assets/Sprites/Level_2_Tileset/Spike_18.png"},
+            {22, "../Assets/Sprites/Level_2_Tileset/Spike_8.png"},
+            {25, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_36.png"},
+            {26, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_57.png"},
+            {27, "../Assets/Sprites/Level_2_Tileset/Spike_1.png"},
+            {28, "../Assets/Sprites/Level_2_Tileset/Spike_17.png"},
+            {29, "../Assets/Sprites/Level_2_Tileset/Spike_7.png"},
+            {32, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_32.png"},
+            {33, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_56.png"},
+            {34, "../Assets/Sprites/Level_2_Tileset/Locker4.png"},
+            {35, "../Assets/Sprites/Level_2_Tileset/Spike_16.png"},
+            {36, "../Assets/Sprites/Level_2_Tileset/Spike_6.png"},
+            {40, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_55.png"},
+            {41, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_71.png"},
+            {42, "../Assets/Sprites/Level_2_Tileset/Spike_15.png"},
+            {43, "../Assets/Sprites/Level_2_Tileset/Spike_5.png"},
+            {48, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_70.png"},
+            {49, "../Assets/Sprites/Level_2_Tileset/Spike_14.png"},
+            {50, "../Assets/Sprites/Level_2_Tileset/Spike_4.png"},
+            {56, "../Assets/Sprites/Level_2_Tileset/Spike_13.png"},
+            {57, "../Assets/Sprites/Level_2_Tileset/Spike_3.png"},
+            {64, "../Assets/Sprites/Level_2_Tileset/Spike_20.png"},
+            };
+
+    for (int y = 0; y < LEVEL_HEIGHT; ++y)
+    {
+        for (int x = 0; x < LEVEL_WIDTH; ++x)
+        {
+            int tile = levelData[y][x];
+
+            if (tile == 17)
+            {
+                mRobotPlane = new RobotPlane(this);
+                mRobotPlane->SetPosition(
+                    Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (tile == 24)
+            {
+                auto *press = new PressMachine(this, mRenderer);
+                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+            }
+            else if (
+                tile == 0 || tile == 8 ||
+                tile == 6 || tile == 7 || tile == 13 || tile == 14 || tile == 15
+                ||
+                tile == 20 || tile == 21 || tile == 22 || tile == 27 || tile ==
+                28 ||
+                tile == 29 || tile == 35 || tile == 36 || tile == 42 || tile ==
+                43 ||
+                tile == 49 || tile == 50 || tile == 56 || tile == 57 || tile ==
+                64)
+            {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
+                    EnemyBlock *enemyBlock = new EnemyBlock(this, it->second);
+                    enemyBlock->SetPosition(
+                        Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+            else // Blocks
+            {
+                auto it = tileMap.find(tile);
+                if (it != tileMap.end())
+                {
+                    // Create a block actor
+                    Block *block = new Block(this, it->second);
+                    block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                }
+            }
+        }
+    }
+}
+
+void Game::BuildIndustrialLevel(int **levelData, int width, int height)
 {
     // Const map to convert tile ID to block type
     const std::map<int, const std::string> tileMap = {
@@ -631,103 +749,6 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
     }
 }
 
-void Game::BuildSecondLevel(int **levelData, int width, int height)
-{
-    // Const map to convert tile ID to block type
-    const std::map<int, const std::string> tileMap = {
-            {0, "../Assets/Sprites/Level_2_Tileset/Acid_1.png"},
-            {1, "../Assets/Sprites/Level_2_Tileset/Barrel1.png"},
-            {2, "../Assets/Sprites/Level_2_Tileset/Entry.png"},
-            {3, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_23.png"},
-            {4, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_54.png"},
-            {5, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_63.png"},
-            {6, "../Assets/Sprites/Level_2_Tileset/Spike_12.png"},
-            {7, "../Assets/Sprites/Level_2_Tileset/Spike_2.png"},
-            {8, "../Assets/Sprites/Level_2_Tileset/Acid_2.png"},
-            {9, "../Assets/Sprites/Level_2_Tileset/Box2.png"},
-            {10, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_11.png"},
-            {11, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_52.png"},
-            {12, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_62.png"},
-            {13, "../Assets/Sprites/Level_2_Tileset/Spike_11.png"},
-            {14, "../Assets/Sprites/Level_2_Tileset/Spike_19.png"},
-            {15, "../Assets/Sprites/Level_2_Tileset/Spike_9.png"},
-            {16, "../Assets/Sprites/Level_2_Tileset/Box1.png"},
-            {18, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_45.png"},
-            {19, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_61.png"},
-            {20, "../Assets/Sprites/Level_2_Tileset/Spike_10.png"},
-            {21, "../Assets/Sprites/Level_2_Tileset/Spike_18.png"},
-            {22, "../Assets/Sprites/Level_2_Tileset/Spike_8.png"},
-            {25, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_36.png"},
-            {26, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_57.png"},
-            {27, "../Assets/Sprites/Level_2_Tileset/Spike_1.png"},
-            {28, "../Assets/Sprites/Level_2_Tileset/Spike_17.png"},
-            {29, "../Assets/Sprites/Level_2_Tileset/Spike_7.png"},
-            {32, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_32.png"},
-            {33, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_56.png"},
-            {34, "../Assets/Sprites/Level_2_Tileset/Locker4.png"},
-            {35, "../Assets/Sprites/Level_2_Tileset/Spike_16.png"},
-            {36, "../Assets/Sprites/Level_2_Tileset/Spike_6.png"},
-            {40, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_55.png"},
-            {41, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_71.png"},
-            {42, "../Assets/Sprites/Level_2_Tileset/Spike_15.png"},
-            {43, "../Assets/Sprites/Level_2_Tileset/Spike_5.png"},
-            {48, "../Assets/Sprites/Level_2_Tileset/IndustrialTile_70.png"},
-            {49, "../Assets/Sprites/Level_2_Tileset/Spike_14.png"},
-            {50, "../Assets/Sprites/Level_2_Tileset/Spike_4.png"},
-            {56, "../Assets/Sprites/Level_2_Tileset/Spike_13.png"},
-            {57, "../Assets/Sprites/Level_2_Tileset/Spike_3.png"},
-            {64, "../Assets/Sprites/Level_2_Tileset/Spike_20.png"},
-            };
-
-    for (int y = 0; y < LEVEL_HEIGHT; ++y)
-    {
-        for (int x = 0; x < LEVEL_WIDTH; ++x)
-        {
-            int tile = levelData[y][x];
-
-            if (tile == 17) // Mario
-            {
-                mRobotPlane = new RobotPlane(this);
-                mRobotPlane->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }
-            else if (tile == 24)
-            {
-                auto *press = new PressMachine(this, mRenderer);
-                press->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-            }
-            else if (
-                tile == 0 || tile == 8 ||
-                tile == 6 || tile == 7 || tile == 13 || tile == 14 || tile == 15
-                ||
-                tile == 20 || tile == 21 || tile == 22 || tile == 27 || tile ==
-                28 ||
-                tile == 29 || tile == 35 || tile == 36 || tile == 42 || tile ==
-                43 ||
-                tile == 49 || tile == 50 || tile == 56 || tile == 57 || tile ==
-                64)
-            {
-                auto it = tileMap.find(tile);
-                if (it != tileMap.end())
-                {
-                    EnemyBlock *enemyBlock = new EnemyBlock(this, it->second);
-                    enemyBlock->SetPosition(
-                        Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                }
-            }
-            else // Blocks
-            {
-                auto it = tileMap.find(tile);
-                if (it != tileMap.end())
-                {
-                    // Create a block actor
-                    Block *block = new Block(this, it->second);
-                    block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
-                }
-            }
-        }
-    }
-}
-
 int **Game::ReadLevelData(const std::string &fileName,
                           const int width,
                           const int height)
@@ -796,9 +817,10 @@ void Game::ProcessInput()
             }
             case SDL_KEYDOWN:
             {
-                const bool isPlayingScene = (mGameScene == GameScene::TutorialLevel||
-                                            mGameScene == GameScene::Level1 ||
-                                            mGameScene == GameScene::Level2);
+                const bool isPlayingScene = (
+                    mGameScene == GameScene::TutorialLevel ||
+                    mGameScene == GameScene::Level1 ||
+                    mGameScene == GameScene::Level2);
 
                 if (event.key.keysym.sym == SDLK_RETURN && isPlayingScene &&
                     mGamePlayState == GamePlayState::Playing) { TogglePause(); }
@@ -913,7 +935,6 @@ void Game::ToggleTutorial()
         && mSceneAttempts[GameScene::TutorialLevel] == 1
     )
     {
-
         if (mGamePlayState == GamePlayState::Playing)
         {
             mGamePlayState = GamePlayState::ShowingTutorial;
@@ -983,11 +1004,38 @@ void Game::UpdateGame()
     if (mGameScene != GameScene::MainMenu && mGamePlayState ==
         GamePlayState::Playing)
     {
-        UpdateLevelTime(deltaTime);
         if (mPlayer)
         {
             const float playerX = mPlayer->GetPosition().x;
+            if (constexpr float levelLimitX = TUTORIAL_LEVEL_WIDTH * TILE_SIZE;
+                mGameScene == GameScene::TutorialLevel && playerX >=
+                levelLimitX)
+            {
+                mPlayer->SetState(ActorState::Destroy);
+                mPlayer = nullptr;
+                this->GetAudio()->StopAllSounds();
 
+                SetGameScene(GameScene::EasyLevel, 0.5);
+            }
+            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                mGameScene == GameScene::EasyLevel && playerX >= levelLimitX)
+            {
+                mPlayer->SetState(ActorState::Destroy);
+                mPlayer = nullptr;
+                this->GetAudio()->StopAllSounds();
+
+                SetGameScene(GameScene::Level2, 0.5);
+            }
+
+            if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
+                mGameScene == GameScene::Level2 && playerX >= levelLimitX)
+            {
+                mPlayer->SetState(ActorState::Destroy);
+                mPlayer = nullptr;
+                this->GetAudio()->StopAllSounds();
+
+                SetGameScene(GameScene::Level1, 0.5);
+            }
             if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
                 mGameScene == GameScene::Level1 && playerX >= levelLimitX)
             {
@@ -996,15 +1044,6 @@ void Game::UpdateGame()
                 this->GetAudio()->StopAllSounds();
 
                 SetGameScene(GameScene::GameWinScreen, 0.5);
-            }
-            if (constexpr float levelLimitX = TUTORIAL_LEVEL_WIDTH * TILE_SIZE;
-                mGameScene == GameScene::TutorialLevel && playerX >= levelLimitX)
-            {
-                mPlayer->SetState(ActorState::Destroy);
-                mPlayer = nullptr;
-                this->GetAudio()->StopAllSounds();
-
-                SetGameScene(GameScene::Level2, 0.5);
             }
         }
         else if (mRobotPlane)
@@ -1047,33 +1086,20 @@ void Game::UpdateSceneManager(const float deltaTime)
     }
 }
 
-void Game::UpdateLevelTime(const float deltaTime)
-{
-    mGameTimer += deltaTime;
-
-    if (mGameTimer >= 1.0f)
-    {
-        mGameTimer = 0.0f;
-        mGameTimeLimit--;
-
-        if (mGameTimeLimit <= 0 && mPlayer)
-        {
-            //mPlayer->Kill();
-        }
-    }
-}
-
 void Game::UpdateCamera(const float deltaTime)
 {
     if (!mPlayer && !mRobotPlane) return;
 
-    if (mGameScene == GameScene::Level1 || mGameScene == GameScene::TutorialLevel )
+    if (mGameScene == GameScene::Level1 ||
+        mGameScene == GameScene::TutorialLevel ||
+        mGameScene == GameScene::EasyLevel)
     {
         if (mGamePlayState == GamePlayState::Playing)
         {
-            int levelWidth = mGameScene == GameScene::Level1
-                ? LEVEL_WIDTH
-                : TUTORIAL_LEVEL_WIDTH;
+            int levelWidth = (mGameScene == GameScene::Level1 ||
+                              mGameScene == GameScene::EasyLevel)
+                                 ? LEVEL_WIDTH
+                                 : TUTORIAL_LEVEL_WIDTH;
 
             const float horizontalPos = Math::Max(
                 mPlayer->GetPosition().x - mWindowWidth / 4,
@@ -1165,7 +1191,10 @@ void Game::GenerateOutput()
     // Clear back buffer
     SDL_RenderClear(mRenderer);
 
-    if (mGameScene == GameScene::TutorialLevel || mGameScene == GameScene::Level1 || mGameScene == GameScene::Level2)
+    if (mGameScene == GameScene::TutorialLevel ||
+        mGameScene == GameScene::EasyLevel ||
+        mGameScene == GameScene::Level1 ||
+        mGameScene == GameScene::Level2)
     {
         DrawParallaxBackground(mRenderer, mCameraPos);
     }

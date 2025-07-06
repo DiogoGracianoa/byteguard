@@ -39,6 +39,7 @@ public:
         MainMenu,
         StoryScreen,
         TutorialLevel,
+        EasyLevel,
         Level1,
         Level2,
         GameWinScreen
@@ -164,9 +165,6 @@ private:
     SceneManagerState mSceneManagerState;
     float mSceneManagerTimer;
 
-    // HUD functions
-    void UpdateLevelTime(float deltaTime);
-
     void DrawParallaxBackground(SDL_Renderer *renderer,
                                 const Vector2 &cameraPos) const;
 
@@ -177,9 +175,9 @@ private:
 
     void BuildTutorialLevel(int **levelData, int width, int height);
 
-    void BuildFirstLevel(int **levelData, int width, int height);
+    void BuildIndustrialLevel(int **levelData, int width, int height);
 
-    void BuildSecondLevel(int **levelData, int width, int height);
+    void BuildRobotPlaneLevel(int **levelData, int width, int height);
 
     // Spatial Hashing for collision detection
     class SpatialHashing *mSpatialHashing;
@@ -218,9 +216,6 @@ private:
     class RobotPlane *mRobotPlane;
     class HUD *mHUD;
     SoundHandle mMusicHandle;
-
-    float mGameTimer;
-    int mGameTimeLimit;
 
     SDL_Texture *mBackgroundTexture;
     Vector2 mBackgroundSize;

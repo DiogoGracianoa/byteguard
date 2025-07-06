@@ -6,7 +6,6 @@
 
 #include "Actor.h"
 #include "../Components/DrawComponents/DrawAnimatedComponent.h"
-#include "../Components/DrawComponents/DrawComponent.h"
 
 class Missile final : public Actor
 {

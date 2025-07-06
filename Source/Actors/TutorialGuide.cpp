@@ -23,9 +23,9 @@ TutorialGuide::TutorialGuide(Game* game, std::string fontName)
         "Você coletou um POWER-UP de TEMPO.\n"
         "Aperte a tecla Q para usá-lo quando\n"
         "mais precisar.      \n\n"
-        "Além do power-up, saiba que você\n"
-        "pode frear apertando a tecla A \n"
-        "e acelerar apertando a tecla D.\n\n"
+        "Além do power-up, você pode frear\n"
+        "com a tecla A, acelerar com a\n"
+        "tecla D e pular com a tecla SPACE.\n\n"
         "Mas cuidado, não freie demais, \n"
         "há um míssil te seguindo.\n"
         "Boa sorte!";

@@ -9,9 +9,12 @@
 #include "Player.h"
 #include "../Game.h"
 
-MissileSpawner::MissileSpawner(Game *game, const float spawnDistance)
+MissileSpawner::MissileSpawner(Game *game,
+                               const float spawnDistance,
+                               const float SForceFactor)
     : Actor(game),
-      mSpawnDistance(spawnDistance)
+      mSpawnDistance(spawnDistance),
+      mSForceFactor(SForceFactor)
 {
     new DrawSpriteComponent(this,
                             "../Assets/Sprites/Missile/Missile_Launcher.png",
@@ -27,7 +30,7 @@ void MissileSpawner::OnUpdate(float deltaTime)
     if (abs(mGame->GetPlayer()->GetPosition().x - GetPosition().x) <
         mSpawnDistance)
     {
-        const auto spawned = new Missile(GetGame());
+        const auto spawned = new Missile(GetGame(), 330, mSForceFactor);
         spawned->SetPosition(GetPosition() + Vector2(5, 0));
         mState = ActorState::Destroy;
     }
