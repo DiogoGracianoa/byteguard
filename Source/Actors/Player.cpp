@@ -177,6 +177,8 @@ void Player::OnHorizontalCollision(const float minOverlap,
         }
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);
+
+        mGame->ToggleTutorial();
     }
 }
 
@@ -197,5 +199,7 @@ void Player::OnVerticalCollision(const float minOverlap,
         }
         other->SetEnabled(false);
         other->GetOwner()->SetState(ActorState::Destroy);
+
+        mGame->ToggleTutorial();
     }
 }

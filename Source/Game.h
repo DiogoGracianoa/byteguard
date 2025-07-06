@@ -58,7 +58,8 @@ public:
         Paused,
         GameOver,
         LevelComplete,
-        Leaving
+        Leaving,
+        ShowingTutorial,
     };
 
     Game(int windowWidth, int windowHeight);
@@ -130,6 +131,8 @@ public:
                             const Vector2 &size = Vector2::Zero);
 
     void TogglePause();
+
+    void ToggleTutorial();
 
     // Game-specific
     const class Player *GetPlayer() const { return mPlayer; }

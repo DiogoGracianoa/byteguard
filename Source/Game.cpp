@@ -33,6 +33,7 @@
 #include "Actors/RobotPlane.h"
 #include "Actors/Saw.h"
 #include "Actors/StoryScreen.h"
+#include "Actors/TutorialGuide.h"
 #include "Actors/WallBlades.h"
 #include "Components/PowerupComponents/TimePowerupComponent.h"
 #include "Components/ColliderComponents/AABBColliderComponent.h"
@@ -238,7 +239,7 @@ void Game::ChangeScene()
         const int tryCount = mSceneAttempts[mNextScene];
         mHUD->SetAttemptCount(tryCount);
 
-        //mMusicHandle = mAudio->PlaySound("Main_Level1.mp3", true);
+        mMusicHandle = mAudio->PlaySound("Main_Tutorial.mp3", true);
 
         // Set background color
         mBackgroundColor.Set(131.0f, 66.0f, 61.0f);
@@ -798,8 +799,9 @@ void Game::ProcessInput()
             }
             case SDL_KEYDOWN:
             {
-                const bool isPlayingScene = (mGameScene == GameScene::Level1 ||
-                                             mGameScene == GameScene::Level2);
+                const bool isPlayingScene = (mGameScene == GameScene::TutorialLevel||
+                                            mGameScene == GameScene::Level1 ||
+                                            mGameScene == GameScene::Level2);
 
                 if (event.key.keysym.sym == SDLK_RETURN && isPlayingScene &&
                     mGamePlayState == GamePlayState::Playing) { TogglePause(); }
@@ -908,6 +910,27 @@ void Game::TogglePause()
     }
 }
 
+void Game::ToggleTutorial()
+{
+    if (mGameScene == GameScene::TutorialLevel
+        && mSceneAttempts[GameScene::TutorialLevel] == 1
+    )
+    {
+
+        if (mGamePlayState == GamePlayState::Playing)
+        {
+            mGamePlayState = GamePlayState::ShowingTutorial;
+            mAudio->PauseSound(mMusicHandle);
+            new TutorialGuide(this);
+        }
+        else if (mGamePlayState == GamePlayState::ShowingTutorial)
+        {
+            mGamePlayState = GamePlayState::Playing;
+            mAudio->ResumeSound(mMusicHandle);
+        }
+    }
+}
+
 void Game::UpdateGame()
 {
     while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16)) {};
@@ -921,8 +944,9 @@ void Game::UpdateGame()
 
     mTicksCount = SDL_GetTicks();
 
-    if (mGamePlayState != GamePlayState::Paused && mGamePlayState !=
-        GamePlayState::GameOver)
+    if (mGamePlayState != GamePlayState::Paused
+        && mGamePlayState != GamePlayState::ShowingTutorial
+        && mGamePlayState != GamePlayState::GameOver)
     {
         // Reinsert all actors and pending actors
         UpdateActors(deltaTime);
