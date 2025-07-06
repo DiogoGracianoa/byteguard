@@ -107,13 +107,6 @@ bool Game::Initialize()
         return false;
     }
 
-    // Initialize SDL_mixer
-    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
-    {
-        SDL_Log("Failed to initialize SDL_mixer");
-        return false;
-    }
-
     // Start random number generator
     Random::Init();
 
@@ -149,7 +142,6 @@ bool Game::Initialize()
             LoadTexture("../Assets/Sprites/Background/4_Level_2.png"),
             LoadTexture("../Assets/Sprites/Background/5_Level_2.png")
             };
-
 
     return true;
 }
@@ -587,6 +579,11 @@ void Game::BuildFirstLevel(int **levelData, int width, int height)
             }
             else if (tile == 30)
             {
+                const auto block = new Block(this,
+                                             "../Assets/Sprites/ScifiBlocks/Tile_6.png");
+                block->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
+                block->GetComponent<AABBColliderComponent>()->SetEnabled(false);
+
                 const auto spawner = new MissileSpawner(this, 50);
                 spawner->SetPosition(Vector2(x * TILE_SIZE, y * TILE_SIZE));
             }
@@ -1010,17 +1007,17 @@ void Game::UpdateGame()
                 SetGameScene(GameScene::Level2, 0.5);
             }
         }
-        else if (mRobotPlane) {
+        else if (mRobotPlane)
+        {
             const float playerX = mRobotPlane->GetPosition().x;
             if (constexpr float levelLimitX = LEVEL_WIDTH * TILE_SIZE;
                 mGameScene == GameScene::Level2 && playerX >= levelLimitX)
-                {
-                    mRobotPlane->SetState(ActorState::Destroy);
-                    mRobotPlane = nullptr;
-                    this->GetAudio()->StopAllSounds();
-
-                    SetGameScene(GameScene::Level1, 0.5);
-                }
+            {
+                mRobotPlane->SetState(ActorState::Destroy);
+                mRobotPlane = nullptr;
+                this->GetAudio()->StopAllSounds();
+                SetGameScene(GameScene::Level1, 0.5);
+            }
         }
     }
 }

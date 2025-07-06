@@ -3,6 +3,8 @@
 //
 
 #include "Missile.h"
+
+#include "ExplosionParticles.h"
 #include "Player.h"
 #include "../Game.h"
 #include "../Components/ColliderComponents/AABBColliderComponent.h"
@@ -71,8 +73,9 @@ void Missile::OnHorizontalCollision(const float minOverlap,
     {
         other->GetOwner()->Kill();
     }
+    if (other->GetLayer() == ColliderLayer::Enemy) { return; }
 
-    mState = ActorState::Destroy;
+    Kill();
 }
 
 void Missile::OnVerticalCollision(const float minOverlap,
@@ -82,8 +85,18 @@ void Missile::OnVerticalCollision(const float minOverlap,
     {
         other->GetOwner()->Kill();
     }
+    if (other->GetLayer() == ColliderLayer::Enemy) { return; }
 
-    mState = ActorState::Destroy;
+    Kill();
 }
 
-void Missile::Kill() { mState = ActorState::Destroy; }
+void Missile::Kill()
+{
+    mState = ActorState::Destroy;
+    mGame->GetAudio()->PlaySound("Missile_Explosion.ogg");
+    int numParticles = 15;
+    for (int i = 0; i < numParticles; i++)
+    {
+        new ExplosionParticles(mGame, mPosition, 1.0f);
+    }
+}

@@ -176,7 +176,7 @@ void Player::OnHorizontalCollision(const float minOverlap,
             mGame->SetHUDPowerupUsable(true);
         }
         other->SetEnabled(false);
-        other->GetOwner()->SetState(ActorState::Destroy);
+        other->GetOwner()->Kill();
 
         mGame->ToggleTutorial();
     }
@@ -198,7 +198,7 @@ void Player::OnVerticalCollision(const float minOverlap,
             mCollectibles[Powerups::TimePowerup]->SetUsable(true);
         }
         other->SetEnabled(false);
-        other->GetOwner()->SetState(ActorState::Destroy);
+        other->GetOwner()->Kill();
 
         mGame->ToggleTutorial();
     }
