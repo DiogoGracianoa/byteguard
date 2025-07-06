@@ -869,7 +869,7 @@ void Game::UpdateActors(const float deltaTime)
             mSpatialHashing->QueryOnCamera(mCameraPos,
                                            mWindowWidth,
                                            mWindowHeight,
-                                           TILE_SIZE);
+                                           TILE_SIZE * 5);
 
     bool isPlayerOnCamera = false;
     for (const auto &actor: actorsOnCamera)
@@ -936,7 +936,7 @@ void Game::GenerateOutput()
             mSpatialHashing->QueryOnCamera(mCameraPos,
                                            mWindowWidth,
                                            mWindowHeight,
-                                           TILE_SIZE);
+                                           TILE_SIZE * 5);
 
     // Get list of drawables in draw order
     std::vector<DrawComponent *> drawables;
