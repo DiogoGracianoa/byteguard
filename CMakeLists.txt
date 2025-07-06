@@ -74,6 +74,8 @@ add_executable(${PROJECT_NAME}
         Source/Actors/Collectible.h
         Source/Components/PowerupComponents/PowerupComponent.cpp
         Source/Components/PowerupComponents/PowerupComponent.h
+        Source/Actors/ExplosionParticles.cpp
+        Source/Actors/ExplosionParticles.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer)
