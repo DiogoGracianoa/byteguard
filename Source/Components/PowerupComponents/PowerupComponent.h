@@ -20,6 +20,7 @@ public:
     void SetUsable(const bool val) { mIsUsable = val; }
 
 private:
+    const float mOriginalDurationTime;
     float mDurationTime;
     bool mIsUsable;
 };
