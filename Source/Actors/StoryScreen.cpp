@@ -32,7 +32,7 @@ StoryScreen::StoryScreen(Game* game, const std::string& fontName)
         Vector2(windowWidth / 2.0f - 150.0f, windowHeight * 0.8f), // Posição mais para baixo
         Vector2(300.0f, 60.0f),
         [this]() {
-            mGame->SetGameScene(Game::GameScene::Level1);
+            mGame->SetGameScene(Game::GameScene::TutorialLevel);
         }
     );
 }

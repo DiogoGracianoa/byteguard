@@ -3,6 +3,8 @@
 //
 
 #include "Missile.h"
+
+#include "ExplosionParticles.h"
 #include "Player.h"
 #include "../Game.h"
 #include "../Components/ColliderComponents/AABBColliderComponent.h"
@@ -31,7 +33,6 @@ Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
                                                "../Assets/Sprites/Missile/Missile.json");
 
     mDrawComponent->AddAnimation("seek", {0, 1, 2});
-    // mDrawComponent->AddAnimation("explode", {3, 4});
 
     mDrawComponent->SetAnimation("seek");
     mDrawComponent->SetAnimFPS(10.0f);
@@ -39,14 +40,24 @@ Missile::Missile(Game *game, const float dForceFactor, const float sForceFactor)
 
 void Missile::OnUpdate(const float deltaTime)
 {
+    if (mGame == nullptr) {
+        Kill();
+        return;
+    }
+
     const auto player = mGame->GetPlayer();
+    if (player == nullptr) {
+        Kill();
+        return;
+    }
+
     const auto dForce =
-            mDForceFactor * Vector2::Normalize(
-                player->GetPosition() - GetPosition()
-            );
+        mDForceFactor * Vector2::Normalize(
+            player->GetPosition() - GetPosition()
+        );
 
     const auto sForce =
-            mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
+        mSForceFactor * (dForce - mRigidBodyComponent->GetVelocity());
 
     mRigidBodyComponent->ApplyForce(sForce);
     const auto vel = mRigidBodyComponent->GetVelocity();
@@ -61,8 +72,9 @@ void Missile::OnHorizontalCollision(const float minOverlap,
     {
         other->GetOwner()->Kill();
     }
+    if (other->GetLayer() == ColliderLayer::Enemy) { return; }
 
-    mState = ActorState::Destroy;
+    Kill();
 }
 
 void Missile::OnVerticalCollision(const float minOverlap,
@@ -72,8 +84,18 @@ void Missile::OnVerticalCollision(const float minOverlap,
     {
         other->GetOwner()->Kill();
     }
+    if (other->GetLayer() == ColliderLayer::Enemy) { return; }
 
-    mState = ActorState::Destroy;
+    Kill();
 }
 
-void Missile::Kill() { mState = ActorState::Destroy; }
+void Missile::Kill()
+{
+    mState = ActorState::Destroy;
+    mGame->GetAudio()->PlaySound("Missile_Explosion.ogg");
+    int numParticles = 15;
+    for (int i = 0; i < numParticles; i++)
+    {
+        new ExplosionParticles(mGame, mPosition, 1.0f);
+    }
+}

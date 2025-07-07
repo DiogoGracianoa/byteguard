@@ -15,11 +15,11 @@ RobotPlane::RobotPlane(Game *game,
 {
     mRigidBodyComponent = new RigidBodyComponent(this, 1.0f, 0.0f);
 
-    float byteGuardPlaneColliderWidth = Game::TILE_SIZE - 10.0f;
-    float byteGuardPlaneColliderHeight = Game::TILE_SIZE;
+    float byteGuardPlaneColliderWidth = Game::TILE_SIZE - 15.0f;
+    float byteGuardPlaneColliderHeight = Game::TILE_SIZE - 10.0f;
 
     float offsetX = 7.5f;
-    float offsetY = 0;
+    float offsetY = 5.0f;
 
     mColliderComponent = new AABBColliderComponent(
         this,
@@ -39,7 +39,7 @@ RobotPlane::RobotPlane(Game *game,
 
     mDrawComponent->AddAnimation("fly", {2});
     mDrawComponent->AddAnimation("idle", {1});
-    mDrawComponent->AddAnimation("down", {0});
+    mDrawComponent->AddAnimation("dead", {0});
     mDrawComponent->SetAnimation("idle");
     mDrawComponent->SetAnimFPS(10.0f);
 
@@ -57,9 +57,6 @@ void RobotPlane::OnProcessInput(const uint8_t *state)
             mLiftSpeed
         ));
 
-        //TODO: Adicionar o som aqui depois. Tem que fazer um esquema para ele só tocar enquanto tiver com space pressionado
-        //Acho que dá pra fazer isso com o soundHandle, criando uma variável global dessa classe para o soundo handel desse som.
-        //Pra ele tocar em loop, mas parar de tocar quando soltar o espaço. E o principal, quando ficar segurando, só tocar uma vez o mesmo som
         mDrawComponent->SetAnimation("fly");
     }
     else { mDrawComponent->SetAnimation("idle"); }
@@ -77,12 +74,12 @@ void RobotPlane::OnUpdate(float deltaTime)
 
 void RobotPlane::Kill()
 {
+    mGame->SetGamePlayState(Game::GamePlayState::GameOver);
     mState = ActorState::Destroy;
-    mDrawComponent->SetAnimation("idle");
+
+    mDrawComponent->SetAnimation("dead");
     mRigidBodyComponent->SetEnabled(false);
     mColliderComponent->SetEnabled(false);
-
-    mGame->SetGamePlayState(Game::GamePlayState::GameOver);
 
     mGame->GetAudio()->StopAllSounds();
     mGame->GetAudio()->PlaySound("ByteGuard_Dead.ogg");
@@ -94,35 +91,10 @@ void RobotPlane::OnHorizontalCollision(const float minOverlap,
 {
     if (other->GetLayer() == ColliderLayer::Enemy || other->GetLayer() ==
         ColliderLayer::EnemyBlocks) { Kill(); }
-    /*else if (other->GetLayer() == ColliderLayer::Pole)
-    {
-        mIsOnPole = true;
-        Win(other);
-    }*/
-    else if (other->GetLayer() == ColliderLayer::Collectible)
-    {
-        other->SetEnabled(false);
-        other->GetOwner()->SetState(ActorState::Destroy);
-        mGame->GetAudio()->PlaySound("Coin.wav");
-    }
 }
 
 void RobotPlane::OnVerticalCollision(const float minOverlap,
                                      AABBColliderComponent *other)
 {
-    if (other->GetLayer() == ColliderLayer::Blocks)
-    {
-        if (!mIsOnGround)
-        {
-            // Cast actor to Block to call OnBump
-            //auto* block = dynamic_cast<Block*>(other->GetOwner());
-            //block->OnBump();
-        }
-    }
-    else if (other->GetLayer() == ColliderLayer::Collectible)
-    {
-        other->GetOwner()->SetState(ActorState::Destroy);
-        mGame->GetAudio()->PlaySound("Coin.wav");
-    }
-    else if (other->GetLayer() == ColliderLayer::EnemyBlocks) { Kill(); }
+    if (other->GetLayer() == ColliderLayer::EnemyBlocks) { Kill(); }
 }

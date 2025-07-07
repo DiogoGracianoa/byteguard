@@ -18,6 +18,7 @@ class Game
 {
 public:
     static constexpr int LEVEL_WIDTH = 200;
+    static constexpr int TUTORIAL_LEVEL_WIDTH = 100;
     static constexpr int LEVEL_HEIGHT = 15;
     static constexpr int TILE_SIZE = 40;
     static constexpr int SPAWN_DISTANCE = 700;
@@ -37,6 +38,8 @@ public:
     {
         MainMenu,
         StoryScreen,
+        TutorialLevel,
+        EasyLevel,
         Level1,
         Level2,
         GameWinScreen
@@ -56,7 +59,8 @@ public:
         Paused,
         GameOver,
         LevelComplete,
-        Leaving
+        Leaving,
+        ShowingTutorial,
     };
 
     Game(int windowWidth, int windowHeight);
@@ -129,6 +133,8 @@ public:
 
     void TogglePause();
 
+    void ToggleTutorial();
+
     // Game-specific
     const class Player *GetPlayer() const { return mPlayer; }
 
@@ -159,9 +165,6 @@ private:
     SceneManagerState mSceneManagerState;
     float mSceneManagerTimer;
 
-    // HUD functions
-    void UpdateLevelTime(float deltaTime);
-
     void DrawParallaxBackground(SDL_Renderer *renderer,
                                 const Vector2 &cameraPos) const;
 
@@ -170,9 +173,11 @@ private:
                                int width,
                                int height);
 
-    void BuildFirstLevel(int **levelData, int width, int height);
+    void BuildTutorialLevel(int **levelData, int width, int height);
 
-    void BuildSecondLevel(int **levelData, int width, int height);
+    void BuildIndustrialLevel(int **levelData, int width, int height);
+
+    void BuildRobotPlaneLevel(int **levelData, int width, int height);
 
     // Spatial Hashing for collision detection
     class SpatialHashing *mSpatialHashing;
@@ -211,9 +216,6 @@ private:
     class RobotPlane *mRobotPlane;
     class HUD *mHUD;
     SoundHandle mMusicHandle;
-
-    float mGameTimer;
-    int mGameTimeLimit;
 
     SDL_Texture *mBackgroundTexture;
     Vector2 mBackgroundSize;

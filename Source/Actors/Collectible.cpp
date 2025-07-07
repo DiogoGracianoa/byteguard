@@ -33,5 +33,5 @@ Collectible::Collectible(Game *game,
 void Collectible::Kill()
 {
     mState = ActorState::Destroy;
-    mGame->GetAudio()->PlaySound("Pick_powerup.wav");
+    mGame->GetAudio()->PlaySound("Pick_Powerup.ogg");
 }

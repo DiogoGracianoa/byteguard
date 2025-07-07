@@ -74,6 +74,18 @@ add_executable(${PROJECT_NAME}
         Source/Actors/Collectible.h
         Source/Components/PowerupComponents/PowerupComponent.cpp
         Source/Components/PowerupComponents/PowerupComponent.h
+        Source/Actors/Saw.cpp
+        Source/Actors/Saw.h
+        Source/Actors/WallBlades.cpp
+        Source/Actors/WallBlades.h
+        Source/Actors/LaserSpikes.cpp
+        Source/Actors/LaserSpikes.h
+        Source/Actors/LaserTurret.cpp
+        Source/Actors/LaserTurret.h
+        Source/Actors/TutorialGuide.cpp
+        Source/Actors/TutorialGuide.h
+        Source/Actors/ExplosionParticles.cpp
+        Source/Actors/ExplosionParticles.h
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE SDL2::SDL2 SDL2_image::SDL2_image SDL2_ttf::SDL2_ttf SDL2_mixer::SDL2_mixer)

@@ -23,33 +23,22 @@ GameWinScreen::GameWinScreen(Game* game, const std::string& fontName)
     );
 
     std::string winText = 
-        "       Parabéns! Você navegou pelos perigos e superou a IA hostil.\n"
-        "O sistema central foi restaurado e a cidade, lentamente voltará à vida, \n\n "
-        "  Graças à sua coragem e velocidade, a ordem foi restabelecida.\n"
-        "            A metrópole futurista está salva... por enquanto.";
+        "Parabéns! Você navegou pelos perigos e superou a IA hostil.\n"
+        "O sistema central foi restaurado e a cidade lentamente voltará à vida, \n\n "
+        "Graças à sua coragem e velocidade, a ordem foi restabelecida.\n"
+        "A metrópole futurista está salva... por enquanto.";
 
     AddText(
         winText,
         Vector2(130.0f, windowHeight * 0.25f),
-        Vector2(windowWidth - 160, windowHeight * 0.6f),
+        Vector2(windowWidth - 160, windowHeight * 0.4f),
         20,
         static_cast<int>(windowWidth * 0.8f)
     );
 
-
-    // TODO: Adicionar botão de jogar novamente
-    // AddButton(
-    //     u8"Jogar Novamente",
-    //     Vector2(windowWidth / 2.0f - 150.0f, windowHeight * 0.75f),
-    //     Vector2(300.0f, 60.0f),
-    //     [this]() {
-    //         mGame->SetGameScene(GameScene::MainMenu); 
-    //     }
-    // );
-
     AddButton(
         "Sair do Jogo",
-        Vector2(windowWidth / 2.0f - 150.0f, windowHeight * 0.75f + 70.0f),
+        Vector2(windowWidth / 2.0f - 150.0f, windowHeight * 0.75f),
         Vector2(300.0f, 60.0f),
         [this]() {
             mGame->Quit();

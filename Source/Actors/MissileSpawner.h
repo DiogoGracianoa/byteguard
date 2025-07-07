@@ -9,10 +9,13 @@
 class MissileSpawner final : public Actor
 {
 public:
-    explicit MissileSpawner(Game *game, float spawnDistance);
+    explicit MissileSpawner(Game *game,
+                            float spawnDistance,
+                            float SForceFactor = 5.0f);
 
     void OnUpdate(float deltaTime) override;
 
 private:
     float mSpawnDistance;
+    float mSForceFactor;
 };
