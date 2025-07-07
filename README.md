@@ -14,15 +14,27 @@
 
 <img src="Screenshots/Menu_Pause.png" width="400">
 
+- Fase 1 (Tutorial)
+  
+<img src="Screenshots/Tutorial.png" width="400">
+
 - Fase 1
 
-<img src="Screenshots/Level1_Start.png" width="400">
+<img src="Screenshots/Level1.png" width="400">
 
 - Fase 2
 
-<img src="Screenshots/Level2_Start.png" width="400">
+<img src="Screenshots/Level2.png" width="400">
 
-<img src="Screenshots/Level2_Pipes.png" width="400">
+- Fase 3
+
+<img src="Screenshots/Level3_Start.png" width="400">
+
+<img src="Screenshots/Level3_Pipes.png" width="400">
+
+- Fase 4
+
+<img src="Screenshots/Level4_Start.png" width="400">
 
 ## Nome do jogo
 
@@ -43,7 +55,7 @@ um *power-up*, que é uma possibilidade de desaceleração do tempo, o que abre 
 dificuldade aumenta ao passar do jogo, entretanto, o jogo é desafiante do início ao fim, dependendo de agilidade,
 reflexos e memorização para conseguir alcançar o objetivo final.
 
-O objetivo é concluir as fases, que nesse momento de desenvolvimento são duas, e conseguir restaurar a ordem no mundo.
+O objetivo é concluir as fases, que são 4, e conseguir restaurar a ordem no mundo.
 Cada falha reinicia a fase, reforçando o sistema de tentativa e erro como forma de aprendizado. A progressão é marcada
 tanto pela dificuldade quanto pela história, que avança conforme o jogador restaura os setores da cidade, reforçando a
 sensação de avanço e propósito.
@@ -57,6 +69,7 @@ sensação de avanço e propósito.
   do jogo.
 - Funcionalidade da tela de texto para contar a narrativa do jogo, verificando se está transicionando correto entre as
   telas.
+- Funcionalidade do tutorial ao coletar o POWER-UP pela primeira vez
 
 **Funcionalidades de jogabilidade:**
 
@@ -66,12 +79,12 @@ sensação de avanço e propósito.
 - Testar o *power-up*, apertando a tecla 'Q' após coletá-lo, verificando se realmente terá a redução do tempo.
 - Testar os controles de aceleração e freio do personagem na fase 1, se estão funcionando como devem, ou seja, se estão
   acelerando e freando o personagem.
-- Testar, na fase 2, o sistema de voo do personagem, se está muito complexo, subindo ou descendo muito rápido ou muito
+- Testar, na fase 3, o sistema de voo do personagem, se está muito complexo, subindo ou descendo muito rápido ou muito
   devagar.
 - Testar a troca de cena, ao chegar no final da fase 1, se o jogador irá para a fase 2 corretamente.
 - Testar a fuga de mísseis, assim como a dificuldade com a velocidade do míssil escolhida.
 
 ## Créditos
 
-- Diogo Alves Graciano: Desenvolvimento da fase 2 e de elementos gráficos.
-- Lucas Wiermann Cobo da Silva: Desenvolvimento da fase 1 e da física do jogo.
+- Diogo Alves Graciano: Desenvolvimento da fase 1 e 3 e de elementos artísticos em geral.
+- Lucas Wiermann Cobo da Silva: Desenvolvimento da fase 2 e 4 e da física do jogo.
